@@ -1,6 +1,8 @@
 module Cronic
   class Repeater < Tag
 
+    @width : Int32?
+    
     # Scan an Array of Token objects and apply any necessary Repeater
     # tags to each token.
     #

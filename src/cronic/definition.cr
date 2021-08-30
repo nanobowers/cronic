@@ -5,7 +5,7 @@ module Cronic
   # SpanDefinitions subclasses follow a <Type> + Definitions naming pattern
   # Types of Definitions are collected in Dictionaries (see dictionary.rb)
   class Definitions
-    attr_reader :options
+    getter :options
 
     def initialize(**options)
       @options = options

@@ -7,6 +7,8 @@ module Cronic
     getter :text
     getter :position
 
+    @text : String?
+    
     def initialize(word, text = nil, position = 0)
       @word = word
       @tags = [] of Tag

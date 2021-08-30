@@ -2,7 +2,9 @@ module Cronic
   class RepeaterFortnight < Repeater #:nodoc:
     FORTNIGHT_SECONDS = 1_209_600 # (14 * 24 * 60 * 60)
 
-    def initialize(type, width = nil, options = {})
+    @current_fortnight_start : Time?
+    
+    def initialize(type, width = nil, **kwargs)
       super
       @current_fortnight_start = nil
     end
@@ -66,7 +68,7 @@ module Cronic
     end
 
     def to_s
-      super << '-fortnight'
+      super << "-fortnight"
     end
   end
 end

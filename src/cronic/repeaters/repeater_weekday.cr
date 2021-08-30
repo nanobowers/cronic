@@ -11,7 +11,9 @@ module Cronic
       :saturday => 6
     }
 
-    def initialize(type, width = nil, options = {})
+    @current_weekday_start : Time?
+    
+    def initialize(type, width = nil, **kwargs)
       super
       @current_weekday_start = nil
     end
@@ -66,21 +68,19 @@ module Cronic
     end
 
     def to_s
-      super << '-weekday'
+      super << "-weekday"
     end
 
-    private
-
-    def is_weekend?(day)
+    private def is_weekend?(day)
       day == symbol_to_number(:saturday) || day == symbol_to_number(:sunday)
     end
 
-    def is_weekday?(day)
+    private def is_weekday?(day)
       !is_weekend?(day)
     end
 
-    def symbol_to_number(sym)
-      DAYS[sym] || raise RuntimeError.new('Invalid symbol specified')
+    private def symbol_to_number(sym)
+      DAYS[sym] || raise RuntimeError.new("Invalid symbol specified")
     end
   end
 end

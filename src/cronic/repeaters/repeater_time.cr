@@ -1,7 +1,7 @@
 module Cronic
   class RepeaterTime < Repeater #:nodoc:
     class Tick #:nodoc:
-      attr_accessor :time
+      property :time
 
       def initialize(time, ambiguous = false)
         @time = time
@@ -21,18 +21,19 @@ module Cronic
       end
 
       def to_s
-        @time.to_s + (@ambiguous ? '?' : '')
+        @time.to_s + (@ambiguous ? "?" : "")
       end
 
     end
 
-    def initialize(time, width = nil, options = {})
+    @current_time : Time?
+    def initialize(time, width = nil, **kwargs)
       @current_time = nil
-      @options = options
-      time_parts = time.split(':')
-      raise ArgumentError, "Time cannot have more than 4 groups of ':'" if time_parts.count > 4
+      @options = kwargs
+      time_parts = time.split(":")
+      raise ArgumentError.new("Time cannot have more than 4 groups of ':'") if time_parts.count > 4
 
-      if time_parts.first.length > 2 and time_parts.count == 1
+      if time_parts.first.length > 2 && time_parts.count == 1
         if time_parts.first.length > 4
           second_index = time_parts.first.length - 2
           time_parts.insert(1, time_parts.first[second_index..time_parts.first.length])
@@ -46,9 +47,9 @@ module Cronic
       ambiguous = false
       hours = time_parts.first.to_i
 
-      if @options[:hours24].nil? or (not @options[:hours24].nil? and @options[:hours24] != true)
-          ambiguous = true if (time_parts.first.length == 1 and hours > 0) or (hours >= 10 and hours <= 12) or (@options[:hours24] == false and hours > 0)
-          hours = 0 if hours == 12 and ambiguous
+      if @options[:hours24].nil? || (!@options[:hours24].nil? && @options[:hours24] != true)
+          ambiguous = true if (time_parts.first.length == 1 && hours > 0) || (hours >= 10 && hours <= 12) || (@options[:hours24] == false && hours > 0)
+          hours = 0 if hours == 12 && ambiguous
       end
 
       hours *= 60 * 60
@@ -108,7 +109,7 @@ module Cronic
           end
         end
 
-        @current_time || raise RuntimeError.new('Current time cannot be nil at this point')
+        @current_time || raise RuntimeError.new("Current time cannot be nil at this point")
       end
 
       unless first
@@ -132,7 +133,7 @@ module Cronic
     end
 
     def to_s
-      super << '-time-' << @type.to_s
+      super << "-time-" << @type.to_s
     end
   end
 end

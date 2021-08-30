@@ -6,8 +6,10 @@ module Cronic
     property :type
     property :width
 
+    @width : Int32?
+    
     # stype - The Symbol type of this tag.
-    def initialize(@stype, @width = nil, **options)
+    def initialize(@type, @width : Int32? = nil, **options)
       @options = options
     end
 

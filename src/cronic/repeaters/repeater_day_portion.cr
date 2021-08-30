@@ -9,7 +9,7 @@ module Cronic
       :night => (20 * 60 * 60)..(24 * 60 * 60),     # 8pm-12pm
     }
 
-    def initialize(type, width = nil, options = {})
+    def initialize(type, width = nil, **kwargs)
       super
       @current_span = nil
 
@@ -20,7 +20,7 @@ module Cronic
         @range || raise RuntimeError.new("Invalid type '#{type}' for RepeaterDayPortion")
       end
 
-      @range || raise RuntimeError.new('Range should have been set by now')
+      @range || raise RuntimeError.new("Range should have been set by now")
     end
 
     def next(pointer)
@@ -84,7 +84,7 @@ module Cronic
     end
 
     def width
-      @range || raise RuntimeError.new('Range has not been set')
+      @range || raise RuntimeError.new("Range has not been set")
       return @current_span.width if @current_span
       if @type.kind_of? Integer
         return (12 * 60 * 60)
@@ -94,11 +94,10 @@ module Cronic
     end
 
     def to_s
-      super << '-dayportion-' << @type.to_s
+      super << "-dayportion-" << @type.to_s
     end
 
-    private
-    def construct_date_from_reference_and_offset(reference, offset = nil)
+    private def construct_date_from_reference_and_offset(reference, offset = nil)
       elapsed_seconds_for_range = offset || (@range.end - @range.begin)
       second_hand = ((elapsed_seconds_for_range - (12 * 60))) % 60
       minute_hand = (elapsed_seconds_for_range - second_hand) / (60) % 60

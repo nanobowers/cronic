@@ -16,7 +16,9 @@ module Cronic
       :december => 12
     }
 
-    def initialize(type, width = nil, options = {})
+    @current_month_begin : Time?
+    
+    def initialize(type, width = nil, **kwargs)
       super
       @current_month_begin = nil
     end
@@ -45,7 +47,7 @@ module Cronic
             @current_month_begin = Cronic.construct(@now.year - 1, index)
           end
         end
-        @current_month_begin || raise RuntimeError.new('Current month should be set by now')
+        @current_month_begin || raise RuntimeError.new("Current month should be set by now")
       else
         case pointer
         when :future
@@ -89,7 +91,7 @@ module Cronic
     end
 
     def to_s
-      super << '-monthname-' << @type.to_s
+      super << "-monthname-" << @type.to_s
     end
   end
 end

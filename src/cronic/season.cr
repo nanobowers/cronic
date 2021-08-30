@@ -1,8 +1,8 @@
 module Cronic
   class Season
 
-    attr_reader :start
-    attr_reader :end
+    getter :start
+    getter :end
 
     def initialize(start_date, end_date)
       @start = start_date

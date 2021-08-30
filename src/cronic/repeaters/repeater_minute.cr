@@ -2,7 +2,9 @@ module Cronic
   class RepeaterMinute < Repeater #:nodoc:
     MINUTE_SECONDS = 60
 
-    def initialize(type, width = nil, options = {})
+    @current_minute_start : Time?
+    
+    def initialize(type, width = nil, **kwargs)
       super
       @current_minute_start = nil
     end
@@ -53,7 +55,7 @@ module Cronic
     end
 
     def to_s
-      super << '-minute'
+      super << "-minute"
     end
   end
 end

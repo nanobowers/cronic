@@ -1,9 +1,9 @@
 module Cronic
   class Handler
 
-    attr_reader :pattern
+    getter :pattern
 
-    attr_reader :handler_method
+    getter :handler_method
 
     # pattern        - An Array of patterns to match tokens against.
     # handler_method - A Symbol representing the method to be invoked

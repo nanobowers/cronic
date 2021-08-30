@@ -8,7 +8,10 @@ module Cronic
       :winter => Season.new(MiniDate.new(12,22), MiniDate.new(3,19))
     }
 
-    def initialize(type, width = nil, options = {})
+    @next_season_start : Time?
+    @next_season_end : Time?
+    
+    def initialize(type, width = nil, **kwargs)
       super
       @next_season_start = nil
       @next_season_end = nil
@@ -59,12 +62,10 @@ module Cronic
     end
 
     def to_s
-      super << '-season'
+      super << "-season"
     end
 
-    private
-
-    def find_next_season_span(direction, next_season)
+    private def find_next_season_span(direction, next_season)
       unless @next_season_start || @next_season_end
         @next_season_start = Cronic.construct(@now.year, @now.month, @now.day)
         @next_season_end = Cronic.construct(@now.year, @now.month, @now.day)
@@ -76,13 +77,13 @@ module Cronic
       construct_season(@next_season_start, @next_season_end)
     end
 
-    def find_current_season(md)
+    private def find_current_season(md)
       [:spring, :summer, :autumn, :winter].find do |season|
         md.is_between?(SEASONS[season].start, SEASONS[season].end)
       end
     end
 
-    def num_seconds_til(goal, direction)
+    private def num_seconds_til(goal, direction)
       start = Cronic.construct(@now.year, @now.month, @now.day)
       seconds = 0
 
@@ -93,15 +94,15 @@ module Cronic
       seconds
     end
 
-    def num_seconds_til_start(season_symbol, direction)
+    private def num_seconds_til_start(season_symbol, direction)
       num_seconds_til(SEASONS[season_symbol].start, direction)
     end
 
-    def num_seconds_til_end(season_symbol, direction)
+    private def num_seconds_til_end(season_symbol, direction)
       num_seconds_til(SEASONS[season_symbol].end, direction)
     end
 
-    def construct_season(start, finish)
+    private def construct_season(start, finish)
       Span.new(
         Cronic.construct(start.year, start.month, start.day),
         Cronic.construct(finish.year, finish.month, finish.day)

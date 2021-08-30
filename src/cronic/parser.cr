@@ -17,8 +17,8 @@ module Cronic
       :ambiguous_year_future_bias => 50
     }
 
-    attr_accessor :now
-    attr_reader :options
+    property :now
+    getter :options
 
     # options - An optional Hash of configuration options:
     #        :context - If your string represents a birthday, you can set

@@ -2,7 +2,9 @@ module Cronic
   class RepeaterDay < Repeater #:nodoc:
     DAY_SECONDS = 86_400 # (24 * 60 * 60)
 
-    def initialize(type, width = nil, options = {})
+    @current_day_start : Time?
+    
+    def initialize(type, width = nil, **kwargs)
       super
       @current_day_start = nil
     end
@@ -48,7 +50,7 @@ module Cronic
     end
 
     def to_s
-      super << '-day'
+      super << "-day"
     end
   end
 end

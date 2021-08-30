@@ -1,9 +1,9 @@
 module Cronic
   module Handlers
-    module_function
+
 
     # Handle month/day
-    def handle_m_d(month, day, time_tokens, options)
+    def self.handle_m_d(month, day, time_tokens, options)
       month.start = self.now
       span = month.this(options[:context])
       year, month = span.begin.year, span.begin.month

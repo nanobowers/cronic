@@ -2,7 +2,9 @@ module Cronic
   class RepeaterSecond < Repeater #:nodoc:
     SECOND_SECONDS = 1 # haha, awesome
 
-    def initialize(type, width = nil, options = {})
+    @second_start : Time?
+    
+    def initialize(type, width = nil, **kwargs)
       super
       @second_start = nil
     end
@@ -37,7 +39,7 @@ module Cronic
     end
 
     def to_s
-      super << '-second'
+      super << "-second"
     end
   end
 end
