@@ -1,4 +1,7 @@
 module Cronic
+
+  alias TagType = Int32 | Symbol | String | Tick
+  
   # Tokens are tagged with subclassed instances of this class when
   # they match specific criteria.
   class Tag
@@ -7,10 +10,10 @@ module Cronic
     property :width
 
     @width : Int32?
-    
+    #@options : NamedTuple(Symbol)
     # stype - The Symbol type of this tag.
-    def initialize(@type, @width : Int32? = nil, **options)
-      @options = options
+    def initialize(@type : TagType, @width : Int32? = nil, **options)
+      #@options = options
     end
 
     # time - Set the start Time for this Tag.
@@ -24,7 +27,7 @@ module Cronic
     # options - The Hash of options specified in Cronic::parse.
     #
     # Returns an Array of tokens.
-    def self.scan(tokens, options)
+    def self.scan(tokens, **options)
       raise NotImplementedError.new("Subclasses must override scan!")
     end
 
@@ -42,22 +45,22 @@ module Cronic
     # options - Options as hash to pass to Tag class.
     #
     # Returns an instance of specified Tag klass or nil if item didn't match.
-    private def self.match_item(item, klass, symbol, token, options)
+    private def self.match_item(item, klass, symbol, token, **options)
       match = false
       case item
       when String
         item_type = Tokenizer.char_type(item.to_s[-1])
-        text_type = token.text[token.position+item.length]
+        text_type = token.text[token.position+item.size]
         text_type = Tokenizer.char_type(text_type) if text_type
         compatible = true
         compatible = item_type != text_type if text_type && (item_type == :letter || item_type == :digit)
-        match = compatible && token.text[token.position, item.length].casecmp(item).zero?
+        match = compatible && token.text[token.position, item.size].compare(item, case_insensitive: true).zero?
       when Symbol
         match = token.word == item.to_s
-      when Regexp
+      when Regex
         match = token.word =~ item
       end
-      return klass.new(symbol, nil, options) if match
+      return klass.new(symbol, nil, **options) if match
       nil
     end
 
@@ -70,14 +73,15 @@ module Cronic
     # options - Options as hash to pass to Tag class.
     #
     # Returns an instance of specified Tag klass or nil if item(s) didn't match.
-    private def scan_for(token, klass, items, **options)
+    #private
+    def self.scan_for(token, klass, items, **options)
       if items.is_a?(Hash)
         items.each do |item, symbol|
-          scanned = match_item(item, klass, symbol, token, options)
+          scanned = match_item(item, klass, symbol, token, **options)
           return scanned if scanned
         end
       else
-        return match_item(items, klass, token.word, token, options)
+        return match_item(items, klass, token.word, token, **options)
       end
       nil
     end

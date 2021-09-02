@@ -17,16 +17,17 @@ module Cronic
       end
     end
 
-    # Proccess text to tokens
-    def self.tokenize(text)
+    # Process text to tokens
+    def self.tokenize(text) : Array(Token)
       tokens = [] of Token
       index = 0
       previos_index = 0
       text.each_char do |char|
-        type = char_type(char)
-        if type == :space
+        #chtype = char_type(char.to_s)
+        #p! char, chtype
+        if char.whitespace?
           tokens << Token.new(text[previos_index...index], text, previos_index)
-          previos_index = index+1
+          previos_index = index + 1
         end
         index += 1
       end

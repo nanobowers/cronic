@@ -9,12 +9,14 @@ module Cronic
       :night => (20 * 60 * 60)..(24 * 60 * 60),     # 8pm-12pm
     }
 
+    @range : Range(Int32,Int32)
     def initialize(type, width = nil, **kwargs)
       super
       @current_span = nil
 
-      if type.kind_of? Integer
-        @range = (@type * 60 * 60)..((@type + 12) * 60 * 60)
+      if @type.is_a? Int32
+        num = @type.as(Int32)
+        @range = (num * 60 * 60)..((num + 12) * 60 * 60)
       else
         @range = PORTIONS[type]
         @range || raise RuntimeError.new("Invalid type '#{type}' for RepeaterDayPortion")

@@ -8,16 +8,18 @@ module Cronic
     # options - The Hash of options specified in Cronic::parse.
     #
     # Returns an Array of tokens.
-    def self.scan(tokens, options)
+    def self.scan(tokens,
+                  ambiguous_year_future_bias : Int32 = 50,
+                  **options)
       tokens.each_index do |i|
         if tokens[i].word =~ /^(\d+)(st|nd|rd|th|\.)$/
-          width = $1.length
+          width = $1.size
           ordinal = $1.to_i
           tokens[i].tag(Ordinal.new(ordinal, width))
           tokens[i].tag(OrdinalDay.new(ordinal, width)) if Cronic::Date.could_be_day?(ordinal, width)
           tokens[i].tag(OrdinalMonth.new(ordinal, width)) if Cronic::Date.could_be_month?(ordinal, width)
           if Cronic::Date.could_be_year?(ordinal, width)
-            year = Cronic::Date.make_year(ordinal, options[:ambiguous_year_future_bias])
+            year = Cronic::Date.make_year(ordinal, ambiguous_year_future_bias)
             tokens[i].tag(OrdinalYear.new(year.to_i, width))
           end
         elsif tokens[i].word =~ /^second$/

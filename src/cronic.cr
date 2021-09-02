@@ -1,6 +1,6 @@
-require "time"
+#require "time"
 #require "date"
-#require "numerizer"
+require "number_parser" # aka numerizer
 
 require "./cronic/version"
 
@@ -60,8 +60,15 @@ require "./cronic/repeaters/repeater_time"
 #     #=> Mon Aug 21 12:00:00 PDT 2006
 module Cronic
 
+  @@debug : Bool = false
+
   # Returns true when debug mode is enabled.
-  property :debug
+  def self.debug
+    @@debug
+  end
+  def self.debug=(val : Bool)
+    @@debug=val
+  end
   
   # Examples:
   #
@@ -76,7 +83,6 @@ module Cronic
   # Returns The Time class Cronic uses internally.
   property :time_class
 
-  debug = false
   time_class = ::Time
 
 

@@ -5,12 +5,14 @@ module Cronic
 
     getter :handler_method
 
+    alias Pattern = Array(String) | Array(String | Array(String))
+    
     # pattern        - An Array of patterns to match tokens against.
     # handler_method - A Symbol representing the method to be invoked
     #   when a pattern matches.
-    def initialize(pattern, handler_method)
-      @pattern = pattern
-      @handler_method = handler_method
+    def initialize(@pattern : Pattern, @handler_method : String?)
+      #@pattern = pattern
+      #@handler_method = handler_method
     end
 
     # tokens - An Array of tokens to process.
@@ -25,11 +27,13 @@ module Cronic
 
         elements.each_index do |i|
           name = elements[i].to_s
-          optional = name[-1, 1] == '?'
-          name = name.chop if optional
+          optional = (name[-1, 1] == '?')
+          name = name[0..-2] if optional
 
           case elements[i]
-          when Symbol
+#          when Symbol
+
+          when String # Symbol
             if tags_match?(name, tokens, token_index)
               token_index += 1
               break
@@ -37,27 +41,26 @@ module Cronic
               if optional
                 was_optional = true
                 next
-              elsif i + 1 < elements.count
+              elsif i + 1 < elements.size
                 next
               else
                 return false unless was_optional
               end
             end
 
-          when String
             return true if optional && token_index == tokens.size
-
-            if definitions.key?(name.to_sym)
-              sub_handlers = definitions[name.to_sym]
+        # when String
+            if definitions.has_key?(name)
+              sub_handlers = definitions[name]
             else
-              raise "Invalid subset #{name} specified"
+              raise RuntimeError.new("Invalid subset `#{name}` specified.  Def-names: #{definitions.keys}")
             end
 
             sub_handlers.each do |sub_handler|
               return true if sub_handler.match(tokens[token_index..tokens.size], definitions)
             end
           else
-            raise "Invalid match type: #{elements[i].class}"
+            raise RuntimeError.new("Invalid match type: #{elements[i].class}")
           end
         end
 
@@ -67,13 +70,19 @@ module Cronic
       return true
     end
 
-    def invoke(type, tokens, parser, options)
+    def invoke(stype, tokens, parser, options)
       if Cronic.debug
-        puts "-#{type}"
+        puts "-#{stype}"
         puts "Handler: #{@handler_method}"
       end
-
-      parser.send(@handler_method, tokens, options)
+      # No send, so have to define all of the handler method mappings here :(
+      p! @handler_method
+      case @handler_method
+      when :abc then Span.new(::Time.local, ::Time.local)
+      else
+        Span.new(::Time.local, ::Time.local)
+      end
+      #parser.send(@handler_method, tokens, options)
     end
 
     # other - The other Handler object to compare.
@@ -84,11 +93,19 @@ module Cronic
     end
 
     private def tags_match?(name, tokens, token_index)
-      klass = Cronic.const_get(name.to_s.gsub(/(?:^|_)(.)/) { $1.upcase })
-
-      if tokens[token_index]
-        !tokens[token_index].tags.select { |o| o.kind_of?(klass) }.empty?
+      constname = name.to_s.gsub(/(?:^|_)(.)/) { $1.upcase }
+      #p! constname
+      
+#      klass = Cronic.const_get(constname)
+      
+      if tokens[token_index]?
+           seltokens = tokens[token_index].tags.select do |o|
+             p [name, constname, o.class]
+             o.class.to_s == constname # kind_of?(klass)
+           end
+           return !seltokens.empty?
       end
+      false
     end
 
   end

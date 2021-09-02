@@ -8,13 +8,13 @@ module Cronic
     # options - The Hash of options specified in Cronic::parse.
     #
     # Returns an Array of tokens.
-    def self.scan(tokens, options)
+    def self.scan(tokens, **options)
       tokens.each do |token|
-        token.tag scan_for(token, SeparatorComma, { ",".to_sym => :comma })
-        token.tag scan_for(token, SeparatorDot, { ".".to_sym => :dot })
-        token.tag scan_for(token, SeparatorColon, { ":".to_sym => :colon })
-        token.tag scan_for(token, SeparatorSpace, { " ".to_sym => :space })
-        token.tag scan_for(token, SeparatorSlash, { "/".to_sym => :slash })
+        token.tag scan_for(token, SeparatorComma, { :"," => :comma })
+        token.tag scan_for(token, SeparatorDot, { :"." => :dot })
+        token.tag scan_for(token, SeparatorColon, { :":" => :colon })
+        token.tag scan_for(token, SeparatorSpace, { :" " => :space })
+        token.tag scan_for(token, SeparatorSlash, { :"/" => :slash })
         token.tag scan_for(token, SeparatorDash, { :- => :dash })
         token.tag scan_for(token, SeparatorAt, { /^(at|@)$/i => :at })
         token.tag scan_for(token, SeparatorIn, { "in" => :in })
@@ -30,11 +30,7 @@ module Cronic
     #
     # Returns a new SeparatorQuote object.
     def self.scan_for_quote(token)
-      scan_for token, SeparatorQuote,
-      {
-        "'".to_sym => :single_quote,
-        '"'.to_sym => :double_quote
-      }
+      scan_for(token, SeparatorQuote, { '\'' => :single_quote, '"' => :double_quote })
     end
 
     def to_s

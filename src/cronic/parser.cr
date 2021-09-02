@@ -5,20 +5,8 @@ module Cronic
   class Parser
     include Handlers
 
-    # Hash of default configuration options.
-    DEFAULT_OPTIONS = {
-      :context => :future,
-      :now => nil,
-      :hours24 => nil,
-      :week_start => :sunday,
-      :guess => true,
-      :ambiguous_time_range => 6,
-      :endian_precedence    => [:middle, :little],
-      :ambiguous_year_future_bias => 50
-    }
-
     property :now
-    getter :options
+#    getter :options
 
     # options - An optional Hash of configuration options:
     #        :context - If your string represents a birthday, you can set
@@ -54,21 +42,31 @@ module Cronic
     #                 look x amount of years into the future and past. If the
     #                 two digit year is `now + x years` it's assumed to be the
     #                 future, `now - x years` is assumed to be the past.
-    def initialize(**kwargs)
-      validate_options!(**kwargs)
-      @options = DEFAULT_OPTIONS.merge(options)
-      @now = options[:now] || Cronic.time_class.now
+    def initialize(
+          @context : Symbol = :future,
+          @now : ::Time = ::Time.local,
+          @hours24 : Bool? = nil,
+          @week_start : Symbol = :sunday,
+          @guess : Bool | Symbol = true,
+          @ambiguous_time_range : Int = 6,
+          @endian_precedence : Array(Symbol) = [:middle, :little],
+          @ambiguous_year_future_bias : Int = 50
+        )
+
     end
 
     # Parse "text" with the given options
     # Returns either a Time or Cronic::Span, depending on the value of options[:guess]
     def parse(text)
-      tokens = tokenize(text, options)
-      span = tokens_to_span(tokens, options.merge(text: text))
-
-      puts "+#{'-' * 51}\n| #{tokens}\n+#{'-' * 51}" if Cronic.debug
-
-      guess(span, options[:guess]) if span
+      tokens = tokenize(text) # , options
+      span = tokens_to_span(tokens, text: text) # options.merge(text: text))
+      if Cronic.debug
+        sepline = "+" + ("-" * 51)
+        puts sepline
+        puts "| #{tokens}"
+        puts sepline
+      end
+      guess(span, @guess) if span
     end
 
     # Clean up the specified text ready for parsing.
@@ -94,53 +92,52 @@ module Cronic
     # Returns a new String ready for Cronic to parse.
     def pre_normalize(text)
       text = text.to_s.downcase
-      text.gsub!(/\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/, "\3 / \2 / \1")
-      text.gsub!(/\b([ap])\.m\.?/, "\1m")
-      text.gsub!(/(\s+|:\d{2}|:\d{2}\.\d+)\-(\d{2}:?\d{2})\b/, "\1tzminus\2")
-      text.gsub!(/\./, ":")
-      text.gsub!(/([ap]):m:?/, "\1m")
-      text.gsub!(/'(\d{2})\b/) do
+      text = text.gsub(/\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/, "\3 / \2 / \1")
+      text = text.gsub(/\b([ap])\.m\.?/, "\1m")
+      text = text.gsub(/(\s+|:\d{2}|:\d{2}\.\d+)\-(\d{2}:?\d{2})\b/, "\1tzminus\2")
+      text = text.gsub(/\./, ":")
+      text = text.gsub(/([ap]):m:?/, "\1m")
+      text = text.gsub(/'(\d{2})\b/) do
         number = $1.to_i
-
         if Cronic::Date.could_be_year?(number)
-          Cronic::Date.make_year(number, options[:ambiguous_year_future_bias])
+          Cronic::Date.make_year(number, @ambiguous_year_future_bias)
         else
           number
         end
       end
-      text.gsub!(/['"]/, "")
-      text.gsub!(/,/, " ")
-      text.gsub!(/^second /, "2nd ")
-      text.gsub!(/\bsecond (of|day|month|hour|minute|second|quarter)\b/, "2nd \1")
-      text.gsub!(/\bthird quarter\b/, "3rd q")
-      text.gsub!(/\bfourth quarter\b/, "4th q")
-      text.gsub!(/quarters?(\s+|$)(?!to|till|past|after|before)/, "q\1")
-      text = Numerizer.numerize(text)
-      text.gsub!(/\b(\d)(?:st|nd|rd|th)\s+q\b/, "q\1")
-      text.gsub!(/([\/\-\,\@])/) { " " + $1 + " " }
-      text.gsub!(/(?:^|\s)0(\d+:\d+\s*pm?\b)/, " \1")
-      text.gsub!(/\btoday\b/, "this day")
-      text.gsub!(/\btomm?orr?ow\b/, "next day")
-      text.gsub!(/\byesterday\b/, "last day")
-      text.gsub!(/\bnoon|midday\b/, "12:00pm")
-      text.gsub!(/\bmidnight\b/, "24:00")
-      text.gsub!(/\bnow\b/, "this second")
-      text.gsub!("quarter", "15")
-      text.gsub!("half", "30")
-      text.gsub!(/(\d{1,2}) (to|till|prior to|before)\b/, "\1 minutes past")
-      text.gsub!(/(\d{1,2}) (after|past)\b/, "\1 minutes future")
-      text.gsub!(/\b(?:ago|before(?: now)?)\b/, "past")
-      text.gsub!(/\bthis (?:last|past)\b/, "last")
-      text.gsub!(/\b(?:in|during) the (morning)\b/, "\1")
-      text.gsub!(/\b(?:in the|during the|at) (afternoon|evening|night)\b/, "\1")
-      text.gsub!(/\btonight\b/, "this night")
-      text.gsub!(/\b\d+:?\d*[ap]\b/,"\0m")
-      text.gsub!(/\b(\d{2})(\d{2})(am|pm)\b/, "\1:\2\3")
-      text.gsub!(/(\d)([ap]m|oclock)\b/, "\1 \2")
-      text.gsub!(/\b(hence|after|from)\b/, "future")
-      text.gsub!(/^\s?an? /i, "1 ")
-      text.gsub!(/\b(\d{4}):(\d{2}):(\d{2})\b/, "\1 / \2 / \3") # DTOriginal
-      text.gsub!(/\b0(\d+):(\d{2}):(\d{2}) ([ap]m)\b/, "\1:\2:\3 \4")
+      text = text.gsub(/['"]/, "")
+      text = text.gsub(/,/, " ")
+      text = text.gsub(/^second /, "2nd ")
+      text = text.gsub(/\bsecond (of|day|month|hour|minute|second|quarter)\b/, "2nd \1")
+      text = text.gsub(/\bthird quarter\b/, "3rd q")
+      text = text.gsub(/\bfourth quarter\b/, "4th q")
+      text = text.gsub(/quarters?(\s+|$)(?!to|till|past|after|before)/, "q\1")
+      text = NumberParser.parse(text)
+      text = text.gsub(/\b(\d)(?:st|nd|rd|th)\s+q\b/, "q\1")
+      text = text.gsub(/([\/\-\,\@])/) { " " + $1 + " " }
+      text = text.gsub(/(?:^|\s)0(\d+:\d+\s*pm?\b)/, " \1")
+      text = text.gsub(/\btoday\b/, "this day")
+      text = text.gsub(/\btomm?orr?ow\b/, "next day")
+      text = text.gsub(/\byesterday\b/, "last day")
+      text = text.gsub(/\bnoon|midday\b/, "12:00pm")
+      text = text.gsub(/\bmidnight\b/, "24:00")
+      text = text.gsub(/\bnow\b/, "this second")
+      text = text.gsub("quarter", "15")
+      text = text.gsub("half", "30")
+      text = text.gsub(/(\d{1,2}) (to|till|prior to|before)\b/, "\1 minutes past")
+      text = text.gsub(/(\d{1,2}) (after|past)\b/, "\1 minutes future")
+      text = text.gsub(/\b(?:ago|before(?: now)?)\b/, "past")
+      text = text.gsub(/\bthis (?:last|past)\b/, "last")
+      text = text.gsub(/\b(?:in|during) the (morning)\b/, "\1")
+      text = text.gsub(/\b(?:in the|during the|at) (afternoon|evening|night)\b/, "\1")
+      text = text.gsub(/\btonight\b/, "this night")
+      text = text.gsub(/\b\d+:?\d*[ap]\b/,"\0m")
+      text = text.gsub(/\b(\d{2})(\d{2})(am|pm)\b/, "\1:\2\3")
+      text = text.gsub(/(\d)([ap]m|oclock)\b/, "\1 \2")
+      text = text.gsub(/\b(hence|after|from)\b/, "future")
+      text = text.gsub(/^\s?an? /i, "1 ")
+      text = text.gsub(/\b(\d{4}):(\d{2}):(\d{2})\b/, "\1 / \2 / \3") # DTOriginal
+      text = text.gsub(/\b0(\d+):(\d{2}):(\d{2}) ([ap]m)\b/, "\1:\2:\3 \4")
       text
     end
 
@@ -149,9 +146,11 @@ module Cronic
     # span - The Cronic::Span object to calcuate a guess from.
     #
     # Returns a new Time object.
-    def guess(span, mode = :middle)
-      return span if not mode
-      return span.begin + span.width / 2 if (span.width > 1) && (mode == true || mode == :middle)
+    def guess(span : Span, mode = :middle)
+      return span unless mode
+      if (span.width > 1) && (mode == true || mode == :middle)
+        return span.begin + ::Time::Span.new(seconds: span.width // 2)
+      end
       return span.end if mode == :end
       span.begin
     end
@@ -166,47 +165,44 @@ module Cronic
       SpanDictionary.new(**kwargs).definitions
     end
 
-    private def validate_options!(options)
-      given = options.keys.map(&:to_s).sort
-      allowed = DEFAULT_OPTIONS.keys.map(&:to_s).sort
-      non_permitted = given - allowed
-      raise ArgumentError, "Unsupported option(s): #{non_permitted.join(", ")}" if non_permitted.any?
-    end
-
-    private def tokenize(text, options)
+    
+    def tokenize(text, **options)
       text = pre_normalize(text)
       tokens = Tokenizer.tokenize(text)
       [Repeater, Grabber, Pointer, Scalar, Ordinal, Separator, Sign, TimeZone].each do |tok|
-        tok.scan(tokens, options)
+        tok.scan(tokens, **options)
       end
       tokens.select { |token| token.tagged? }
     end
 
-    private def tokens_to_span(tokens, options)
-      definitions = definitions(options)
+    private def tokens_to_span(tokens, **options) : Span?
+      definitions = definitions(**options)
 
-      (definitions[:endian] + definitions[:date]).each do |handler|
+      (definitions["endian"] + definitions["date"]).each do |handler|
         if handler.match(tokens, definitions)
           good_tokens = tokens.select { |o| !o.get_tag Separator }
+          #return self.date(good_tokens, **options)
           return handler.invoke(:date, good_tokens, self, options)
         end
       end
 
-      definitions[:anchor].each do |handler|
+      definitions["anchor"].each do |handler|
         if handler.match(tokens, definitions)
           good_tokens = tokens.select { |o| !o.get_tag Separator }
+          #return self.anchor(good_tokens, **options)
           return handler.invoke(:anchor, good_tokens, self, options)
         end
       end
 
-      definitions[:arrow].each do |handler|
+      definitions["arrow"].each do |handler|
         if handler.match(tokens, definitions)
           good_tokens = tokens.reject { |o| o.get_tag(SeparatorAt) || o.get_tag(SeparatorSlash) || o.get_tag(SeparatorDash) || o.get_tag(SeparatorComma) || o.get_tag(SeparatorAnd) }
+          #return self.arrow(good_tokens, **options)
           return handler.invoke(:arrow, good_tokens, self, options)
         end
       end
 
-      definitions[:narrow].each do |handler|
+      definitions["narrow"].each do |handler|
         if handler.match(tokens, definitions)
           return handler.invoke(:narrow, tokens, self, options)
         end

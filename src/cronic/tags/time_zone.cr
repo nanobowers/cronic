@@ -8,7 +8,7 @@ module Cronic
     # options - The Hash of options specified in Cronic::parse.
     #
     # Returns an Array of tokens.
-    def self.scan(tokens, options)
+    def self.scan(tokens, **options)
       tokens.each do |token|
         token.tag scan_for_all(token)
       end

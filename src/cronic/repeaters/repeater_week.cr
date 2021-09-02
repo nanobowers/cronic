@@ -4,9 +4,9 @@ module Cronic
 
     @current_week_start : Time?
     
-    def initialize(type, width = nil, **kwargs)
-      super
-      @repeater_day_name = options[:week_start] || :sunday
+    def initialize(xtype, width = nil, week_start : Symbol = :sunday, **kwargs)
+      super(xtype, width, **kwargs)
+      @repeater_day_name = week_start # options[:week_start] || :sunday
       @current_week_start = nil
     end
 

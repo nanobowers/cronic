@@ -5,6 +5,11 @@ module Cronic
 
   #TODO: Error: can't make class 'Span' inherit generic struct 'Range(Int32, Int32)'
   class Span # < Range(I nt32, Int32)
+    getter :begin, :end
+    
+    def initialize(@begin : ::Time, @end : ::Time)
+    end
+    
     # Returns the width of this span in seconds
     def width
       (self.end - self.begin).to_i
@@ -19,7 +24,8 @@ module Cronic
     # Subtract a number of seconds to this span, returning the
     # resulting Span
     def -(seconds)
-      self + -seconds
+      #self + -seconds
+      Span.new(self.begin - seconds, self.end - seconds)
     end
 
     # Prints this span in a nice fashion

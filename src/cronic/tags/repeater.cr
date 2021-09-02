@@ -10,15 +10,15 @@ module Cronic
     # options - The Hash of options specified in Cronic::parse.
     #
     # Returns an Array of tokens.
-    def self.scan(tokens, options)
+    def self.scan(tokens, **options)
       tokens.each do |token|
-        token.tag scan_for_quarter_names(token, options)
-        token.tag scan_for_season_names(token, options)
-        token.tag scan_for_month_names(token, options)
-        token.tag scan_for_day_names(token, options)
-        token.tag scan_for_day_portions(token, options)
-        token.tag scan_for_times(token, options)
-        token.tag scan_for_units(token, options)
+        token.tag scan_for_quarter_names(token, **options)
+        token.tag scan_for_season_names(token, **options)
+        token.tag scan_for_month_names(token, **options)
+        token.tag scan_for_day_names(token, **options)
+        token.tag scan_for_day_portions(token, **options)
+        token.tag scan_for_times(token, **options)
+        token.tag scan_for_units(token, **options)
       end
     end
 
@@ -111,30 +111,22 @@ module Cronic
     #
     # Returns a new Repeater object.
     def self.scan_for_units(token, **kwargs)
-      {
-        /^years?$/ => :year,
-        /^q$/ => :quarter,
-        /^seasons?$/ => :season,
-        /^months?$/ => :month,
-        /^fortnights?$/ => :fortnight,
-        /^weeks?$/ => :week,
-        /^weekends?$/ => :weekend,
-        /^(week|business)days?$/ => :weekday,
-        /^days?$/ => :day,
-	      /^hrs?$/ => :hour,
-        /^hours?$/ => :hour,
-	      /^mins?$/ => :minute,
-        /^minutes?$/ => :minute,
-	      /^secs?$/ => :second,
-        /^seconds?$/ => :second
-      }.each do |item, symbol|
-        if item =~ token.word
-          klass_name = "Repeater" + symbol.to_s.capitalize
-          klass = Cronic.const_get(klass_name)
-          return klass.new(symbol, nil, **kwargs)
-        end
+      case token.word
+      when /^years?$/ then RepeaterYear.new(:year, nil, **kwargs)
+      when /^q$/ then RepeaterQuarter.new(:quarter, nil, **kwargs)
+      when /^seasons?$/ then RepeaterSeason.new(:season, nil, **kwargs)
+      when /^months?$/ then RepeaterMonth.new(:month, nil, **kwargs)
+      when /^fortnights?$/ then RepeaterFortnight.new(:fortnight, nil, **kwargs)
+      when /^weeks?$/ then RepeaterWeek.new(:week, nil, **kwargs)
+      when /^weekends?$/ then RepeaterWeekend.new(:weekend, nil, **kwargs)
+      when /^(week|business)days?$/ then RepeaterWeekday.new(:weekday, nil, **kwargs)
+      when /^days?$/ then RepeaterDay.new(:day, nil, **kwargs)
+      when /^h(ou)?rs?$/ then RepeaterHour.new(:hour, nil, **kwargs)
+      when /^min(ute)?s?$/ then RepeaterMinute.new(:minute, nil, **kwargs)
+      when /^sec(ond)?s?$/ then RepeaterSecond.new(:second, nil, **kwargs)
+      else
+        return nil
       end
-      return nil
     end
 
     def <=>(other)

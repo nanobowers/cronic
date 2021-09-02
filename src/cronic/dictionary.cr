@@ -2,30 +2,26 @@ require "./definition"
 
 module Cronic
   
-  # A collection of Definitions
-  class Dictionary
-    getter :defined_items, :options
+  # A collection of SpanDefinitions
+  class SpanDictionary 
 
-    def initialize(**options)
-      @options = options
-      @defined_items = [] of String
+    def initialize(**kwargs)
+#      @defined_items = {"time" => TimeDefinitions,
+#                        "date" => DateDefinitions,
+#                        "anchor" => AnchorDefinitions,
+#                        "arrow" => ArrowDefinitions,
+#                        "narrow" => NarrowDefinitions,
+#                        "endian" => EndianDefinitions }
     end
 
     # returns a hash of each word's Definitions
-    def definitions
-      defined_items.each_with_object() do |word, defs|
-        word_type = "#{word.capitalize.to_s + "Definitions"}"
-        defs[word] = Cronic.const_get(word_type).new(options).definitions
-      end
-    end
-  end
-
-  # A collection of SpanDefinitions
-  class SpanDictionary < Dictionary
-
-    def initialize(**kwargs)
-      super
-      @defined_items = [:time,:date,:anchor,:arrow,:narrow,:endian]
+    def definitions : Hash(String, Array(Handler))
+      {"time" => TimeDefinitions.new.definitions,
+       "date" => DateDefinitions.new.definitions,
+       "anchor" => AnchorDefinitions.new.definitions,
+       "arrow" => ArrowDefinitions.new.definitions,
+       "narrow" => NarrowDefinitions.new.definitions,
+       "endian" => EndianDefinitions.new.definitions }
     end
 
     # returns the definitions of a specific subclass of SpanDefinitions

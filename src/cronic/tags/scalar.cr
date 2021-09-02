@@ -10,24 +10,27 @@ module Cronic
     # options - The Hash of options specified in Cronic::parse.
     #
     # Returns an Array of tokens.
-    def self.scan(tokens, options)
+    def self.scan(tokens,
+                  hours24 : Bool ?= nil,
+                  ambiguous_year_future_bias : Int32 = 50,
+                  **options)
       tokens.each_index do |i|
         token = tokens[i]
-        post_token = tokens[i + 1]
+        post_token = tokens[i + 1]?
         if token.word =~ /^\d+$/
-            width = token.word.length
+            width = token.word.size
             scalar = token.word.to_i
             token.tag(Scalar.new(scalar, width))
             token.tag(ScalarWide.new(token.word, width)) if width == 4
             token.tag(ScalarSubsecond.new(scalar, width)) if Cronic::Time.could_be_subsecond?(scalar, width)
             token.tag(ScalarSecond.new(scalar, width)) if Cronic::Time.could_be_second?(scalar, width)
             token.tag(ScalarMinute.new(scalar, width)) if Cronic::Time.could_be_minute?(scalar, width)
-            token.tag(ScalarHour.new(scalar, width)) if Cronic::Time.could_be_hour?(scalar, width, options[:hours24] == false)
-            unless post_token and DAY_PORTIONS.include?(post_token.word)
+            token.tag(ScalarHour.new(scalar, width)) if Cronic::Time.could_be_hour?(scalar, width, hours24 == false)
+            unless post_token && DAY_PORTIONS.includes?(post_token.word)
               token.tag(ScalarDay.new(scalar, width)) if Cronic::Date.could_be_day?(scalar, width)
               token.tag(ScalarMonth.new(scalar, width)) if Cronic::Date.could_be_month?(scalar, width)
               if Cronic::Date.could_be_year?(scalar, width)
-                year = Cronic::Date.make_year(scalar, options[:ambiguous_year_future_bias])
+                year = Cronic::Date.make_year(scalar, ambiguous_year_future_bias)
                 token.tag(ScalarYear.new(year.to_i, width))
               end
           end

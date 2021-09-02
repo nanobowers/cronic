@@ -1,54 +1,51 @@
 module Cronic
-  class RepeaterTime < Repeater #:nodoc:
-    class Tick #:nodoc:
-      property :time
 
-      def initialize(time, ambiguous = false)
-        @time = time
-        @ambiguous = ambiguous
-      end
-
-      def ambiguous?
-        @ambiguous
-      end
-
-      def *(other)
-        Tick.new(@time * other, @ambiguous)
-      end
-
-      def to_f
-        @time.to_f
-      end
-
-      def to_s
-        @time.to_s + (@ambiguous ? "?" : "")
-      end
-
+  class Tick #:nodoc:
+    property :time
+    getter? :ambiguous
+    def initialize(@time : Int32 | Float64, @ambiguous = false)
     end
 
-    @current_time : Time?
-    def initialize(time, width = nil, **kwargs)
-      @current_time = nil
-      @options = kwargs
-      time_parts = time.split(":")
-      raise ArgumentError.new("Time cannot have more than 4 groups of ':'") if time_parts.count > 4
+    def *(other)
+      Tick.new(@time * other, @ambiguous)
+    end
 
-      if time_parts.first.length > 2 && time_parts.count == 1
-        if time_parts.first.length > 4
-          second_index = time_parts.first.length - 2
-          time_parts.insert(1, time_parts.first[second_index..time_parts.first.length])
+    def to_f
+      @time.to_f
+    end
+
+    def to_s
+      @time.to_s + (@ambiguous ? "?" : "")
+    end
+  end
+
+  class RepeaterTime < Repeater #:nodoc:
+
+    @current_time : Time?
+    #@type : Tick
+          
+    def initialize(time, width = nil, @hours24 : Bool? = nil)
+      @current_time = nil
+      #@options = kwargs
+      time_parts = time.split(":")
+      raise ArgumentError.new("Time cannot have more than 4 groups of ':'") if time_parts.size > 4
+
+      if time_parts.first.size > 2 && time_parts.size == 1
+        if time_parts.first.size > 4
+          second_index = time_parts.first.size - 2
+          time_parts.insert(1, time_parts.first[second_index..time_parts.first.size])
           time_parts[0] = time_parts.first[0..second_index - 1]
         end
-        minute_index = time_parts.first.length - 2
-        time_parts.insert(1, time_parts.first[minute_index..time_parts.first.length])
+        minute_index = time_parts.first.size - 2
+        time_parts.insert(1, time_parts.first[minute_index..time_parts.first.size])
         time_parts[0] = time_parts.first[0..minute_index - 1]
       end
 
       ambiguous = false
       hours = time_parts.first.to_i
 
-      if @options[:hours24].nil? || (!@options[:hours24].nil? && @options[:hours24] != true)
-          ambiguous = true if (time_parts.first.length == 1 && hours > 0) || (hours >= 10 && hours <= 12) || (@options[:hours24] == false && hours > 0)
+      if @hours24.nil? || (!@hours24.nil? && @hours24 != true)
+          ambiguous = true if (time_parts.first.size == 1 && hours > 0) || (hours >= 10 && hours <= 12) || (@hours24 == false && hours > 0)
           hours = 0 if hours == 12 && ambiguous
       end
 
@@ -57,9 +54,9 @@ module Cronic
       seconds = 0
       subseconds = 0
 
-      minutes = time_parts[1].to_i * 60 if time_parts.count > 1
-      seconds = time_parts[2].to_i if time_parts.count > 2
-      subseconds = time_parts[3].to_f / (10 ** time_parts[3].length) if time_parts.count > 3
+      minutes = time_parts[1].to_i * 60 if time_parts.size > 1
+      seconds = time_parts[2].to_i if time_parts.size > 2
+      subseconds = time_parts[3].to_f / (10 ** time_parts[3].size) if time_parts.size > 3
 
       @type = Tick.new(hours + minutes + seconds + subseconds, ambiguous)
     end
