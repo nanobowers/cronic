@@ -10,10 +10,13 @@ module Cronic
     property :width
 
     @width : Int32?
+    @now : ::Time
+    
     #@options : NamedTuple(Symbol)
     # stype - The Symbol type of this tag.
     def initialize(@type : TagType, @width : Int32? = nil, **options)
       #@options = options
+      @now = ::Time.local
     end
 
     # time - Set the start Time for this Tag.
@@ -50,7 +53,7 @@ module Cronic
       case item
       when String
         item_type = Tokenizer.char_type(item.to_s[-1])
-        text_type = token.text[token.position+item.size]
+        text_type = token.text[token.position+item.size]?
         text_type = Tokenizer.char_type(text_type) if text_type
         compatible = true
         compatible = item_type != text_type if text_type && (item_type == :letter || item_type == :digit)
@@ -74,7 +77,8 @@ module Cronic
     #
     # Returns an instance of specified Tag klass or nil if item(s) didn't match.
     #private
-    def self.scan_for(token, klass, items, **options)
+    def self.scan_for(token : Token, klass : Class, items, **options)
+      ##p! token, klass, items
       if items.is_a?(Hash)
         items.each do |item, symbol|
           scanned = match_item(item, klass, symbol, token, **options)

@@ -1,20 +1,12 @@
 module Cronic
   module Tokenizer
     def self.char_type(char)
-      case char
-      when '.'
-        :period
-      when /[[:alpha:]]/
-        :letter
-      when /[[:digit:]]/
-        :digit
-      when /[[:space:]]/
-        :space
-      when /[[:punct:]]/
-        :punct
-      else
-        :other
-      end
+      return :period if char == '.'
+      return :letter if char.letter?
+      return :digit if char.number?
+      return :space if char.whitespace?
+      return :punct if ' ' < char < '0'
+      return :other
     end
 
     # Process text to tokens
@@ -23,8 +15,6 @@ module Cronic
       index = 0
       previos_index = 0
       text.each_char do |char|
-        #chtype = char_type(char.to_s)
-        #p! char, chtype
         if char.whitespace?
           tokens << Token.new(text[previos_index...index], text, previos_index)
           previos_index = index + 1

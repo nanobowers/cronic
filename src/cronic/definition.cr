@@ -104,10 +104,10 @@ module Cronic
     end
 
     def definitions
-      prefered_endian
-    end
-
-    def prefered_endian
+#      prefered_endian
+#    end
+#
+#    def prefered_endian
       @endian_precedence = ["middle", "little"] if @endian_precedence.empty?
 
       definitions = [

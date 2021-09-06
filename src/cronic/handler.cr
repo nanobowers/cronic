@@ -20,6 +20,7 @@ module Cronic
     #
     # Returns true if a match is found.
     def match(tokens, definitions)
+      
       token_index = 0
       @pattern.each do |elements|
         was_optional = false
@@ -30,14 +31,17 @@ module Cronic
           optional = (name[-1, 1] == '?')
           name = name[0..-2] if optional
 
+          puts "Testing #{elements[i]}"
           case elements[i]
-#          when Symbol
 
           when String # Symbol
             if tags_match?(name, tokens, token_index)
+              puts ">>#{elements[i]} #{name} matched"
               token_index += 1
               break
             else
+              puts ">>#{elements[i]} #{name} didnt-match"
+
               if optional
                 was_optional = true
                 next
@@ -49,6 +53,7 @@ module Cronic
             end
 
             return true if optional && token_index == tokens.size
+
         # when String
             if definitions.has_key?(name)
               sub_handlers = definitions[name]
@@ -88,20 +93,22 @@ module Cronic
     # other - The other Handler object to compare.
     #
     # Returns true if these Handlers match.
-    def ==(other)
+    def ==(other : Handler) : Bool
       @pattern == other.pattern
     end
 
     private def tags_match?(name, tokens, token_index)
       constname = name.to_s.gsub(/(?:^|_)(.)/) { $1.upcase }
-      #p! constname
-      
-#      klass = Cronic.const_get(constname)
-      
       if tokens[token_index]?
-           seltokens = tokens[token_index].tags.select do |o|
-             p [name, constname, o.class]
-             o.class.to_s == constname # kind_of?(klass)
+           searchtags = tokens[token_index].tags
+           #puts ">> #{searchtags.map(&.class)}"
+           seltokens = searchtags.select do |o|
+             #dbug
+             #p [name, constname, o.class]
+             piece = o.class.to_s.sub(/.*::/,"")
+             #p [o.class, piece, constname]
+             
+             piece.match(Regex.new(constname)) # == constname # kind_of?(klass)
            end
            return !seltokens.empty?
       end

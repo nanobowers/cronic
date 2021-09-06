@@ -179,9 +179,11 @@ module Cronic
       definitions = definitions(**options)
 
       (definitions["endian"] + definitions["date"]).each do |handler|
+
+        #pp! tokens
+        
         if handler.match(tokens, definitions)
           good_tokens = tokens.select { |o| !o.get_tag Separator }
-          #return self.date(good_tokens, **options)
           return handler.invoke(:date, good_tokens, self, options)
         end
       end
@@ -189,7 +191,6 @@ module Cronic
       definitions["anchor"].each do |handler|
         if handler.match(tokens, definitions)
           good_tokens = tokens.select { |o| !o.get_tag Separator }
-          #return self.anchor(good_tokens, **options)
           return handler.invoke(:anchor, good_tokens, self, options)
         end
       end
@@ -197,8 +198,7 @@ module Cronic
       definitions["arrow"].each do |handler|
         if handler.match(tokens, definitions)
           good_tokens = tokens.reject { |o| o.get_tag(SeparatorAt) || o.get_tag(SeparatorSlash) || o.get_tag(SeparatorDash) || o.get_tag(SeparatorComma) || o.get_tag(SeparatorAnd) }
-          #return self.arrow(good_tokens, **options)
-          return handler.invoke(:arrow, good_tokens, self, options)
+           return handler.invoke(:arrow, good_tokens, self, options)
         end
       end
 

@@ -26,6 +26,7 @@ module Cronic
           
     def initialize(time, width = nil, @hours24 : Bool? = nil)
       @current_time = nil
+      @now = ::Time.local
       #@options = kwargs
       time_parts = time.split(":")
       raise ArgumentError.new("Time cannot have more than 4 groups of ':'") if time_parts.size > 4
@@ -66,7 +67,7 @@ module Cronic
     #             must be either :past or :future
     def next(pointer)
       super
-
+      
       half_day = 60 * 60 * 12
       full_day = 60 * 60 * 24
 
@@ -74,7 +75,7 @@ module Cronic
 
       unless @current_time
         first = true
-        midnight = Cronic.time_class.local(@now.year, @now.month, @now.day)
+        midnight = ::Time.local(@now.year, @now.month, @now.day)
 
         yesterday_midnight = midnight - full_day
         tomorrow_midnight = midnight + full_day

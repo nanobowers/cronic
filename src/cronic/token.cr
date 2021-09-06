@@ -35,20 +35,16 @@ module Cronic
     # tag_class - The tag Class to remove.
     # Returns nothing.
 
-## TODO     
-#    def untag(tag_class)
-#      @tags.delete_if { |m| m.kind_of? tag_class }
-#    end
+    def untag(tag_class)
+      @tags.reject! { |m| m.class == tag_class }
+    end
 
 
     # tag_class - The tag Class to search for.
     # Returns The first Tag that matches the given class.
-
-## TODO    
     def get_tag(tg_class : Class)
-      @tags.find { |tg|
-        #tg.is_a? tg_class
-        typeof(tg) == tg_class # .is_a?(tg_class)
+      @tags.find { |m|
+        m.class == tg_class
       }
     end
 

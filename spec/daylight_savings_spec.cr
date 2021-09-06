@@ -2,17 +2,17 @@ require "./spec_helper"
 
 describe "daylight-savings" do
 
-  begin_daylight_savings : Time
-  end_daylight_savings : Time
+  begin_daylight_savings = Time.local(2008, 3, 9, 5, 0, 0)
+  end_daylight_savings = Time.local(2008, 11, 2, 5, 0, 0)
 
   Spec.before_each do
-    begin_daylight_savings = Time.local(2008, 3, 9, 5, 0, 0, 0)
-    end_daylight_savings = Time.local(2008, 11, 2, 5, 0, 0, 0)
+    begin_daylight_savings = Time.local(2008, 3, 9, 5, 0, 0)
+    end_daylight_savings = Time.local(2008, 11, 2, 5, 0, 0)
   end
 
   it("begin past") do
     t = Cronic::RepeaterTime.new("900")
-    t.start = @begin_daylight_savings
+    t.start = begin_daylight_savings
     t.next(:past).begin.should eq Time.local(2008, 3, 8, 21)
     t = Cronic::RepeaterTime.new("900")
     t.start = Time.local(2008, 3, 9, 22, 0, 0, 0)
