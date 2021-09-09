@@ -1,10 +1,9 @@
 module Cronic
-  # A Span represents a range of time. Since this class extends
-  # Range, you can use #begin and #end to get the beginning and
-  # ending times of the span (they will be of class Time)
+  # A SecSpan represents a range of time in seconds.
 
   #TODO: Error: can't make class 'Span' inherit generic struct 'Range(Int32, Int32)'
-  class Span # < Range(I nt32, Int32)
+  
+  class SecSpan # < Range(I nt32, Int32)
     getter :begin, :end
     
     def initialize(@begin : ::Time, @end : ::Time)
@@ -17,15 +16,20 @@ module Cronic
 
     # Add a number of seconds to this span, returning the
     # resulting Span
-    def +(seconds)
-      Span.new(self.begin + seconds, self.end + seconds)
+    def +(seconds : Int32)
+      adjust = ::Time::Span.new(seconds: seconds)
+      SecSpan.new(self.begin + adjust, self.end + adjust)
+    end
+
+    def +(seconds : ::Time::Span)
+      SecSpan.new(self.begin + seconds, self.end + seconds)
     end
 
     # Subtract a number of seconds to this span, returning the
     # resulting Span
     def -(seconds)
       #self + -seconds
-      Span.new(self.begin - seconds, self.end - seconds)
+      SecSpan.new(self.begin - seconds, self.end - seconds)
     end
 
     # Prints this span in a nice fashion

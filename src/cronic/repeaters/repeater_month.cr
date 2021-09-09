@@ -21,7 +21,7 @@ module Cronic
         @current_month_start = offset_by(Cronic.construct(@current_month_start.year, @current_month_start.month), 1, pointer)
       end
 
-      Span.new(@current_month_start, Cronic.construct(@current_month_start.year, @current_month_start.month + 1))
+      SecSpan.new(@current_month_start, Cronic.construct(@current_month_start.year, @current_month_start.month + 1))
     end
 
     def this(pointer = :future)
@@ -39,17 +39,17 @@ module Cronic
         month_end = self.offset_by(Cronic.construct(@now.year, @now.month), 1, :future)
       end
 
-      Span.new(month_start, month_end)
+      SecSpan.new(month_start, month_end)
     end
 
     def offset(span, amount, pointer)
-      Span.new(offset_by(span.begin, amount, pointer), offset_by(span.end, amount, pointer))
+      SecSpan.new(offset_by(span.begin, amount, pointer), offset_by(span.end, amount, pointer))
     end
 
     def offset_by(time, amount, pointer)
       direction = pointer == :future ? 1 : -1
 
-      amount_years = direction * amount / YEAR_MONTHS
+      amount_years = direction * amount // YEAR_MONTHS
       amount_months = direction * amount % YEAR_MONTHS
 
       new_year = time.year + amount_years
@@ -62,7 +62,7 @@ module Cronic
       days = month_days(new_year, new_month)
       new_day = time.day > days ? days : time.day
 
-      Cronic.construct(new_year, new_month, new_day, time.hour, time.min, time.sec)
+      Cronic.construct(new_year, new_month, new_day, time.hour, time.minute, time.second)
     end
 
     def width
@@ -74,7 +74,7 @@ module Cronic
     end
 
     private def month_days(year, month)
-      ::Date.leap?(year) ? MONTH_DAYS_LEAP[month - 1] : MONTH_DAYS[month - 1]
+      ::Time.leap_year?(year) ? MONTH_DAYS_LEAP[month - 1] : MONTH_DAYS[month - 1]
     end
   end
 end

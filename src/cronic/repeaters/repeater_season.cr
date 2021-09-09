@@ -2,10 +2,10 @@ module Cronic
   class RepeaterSeason < Repeater #:nodoc:
     SEASON_SECONDS = 7_862_400 # 91 * 24 * 60 * 60
     SEASONS = {
-      :spring => Season.new(MiniDate.new(3,20), MiniDate.new(6,20)),
-      :summer => Season.new(MiniDate.new(6,21), MiniDate.new(9,22)),
-      :autumn => Season.new(MiniDate.new(9,23), MiniDate.new(12,21)),
-      :winter => Season.new(MiniDate.new(12,22), MiniDate.new(3,19))
+      :spring => SeasonSpan.new(MiniDate.new(3,20), MiniDate.new(6,20)),
+      :summer => SeasonSpan.new(MiniDate.new(6,21), MiniDate.new(9,22)),
+      :autumn => SeasonSpan.new(MiniDate.new(9,23), MiniDate.new(12,21)),
+      :winter => SeasonSpan.new(MiniDate.new(12,22), MiniDate.new(3,19))
     }
 
     @next_season_start : Time?

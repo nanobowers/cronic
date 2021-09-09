@@ -1,10 +1,14 @@
 require "./spec_helper"
+
+def now_time
+  Time.local(2006, 8, 16, 14, 0, 0)
+end
+
 describe Cronic::RepeaterWeekday do
-  now : Time
-  Spec.before_each { now = Time.local(2007, 6, 11, 14, 0, 0, 0) }
+
   it("next future") do
     weekdays = Cronic::RepeaterWeekday.new(:weekday)
-    weekdays.start = @now
+    weekdays.start = now_time
     next1_weekday = weekdays.next(:future)
     next1_weekday.begin.should eq Time.local(2007, 6, 12)
     next1_weekday.end.should eq Time.local(2007, 6, 13)
@@ -23,7 +27,7 @@ describe Cronic::RepeaterWeekday do
   end
   it("next past") do
     weekdays = Cronic::RepeaterWeekday.new(:weekday)
-    weekdays.start = @now
+    weekdays.start = now_time
     last1_weekday = weekdays.next(:past)
     last1_weekday.begin.should eq Time.local(2007, 6, 8)
     last1_weekday.end.should eq Time.local(2007, 6, 9)
@@ -32,7 +36,7 @@ describe Cronic::RepeaterWeekday do
     last2_weekday.end.should eq Time.local(2007, 6, 8)
   end
   it("offset") do
-    span = Cronic::Span.new(@now, (@now + 1))
+    span = Cronic::SecSpan.new(now_time, (now_time + Time::Span.new(seconds: 1)))
     offset_span = Cronic::RepeaterWeekday.new(:weekday).offset(span, 5, :future)
     offset_span.begin.should eq Time.local(2007, 6, 18, 14)
     offset_span.end.should eq Time.local(2007, 6, 18, 14, 0, 1)

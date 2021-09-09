@@ -6,16 +6,13 @@ module Cronic
       new(time.month, time.day)
     end
 
-    def initialize(month, day)
+    def initialize(@month : Int32, @day : Int32)
       unless (1..12).includes?(month)
         raise ArgumentError.new("1..12 are valid months")
       end
-
-      @month = month
-      @day = day
     end
 
-    def is_between?(md_start, md_end)
+    def is_between?(md_start : MiniDate, md_end : MiniDate) : Bool
       return false if (@month == md_start.month && @month == md_end.month) &&
                       (@day < md_start.day || @day > md_end.day)
       return true if (@month == md_start.month && @day >= md_start.day) ||
@@ -31,8 +28,8 @@ module Cronic
       return false
     end
 
-    def equals?(other)
-      @month == other.month and @day == other.day
+    def equals?(other) : Bool
+      @month == other.month && @day == other.day
     end
   end
 end

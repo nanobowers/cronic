@@ -1,11 +1,10 @@
 require "../src/cronic"
 
-describe Cronic::RepeaterDayPortion do
+def now_time
+  Time.local(2006, 8, 16, 14, 0, 0)
+end
 
-  now_time : Time
-  Spec.before_suite do
-    now_time = Time.local(2006, 8, 16, 14, 0, 0, 0)
-  end
+describe Cronic::RepeaterDayPortion do
 
   it("am future") do
     day_portion = Cronic::RepeaterDayPortion.new(:am)

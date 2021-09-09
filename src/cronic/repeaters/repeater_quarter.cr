@@ -3,13 +3,15 @@ module Cronic
     MONTHS_PER_QUARTER = 3
     QUARTER_SECONDS = 7_776_000 # 3 * 30 * 24 * 60 * 60
 
+    @current_span : SecSpan?
+    
     def next(pointer)
       @current_span ||= quarter(@now)
       offset_quarter_amount = pointer == :future ? 1 : -1
-      @current_span = offset_quarter(@current_span.begin, offset_quarter_amount)
+      @current_span = offset_quarter(@current_span.as(SecSpan).begin, offset_quarter_amount)
     end
 
-    def this # (*)
+    def this
       @current_span = quarter(@now)
     end
 
@@ -19,7 +21,7 @@ module Cronic
     end
 
     def width
-      @current_span ? @current_span.width : QUARTER_SECONDS
+      @current_span ? @current_span.as(SecSpan).width : QUARTER_SECONDS
     end
 
     def to_s
@@ -28,10 +30,10 @@ module Cronic
 
 
     protected def quarter_index(month)
-      (month - 1) / MONTHS_PER_QUARTER
+      (month - 1) // MONTHS_PER_QUARTER
     end
 
-    protected def quarter(time)
+    protected def quarter(time) : SecSpan
       year, month = time.year, time.month
 
       quarter_index = quarter_index(month)
@@ -41,13 +43,13 @@ module Cronic
       quarter_start = Cronic.construct(year, quarter_month_start)
       quarter_end = Cronic.construct(year, quarter_month_end)
 
-      Span.new(quarter_start, quarter_end)
+      SecSpan.new(quarter_start, quarter_end)
     end
 
-    protected def offset_quarter(time, amount)
+    protected def offset_quarter(time, amount) : SecSpan
       new_month = time.month - 1
       new_month = new_month + MONTHS_PER_QUARTER * amount
-      new_year = time.year + new_month / 12
+      new_year = time.year + new_month // 12
       new_month = new_month % 12 + 1
 
       offset_time_basis = Cronic.construct(new_year, new_month)

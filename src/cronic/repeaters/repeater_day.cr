@@ -2,24 +2,20 @@ module Cronic
   class RepeaterDay < Repeater #:nodoc:
     DAY_SECONDS = 86_400 # (24 * 60 * 60)
 
-    @current_day_start : Time?
+    @current_day_start : ::Time
     
     def initialize(type, width = nil, **kwargs)
       super
-      @current_day_start = nil
+      @current_day_start = ::Time.local(@now.year, @now.month, @now.day)
     end
 
     def next(pointer)
       super
 
-      unless @current_day_start
-        @current_day_start = Cronic.time_class.local(@now.year, @now.month, @now.day)
-      end
+      direction = (pointer == :future) ? 1 : -1
+      @current_day_start += ::Time::Span.new(days: direction)
 
-      direction = pointer == :future ? 1 : -1
-      @current_day_start += direction * DAY_SECONDS
-
-      Span.new(@current_day_start, @current_day_start + DAY_SECONDS)
+      SecSpan.new(@current_day_start, @current_day_start + ::Time::Span.new(days: 1))
     end
 
     def this(pointer = :future)
@@ -37,7 +33,7 @@ module Cronic
         day_end = Cronic.construct(@now.year, @now.month, @now.day) + DAY_SECONDS
       end
 
-      Span.new(day_begin, day_end)
+      SecSpan.new(day_begin, day_end)
     end
 
     def offset(span, amount, pointer)

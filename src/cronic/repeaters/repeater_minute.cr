@@ -2,7 +2,7 @@ module Cronic
   class RepeaterMinute < Repeater #:nodoc:
     MINUTE_SECONDS = 60
 
-    @current_minute_start : Time?
+    @current_minute_start : ::Time?
     
     def initialize(type, width = nil, **kwargs)
       super
@@ -12,19 +12,15 @@ module Cronic
     def next(pointer = :future)
       super
 
-      unless @current_minute_start
-        case pointer
-        when :future
-          @current_minute_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.min + 1)
-        when :past
-          @current_minute_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.min - 1)
-        end
+      if @current_minute_start.nil?
+        direction = pointer == :future ? 1 : -1
+        @current_minute_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute) + ::Time::Span.new(minutes: direction)
       else
         direction = pointer == :future ? 1 : -1
-        @current_minute_start += direction * MINUTE_SECONDS
+        @current_minute_start = @current_minute_start.as(::Time) + ::Time::Span.new(seconds: direction * MINUTE_SECONDS)
       end
-
-      Span.new(@current_minute_start, @current_minute_start + MINUTE_SECONDS)
+      cms = @current_minute_start.as(::Time)
+      SecSpan.new(cms, cms + ::Time::Span.new(minutes: 1))
     end
 
     def this(pointer = :future)
@@ -33,16 +29,16 @@ module Cronic
       case pointer
       when :future
         minute_begin = @now
-        minute_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.min)
+        minute_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute)
       when :past
-        minute_begin = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.min)
+        minute_begin = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute)
         minute_end = @now
       when :none
-        minute_begin = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.min)
-        minute_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.min) + MINUTE_SECONDS
+        minute_begin = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute)
+        minute_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute) + MINUTE_SECONDS
       end
 
-      Span.new(minute_begin, minute_end)
+      SecSpan.new(minute_begin, minute_end)
     end
 
     def offset(span, amount, pointer)

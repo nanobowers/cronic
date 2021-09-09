@@ -3,6 +3,7 @@ module Cronic
   class Tick #:nodoc:
     property :time
     getter? :ambiguous
+
     def initialize(@time : Int32 | Float64, @ambiguous = false)
     end
 
@@ -17,11 +18,15 @@ module Cronic
     def to_s
       @time.to_s + (@ambiguous ? "?" : "")
     end
+
+    def timespan
+      ::Time::Span.new(seconds: @time.to_i)
+    end
   end
 
   class RepeaterTime < Repeater #:nodoc:
 
-    @current_time : Time?
+    @current_time : ::Time?
     #@type : Tick
           
     def initialize(time, width = nil, @hours24 : Bool? = nil)
@@ -61,68 +66,69 @@ module Cronic
 
       @type = Tick.new(hours + minutes + seconds + subseconds, ambiguous)
     end
+    def ticktype
+      @type.as(Tick)
+    end
+      def update_current_time(pointer)
+        half_day = ::Time::Span.new(hours: 12)
+        full_day = ::Time::Span.new(hours: 24)
+        midnight = ::Time.local(@now.year, @now.month, @now.day)
+        yesterday_midnight = midnight - full_day
+        tomorrow_midnight = midnight + full_day
+        offset_fix = ::Time::Span.new(seconds: (midnight.offset - tomorrow_midnight.offset))
+        tomorrow_midnight += offset_fix
 
+        if pointer == :future
+          if ticktype.ambiguous?
+            [midnight + ticktype.timespan + offset_fix, midnight + half_day + ticktype.timespan + offset_fix, tomorrow_midnight + ticktype.timespan].each do |t|
+              (@current_time = t; return) if t >= @now
+            end
+          else
+            [midnight + ticktype.timespan + offset_fix, tomorrow_midnight + ticktype.timespan].each do |t|
+              (@current_time = t; return) if t >= @now
+            end
+          end
+        else # pointer == :past
+          if ticktype.ambiguous?
+             [midnight + half_day + ticktype.timespan + offset_fix, midnight + ticktype.timespan + offset_fix, yesterday_midnight + ticktype.timespan + half_day].each do |t|
+               (@current_time = t; return) if t <= @now
+             end
+          else
+            [midnight + ticktype.timespan + offset_fix, yesterday_midnight + ticktype.timespan].each do |t|
+              (@current_time = t; return) if t <= @now
+            end
+          end
+        end
+      end
+#    end
+#      end
     # Return the next past or future Span for the time that this Repeater represents
     #   pointer - Symbol representing which temporal direction to fetch the next day
     #             must be either :past or :future
     def next(pointer)
       super
       
-      half_day = 60 * 60 * 12
-      full_day = 60 * 60 * 24
-
       first = false
 
       unless @current_time
         first = true
-        midnight = ::Time.local(@now.year, @now.month, @now.day)
 
-        yesterday_midnight = midnight - full_day
-        tomorrow_midnight = midnight + full_day
-
-        offset_fix = midnight.gmt_offset - tomorrow_midnight.gmt_offset
-        tomorrow_midnight += offset_fix
-
-        catch :done do
-          if pointer == :future
-            if @type.ambiguous?
-              [midnight + @type.time + offset_fix, midnight + half_day + @type.time + offset_fix, tomorrow_midnight + @type.time].each do |t|
-                (@current_time = t; throw :done) if t >= @now
-              end
-            else
-              [midnight + @type.time + offset_fix, tomorrow_midnight + @type.time].each do |t|
-                (@current_time = t; throw :done) if t >= @now
-              end
-            end
-          else # pointer == :past
-            if @type.ambiguous?
-              [midnight + half_day + @type.time + offset_fix, midnight + @type.time + offset_fix, yesterday_midnight + @type.time + half_day].each do |t|
-                (@current_time = t; throw :done) if t <= @now
-              end
-            else
-              [midnight + @type.time + offset_fix, yesterday_midnight + @type.time].each do |t|
-                (@current_time = t; throw :done) if t <= @now
-              end
-            end
-          end
-        end
+        update_current_time(pointer)
 
         @current_time || raise RuntimeError.new("Current time cannot be nil at this point")
       end
-
+      @current_time = @current_time.as(::Time)
       unless first
-        increment = @type.ambiguous? ? half_day : full_day
-        @current_time += pointer == :future ? increment : -increment
+        increment = ticktype.ambiguous? ? ::Time::Span.new(hours: 12) : ::Time::Span.new(hours: 24)
+        @current_time = @current_time.as(::Time) + ((pointer == :future) ? increment : -increment)
       end
-
-      Span.new(@current_time, @current_time + width)
+      ctime = @current_time.as(::Time)
+      SecSpan.new(ctime, ctime + ::Time::Span.new(seconds: width))
     end
 
     def this(context = :future)
       super
-
       context = :future if context == :none
-
       self.next(context)
     end
 

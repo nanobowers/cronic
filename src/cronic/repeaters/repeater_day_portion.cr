@@ -10,6 +10,8 @@ module Cronic
     }
 
     @range : Range(Int32,Int32)
+    @current_span : SecSpan?
+    
     def initialize(type, width = nil, **kwargs)
       super
       @current_span = nil
@@ -27,46 +29,48 @@ module Cronic
 
     def next(pointer)
       super
-
+      range_begin = ::Time::Span.new(seconds: @range.begin)
+      range_end = ::Time::Span.new(seconds: @range.end)
       unless @current_span
         now_seconds = @now - Cronic.construct(@now.year, @now.month, @now.day)
-        if now_seconds < @range.begin
+        if now_seconds < range_begin
           case pointer
-          when :future
-            range_start = Cronic.construct(@now.year, @now.month, @now.day) + @range.begin
           when :past
-            range_start = Cronic.construct(@now.year, @now.month, @now.day - 1) + @range.begin
+            range_start = Cronic.construct(@now.year, @now.month, @now.day - 1) + range_begin
+          else # when :future
+            range_start = Cronic.construct(@now.year, @now.month, @now.day) + range_begin
           end
-        elsif now_seconds > @range.end
+        elsif now_seconds > range_end
           case pointer
-          when :future
-            range_start = Cronic.construct(@now.year, @now.month, @now.day + 1) + @range.begin
           when :past
-            range_start = Cronic.construct(@now.year, @now.month, @now.day) + @range.begin
+            range_start = Cronic.construct(@now.year, @now.month, @now.day) + range_begin
+          else # when :future
+            range_start = Cronic.construct(@now.year, @now.month, @now.day + 1) + range_begin
           end
         else
           case pointer
-          when :future
-            range_start = Cronic.construct(@now.year, @now.month, @now.day + 1) + @range.begin
           when :past
-            range_start = Cronic.construct(@now.year, @now.month, @now.day - 1) + @range.begin
+            range_start = Cronic.construct(@now.year, @now.month, @now.day - 1) + range_begin
+          else # when :future
+            range_start = Cronic.construct(@now.year, @now.month, @now.day + 1) + range_begin
           end
         end
         offset = (@range.end - @range.begin)
         range_end = construct_date_from_reference_and_offset(range_start, offset)
-        @current_span = Span.new(range_start, range_end)
+        @current_span = SecSpan.new(range_start, range_end)
       else
         days_to_shift_window =
         case pointer
-        when :future
-          1
         when :past
           -1
+        else # when :future
+          1
         end
 
-        new_begin = Cronic.construct(@current_span.begin.year, @current_span.begin.month, @current_span.begin.day + days_to_shift_window, @current_span.begin.hour, @current_span.begin.min, @current_span.begin.sec)
-        new_end = Cronic.construct(@current_span.end.year, @current_span.end.month, @current_span.end.day + days_to_shift_window, @current_span.end.hour, @current_span.end.min, @current_span.end.sec)
-        @current_span = Span.new(new_begin, new_end)
+        cspan = @current_span.as(SecSpan)
+        new_begin = Cronic.construct(cspan.begin.year, cspan.begin.month, cspan.begin.day + days_to_shift_window, cspan.begin.hour, cspan.begin.minute, cspan.begin.second)
+        new_end = Cronic.construct(cspan.end.year, cspan.end.month, cspan.end.day + days_to_shift_window, cspan.end.hour, cspan.end.minute, cspan.end.second)
+        @current_span = SecSpan.new(new_begin, new_end)
       end
     end
 
@@ -75,7 +79,7 @@ module Cronic
 
       range_start = Cronic.construct(@now.year, @now.month, @now.day) + @range.begin
       range_end = construct_date_from_reference_and_offset(range_start)
-      @current_span = Span.new(range_start, range_end)
+      @current_span = SecSpan.new(range_start, range_end)
     end
 
     def offset(span, amount, pointer)
@@ -87,8 +91,10 @@ module Cronic
 
     def width
       @range || raise RuntimeError.new("Range has not been set")
-      return @current_span.width if @current_span
-      if @type.kind_of? Integer
+      if @current_span.is_a?(SecSpan)
+        return @current_span.as(SecSpan).width
+      end
+      if @type.is_a?(Int32)
         return (12 * 60 * 60)
       else
         @range.end - @range.begin
@@ -99,12 +105,13 @@ module Cronic
       super << "-dayportion-" << @type.to_s
     end
 
-    private def construct_date_from_reference_and_offset(reference, offset = nil)
+      private def construct_date_from_reference_and_offset(reference, offset = nil)
+        reftime = reference.as(::Time)
       elapsed_seconds_for_range = offset || (@range.end - @range.begin)
       second_hand = ((elapsed_seconds_for_range - (12 * 60))) % 60
-      minute_hand = (elapsed_seconds_for_range - second_hand) / (60) % 60
-      hour_hand = (elapsed_seconds_for_range - minute_hand - second_hand) / (60 * 60) + reference.hour % 24
-      Cronic.construct(reference.year, reference.month, reference.day, hour_hand, minute_hand, second_hand)
+      minute_hand = (elapsed_seconds_for_range - second_hand) // (60) % 60
+      hour_hand = (elapsed_seconds_for_range - minute_hand - second_hand) // (60 * 60) + reftime.hour % 24
+      Cronic.construct(reftime.year, reftime.month, reftime.day, hour_hand, minute_hand, second_hand)
     end
   end
 end

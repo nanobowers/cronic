@@ -1,13 +1,14 @@
 require "./spec_helper"
 
-describe Cronic::RepeaterMinute do
+def ref_time_min
+  Time.local(2008, 6, 25, 7, 15, 30)
+end
 
-  now : Time
-  Spec.before_each { now = Time.local(2006, 8, 16, 14, 0, 0, 0) }
+describe Cronic::RepeaterMinute do
 
   it("next future") do
     minutes = Cronic::RepeaterMinute.new(:minute)
-    minutes.start = @now
+    minutes.start = ref_time_min
     next_minute = minutes.next(:future)
     next_minute.begin.should eq Time.local(2008, 6, 25, 7, 16)
     next_minute.end.should eq Time.local(2008, 6, 25, 7, 17)
@@ -17,7 +18,7 @@ describe Cronic::RepeaterMinute do
   end
   it("next past") do
     minutes = Cronic::RepeaterMinute.new(:minute)
-    minutes.start = @now
+    minutes.start = ref_time_min
     prev_minute = minutes.next(:past)
     prev_minute.begin.should eq Time.local(2008, 6, 25, 7, 14)
     prev_minute.end.should eq Time.local(2008, 6, 25, 7, 15)

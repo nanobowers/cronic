@@ -109,19 +109,19 @@ module Cronic
   # second - Integer second.
   #
   # Returns a new Time object constructed from these params.
-  def self.construct(year, month = 1, day = 1, hour = 0, minute = 0, second = 0, offset = nil)
+  def self.construct(year, month : Int32 = 1, day : Int32  = 1, hour : Int32  = 0, minute : Int32  = 0, second : Int32  = 0, offset = nil) : ::Time
     if second >= 60
-      minute += second / 60
+      minute += second // 60
       second = second % 60
     end
 
     if minute >= 60
-      hour += minute / 60
+      hour += minute // 60
       minute = minute % 60
     end
 
     if hour >= 24
-      day += hour / 24
+      day += hour // 24
       hour = hour % 24
     end
 
@@ -129,19 +129,20 @@ module Cronic
     # system (non-constant number of days per month)
     day <= 56 || raise("day must be no more than 56 (makes month resolution easier)")
     if day > 28 # no month ever has fewer than 28 days, so only do this if necessary
-      days_this_month = ::Date.leap?(year) ? Date::MONTH_DAYS_LEAP[month] : Date::MONTH_DAYS[month]
+      days_this_month = ::Time.leap_year?(year) ? Date::MONTH_DAYS_LEAP[month] : Date::MONTH_DAYS[month]
+      days_this_month = days_this_month.as(Int32)
       if day > days_this_month
-        month += day / days_this_month
+        month += day // days_this_month
         day = day % days_this_month
       end
     end
 
     if month > 12
       if month % 12 == 0
-        year += (month - 12) / 12
+        year += (month - 12) // 12
         month = 12
       else
-        year += month / 12
+        year += month // 12
         month = month % 12
       end
     end
@@ -154,7 +155,7 @@ module Cronic
     #  offset = Time::normalize_offset(offset) if Cronic.time_class.name == "DateTime"
     #  Cronic.time_class.new(year, month, day, hour, minute, second, offset)
     #end
-    Cronic.time_class.local(year, month, day, hour, minute, second)
+    ::Time.local(year, month, day, hour, minute, second)
   end
 
 end

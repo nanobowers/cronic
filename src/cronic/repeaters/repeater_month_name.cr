@@ -16,14 +16,14 @@ module Cronic
       :december => 12
     }
 
-    @current_month_begin : Time?
+    @current_month_begin : ::Time?
     
     def initialize(type, width = nil, **kwargs)
       super
       @current_month_begin = nil
     end
 
-    def next(pointer)
+    def next(pointer) : SecSpan
       super
 
       unless @current_month_begin
@@ -49,16 +49,17 @@ module Cronic
         end
         @current_month_begin || raise RuntimeError.new("Current month should be set by now")
       else
+        cmb = @current_month_begin.as(::Time)
         case pointer
         when :future
-          @current_month_begin = Cronic.construct(@current_month_begin.year + 1, @current_month_begin.month)
+          @current_month_begin = Cronic.construct(cmb.year + 1, cmb.month)
         when :past
-          @current_month_begin = Cronic.construct(@current_month_begin.year - 1, @current_month_begin.month)
+          @current_month_begin = Cronic.construct(cmb.year - 1, cmb.month)
         end
       end
 
-      cur_month_year = @current_month_begin.year
-      cur_month_month = @current_month_begin.month
+      cur_month_year = current_month_begin.year
+      cur_month_month = current_month_begin.month
 
       if cur_month_month == 12
         next_month_year = cur_month_year + 1
@@ -68,10 +69,14 @@ module Cronic
         next_month_month = cur_month_month + 1
       end
 
-      Span.new(@current_month_begin, Cronic.construct(next_month_year, next_month_month))
+      SecSpan.new(current_month_begin, Cronic.construct(next_month_year, next_month_month))
     end
 
-    def this(pointer = :future)
+    def current_month_begin
+      @current_month_begin.as(::Time)
+    end
+    
+    def this(pointer = :future) : SecSpan
       super
 
       case pointer
@@ -79,6 +84,8 @@ module Cronic
         self.next(pointer)
       when :future, :none
         self.next(:none)
+      else
+        self.next(:none) # for case type completeness
       end
     end
 
@@ -87,7 +94,7 @@ module Cronic
     end
 
     def index
-      @index ||= MONTHS[@type]
+      MONTHS[@type]
     end
 
     def to_s

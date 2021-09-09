@@ -146,7 +146,7 @@ module Cronic
     # span - The Cronic::Span object to calcuate a guess from.
     #
     # Returns a new Time object.
-    def guess(span : Span, mode = :middle)
+    def guess(span : SecSpan, mode = :middle)
       return span unless mode
       if (span.width > 1) && (mode == true || mode == :middle)
         return span.begin + ::Time::Span.new(seconds: span.width // 2)
@@ -175,9 +175,70 @@ module Cronic
       tokens.select { |token| token.tagged? }
     end
 
-    private def tokens_to_span(tokens, **options) : Span?
+
+#    def tokens_to_span(tokens, **options) : Span?
+#      parse_endian_tokens ||
+#        nil
+#    end
+
+    def maybe(item)
+      Or.new([item], maybe: true)
+    end
+
+    def or(item, item2)
+      Or.new([item, item2], maybe: false)
+    end
+
+    def ormaybe(item, item2)
+      Or.new([item, item2], maybe: true)
+    end
+    
+    # sequence matcher
+    def seqmatch(pattern, tokens) : Bool
+      seq = Sequence.new(pattern)
+      match(seq, tokens)
+    end
+    
+    def match_one(pat, tok)
+      return tok.tags.any? {|x| x.class == pat }
+    end
+    
+    def match_maybe(pattern, tokens) : Bool
+      if match_one(pattern.first, tokens.first) && match(pattern[1..], tokens[1..])
+        return true
+      else 
+        return match(pattern[1..], tokens);
+      end
+    end
+    
+    def match(pattern, tokens) : Bool
+      puts "matching #{pattern.inspect}\n  against #{tokens}"
+      if pattern.empty?
+        return true
+      elsif tokens.empty?
+        return true 
+      elsif pattern.first.class == Or && pattern.first.as(Or).maybe?
+        return match_maybe(pattern, tokens)
+      else
+        return match_one(pattern[0], tokens[0]) && match(pattern[1..], tokens[1..])
+      end
+    end
+  
+    
+    
+    private def tokens_to_span(tokens, **options) : SecSpan?
       definitions = definitions(**options)
 
+      good_tokens = tokens.select { |o| !o.get_tag Separator }
+      #Handler.new(["ordinal_day", "repeater_month_name", "separator_at?", "time?"], "handle_od_rmn"),
+
+      if seqmatch([OrdinalDay, RepeaterMonthName, maybe(SeparatorAt), maybe(Time)], tokens)
+        return handle_od_rmn(tokens, **options)
+      elsif
+        p :elseif
+      end  
+         
+      
       (definitions["endian"] + definitions["date"]).each do |handler|
 
         #pp! tokens

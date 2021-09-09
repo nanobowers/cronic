@@ -3,28 +3,28 @@ module Cronic
 
 
     # Handle month/day
-    def self.handle_m_d(month, day, time_tokens, options)
+    def handle_m_d(month, day, time_tokens, context = :none, **options)
       month.start = self.now
-      span = month.this(options[:context])
+      span = month.this(context)
       year, month = span.begin.year, span.begin.month
-      day_start = Cronic.time_class.local(year, month, day)
-      day_start = Cronic.time_class.local(year + 1, month, day) if options[:context] == :future && day_start < now
+      day_start = ::Time.local(year, month, day)
+      day_start = ::Time.local(year + 1, month, day) if context == :future && day_start < now
 
-      day_or_time(day_start, time_tokens, options)
+      day_or_time(day_start, time_tokens, **options)
     end
 
     # Handle repeater-month-name/scalar-day
-    def handle_rmn_sd(tokens, options)
+    def handle_rmn_sd(tokens, **options)
       month = tokens[0].get_tag(RepeaterMonthName)
       day = tokens[1].get_tag(ScalarDay).type
 
       return if month_overflow?(self.now.year, month.index, day)
 
-      handle_m_d(month, day, tokens[2..tokens.size], options)
+      handle_m_d(month, day, tokens[2..tokens.size], **options)
     end
 
     # Handle repeater-month-name/scalar-day with separator-on
-    def handle_rmn_sd_on(tokens, options)
+    def handle_rmn_sd_on(tokens, **options)
       if tokens.size > 3
         month = tokens[2].get_tag(RepeaterMonthName)
         day = tokens[3].get_tag(ScalarDay).type
@@ -37,37 +37,37 @@ module Cronic
 
       return if month_overflow?(self.now.year, month.index, day)
 
-      handle_m_d(month, day, tokens[token_range], options)
+      handle_m_d(month, day, tokens[token_range], **options)
     end
 
     # Handle repeater-month-name/ordinal-day
-    def handle_rmn_od(tokens, options)
+    def handle_rmn_od(tokens, **options)
       month = tokens[0].get_tag(RepeaterMonthName)
       day = tokens[1].get_tag(OrdinalDay).type
 
       return if month_overflow?(self.now.year, month.index, day)
 
-      handle_m_d(month, day, tokens[2..tokens.size], options)
+      handle_m_d(month, day, tokens[2..tokens.size], **options)
     end
 
     # Handle ordinal this month
-    def handle_od_rm(tokens, options)
+    def handle_od_rm(tokens, **options)
       day = tokens[0].get_tag(OrdinalDay).type
       month = tokens[2].get_tag(RepeaterMonth)
-      handle_m_d(month, day, tokens[3..tokens.size], options)
+      handle_m_d(month, day, tokens[3..tokens.size], **options)
     end
 
     # Handle ordinal-day/repeater-month-name
-    def handle_od_rmn(tokens, options)
-      month = tokens[1].get_tag(RepeaterMonthName)
-      day = tokens[0].get_tag(OrdinalDay).type
-
+    def handle_od_rmn(tokens, **options)
+      month = tokens[1].get_tag(RepeaterMonthName).as(RepeaterMonthName)
+      day = tokens[0].get_tag(OrdinalDay).as(OrdinalDay).type.as(Int)
       return if month_overflow?(self.now.year, month.index, day)
 
-      handle_m_d(month, day, tokens[2..tokens.size], options)
+      handle_m_d(month, day, tokens[2..tokens.size], **options)
+      #nil
     end
 
-    def handle_sy_rmn_od(tokens, options)
+    def handle_sy_rmn_od(tokens, **options)
       year = tokens[0].get_tag(ScalarYear).type
       month = tokens[1].get_tag(RepeaterMonthName).index
       day = tokens[2].get_tag(OrdinalDay).type
@@ -76,25 +76,25 @@ module Cronic
       return if month_overflow?(year, month, day)
 
       begin
-        day_start = Cronic.time_class.local(year, month, day)
-        day_or_time(day_start, time_tokens, options)
+        day_start = ::Time.local(year, month, day)
+        day_or_time(day_start, time_tokens, **options)
       rescue ArgumentError
         nil
       end
     end
 
     # Handle scalar-day/repeater-month-name
-    def handle_sd_rmn(tokens, options)
+    def handle_sd_rmn(tokens, **options)
       month = tokens[1].get_tag(RepeaterMonthName)
       day = tokens[0].get_tag(ScalarDay).type
 
       return if month_overflow?(self.now.year, month.index, day)
 
-      handle_m_d(month, day, tokens[2..tokens.size], options)
+      handle_m_d(month, day, tokens[2..tokens.size], **options)
     end
 
     # Handle repeater-month-name/ordinal-day with separator-on
-    def handle_rmn_od_on(tokens, options)
+    def handle_rmn_od_on(tokens, **options)
       if tokens.size > 3
         month = tokens[2].get_tag(RepeaterMonthName)
         day = tokens[3].get_tag(OrdinalDay).type
@@ -107,16 +107,16 @@ module Cronic
 
       return if month_overflow?(self.now.year, month.index, day)
 
-      handle_m_d(month, day, tokens[token_range], options)
+      handle_m_d(month, day, tokens[token_range], **options)
     end
 
     # Handle scalar-year/repeater-quarter-name
-    def handle_sy_rqn(tokens, options)
-      handle_rqn_sy(tokens[0..1].reverse, options)
+    def handle_sy_rqn(tokens, **options)
+      handle_rqn_sy(tokens[0..1].reverse, **options)
     end
 
     # Handle repeater-quarter-name/scalar-year
-    def handle_rqn_sy(tokens, options)
+    def handle_rqn_sy(tokens, **options)
       year = tokens[1].get_tag(ScalarYear).type
       quarter_tag = tokens[0].get_tag(RepeaterQuarterName)
       quarter_tag.start = Cronic.construct(year)
@@ -124,7 +124,7 @@ module Cronic
     end
 
     # Handle repeater-month-name/scalar-year
-    def handle_rmn_sy(tokens, options)
+    def handle_rmn_sy(tokens, **options)
       month = tokens[0].get_tag(RepeaterMonthName).index
       year = tokens[1].get_tag(ScalarYear).type
 
@@ -137,23 +137,23 @@ module Cronic
       end
 
       begin
-        end_time = Cronic.time_class.local(next_month_year, next_month_month)
-        Span.new(Cronic.time_class.local(year, month), end_time)
+        end_time = ::Time.local(next_month_year, next_month_month)
+        SecSpan.new(::Time.local(year, month), end_time)
       rescue ArgumentError
         nil
       end
     end
 
     # Handle generic timestamp (ruby 1.8)
-    def handle_generic(tokens, options)
-      t = Cronic.time_class.parse(options[:text])
-      Span.new(t, t + 1)
+    def handle_generic(tokens, **options)
+      t = ::Time.parse(options[:text])
+      SecSpan.new(t, t + 1)
     rescue e : ArgumentError
       raise e unless e.message =~ /out of range/
     end
 
     # Handle repeater-month-name/scalar-day/scalar-year
-    def handle_rmn_sd_sy(tokens, options)
+    def handle_rmn_sd_sy(tokens, **options)
       month = tokens[0].get_tag(RepeaterMonthName).index
       day = tokens[1].get_tag(ScalarDay).type
       year = tokens[2].get_tag(ScalarYear).type
@@ -162,15 +162,15 @@ module Cronic
       return if month_overflow?(year, month, day)
 
       begin
-        day_start = Cronic.time_class.local(year, month, day)
-        day_or_time(day_start, time_tokens, options)
+        day_start = ::Time.local(year, month, day)
+        day_or_time(day_start, time_tokens, **options)
       rescue ArgumentError
         nil
       end
     end
 
     # Handle repeater-month-name/ordinal-day/scalar-year
-    def handle_rmn_od_sy(tokens, options)
+    def handle_rmn_od_sy(tokens, **options)
       month = tokens[0].get_tag(RepeaterMonthName).index
       day = tokens[1].get_tag(OrdinalDay).type
       year = tokens[2].get_tag(ScalarYear).type
@@ -179,15 +179,15 @@ module Cronic
       return if month_overflow?(year, month, day)
 
       begin
-        day_start = Cronic.time_class.local(year, month, day)
-        day_or_time(day_start, time_tokens, options)
+        day_start = ::Time.local(year, month, day)
+        day_or_time(day_start, time_tokens, **options)
       rescue ArgumentError
         nil
       end
     end
 
     # Handle oridinal-day/repeater-month-name/scalar-year
-    def handle_od_rmn_sy(tokens, options)
+    def handle_od_rmn_sy(tokens, **options)
       day = tokens[0].get_tag(OrdinalDay).type
       month = tokens[1].get_tag(RepeaterMonthName).index
       year = tokens[2].get_tag(ScalarYear).type
@@ -196,22 +196,22 @@ module Cronic
       return if month_overflow?(year, month, day)
 
       begin
-        day_start = Cronic.time_class.local(year, month, day)
-        day_or_time(day_start, time_tokens, options)
+        day_start = ::Time.local(year, month, day)
+        day_or_time(day_start, time_tokens, **options)
       rescue ArgumentError
         nil
       end
     end
 
     # Handle scalar-day/repeater-month-name/scalar-year
-    def handle_sd_rmn_sy(tokens, options)
+    def handle_sd_rmn_sy(tokens, **options)
       new_tokens = [tokens[1], tokens[0], tokens[2]]
       time_tokens = tokens.last(tokens.size - 3)
-      handle_rmn_sd_sy(new_tokens + time_tokens, options)
+      handle_rmn_sd_sy(new_tokens + time_tokens, **options)
     end
 
     # Handle scalar-month/scalar-day/scalar-year (endian middle)
-    def handle_sm_sd_sy(tokens, options)
+    def handle_sm_sd_sy(tokens, **options)
       month = tokens[0].get_tag(ScalarMonth).type
       day = tokens[1].get_tag(ScalarDay).type
       year = tokens[2].get_tag(ScalarYear).type
@@ -220,29 +220,29 @@ module Cronic
       return if month_overflow?(year, month, day)
 
       begin
-        day_start = Cronic.time_class.local(year, month, day)
-        day_or_time(day_start, time_tokens, options)
+        day_start = ::Time.local(year, month, day)
+        day_or_time(day_start, time_tokens, **options)
       rescue ArgumentError
         nil
       end
     end
 
     # Handle scalar-day/scalar-month/scalar-year (endian little)
-    def handle_sd_sm_sy(tokens, options)
+    def handle_sd_sm_sy(tokens, **options)
       new_tokens = [tokens[1], tokens[0], tokens[2]]
       time_tokens = tokens.last(tokens.size - 3)
-      handle_sm_sd_sy(new_tokens + time_tokens, options)
+      handle_sm_sd_sy(new_tokens + time_tokens, **options)
     end
 
     # Handle scalar-year/scalar-month/scalar-day
-    def handle_sy_sm_sd(tokens, options)
+    def handle_sy_sm_sd(tokens, **options)
       new_tokens = [tokens[1], tokens[2], tokens[0]]
       time_tokens = tokens.last(tokens.size - 3)
-      handle_sm_sd_sy(new_tokens + time_tokens, options)
+      handle_sm_sd_sy(new_tokens + time_tokens, **options)
     end
 
     # Handle scalar-month/scalar-day
-    def handle_sm_sd(tokens, options)
+    def handle_sm_sd(tokens, **options)
       month = tokens[0].get_tag(ScalarMonth).type
       day = tokens[1].get_tag(ScalarDay).type
       year = self.now.year
@@ -251,25 +251,25 @@ module Cronic
       return if month_overflow?(year, month, day)
 
       begin
-        day_start = Cronic.time_class.local(year, month, day)
+        day_start = ::Time.local(year, month, day)
 
         if options[:context] == :future && day_start < now
-          day_start = Cronic.time_class.local(year + 1, month, day)
+          day_start = ::Time.local(year + 1, month, day)
         elsif options[:context] == :past && day_start > now
-          day_start = Cronic.time_class.local(year - 1, month, day)
+          day_start = ::Time.local(year - 1, month, day)
         end
 
-        day_or_time(day_start, time_tokens, options)
+        day_or_time(day_start, time_tokens, **options)
       rescue ArgumentError
         nil
       end
     end
 
     # Handle scalar-day/scalar-month
-    def handle_sd_sm(tokens, options)
+    def handle_sd_sm(tokens, **options)
       new_tokens = [tokens[1], tokens[0]]
       time_tokens = tokens.last(tokens.size - 2)
-      handle_sm_sd(new_tokens + time_tokens, options)
+      handle_sm_sd(new_tokens + time_tokens, **options)
     end
 
     def handle_year_and_month(year, month)
@@ -282,29 +282,29 @@ module Cronic
       end
 
       begin
-        end_time = Cronic.time_class.local(next_month_year, next_month_month)
-        Span.new(Cronic.time_class.local(year, month), end_time)
+        end_time = ::Time.local(next_month_year, next_month_month)
+        SecSpan.new(::Time.local(year, month), end_time)
       rescue ArgumentError
         nil
       end
     end
 
     # Handle scalar-month/scalar-year
-    def handle_sm_sy(tokens, options)
+    def handle_sm_sy(tokens, **options)
       month = tokens[0].get_tag(ScalarMonth).type
       year = tokens[1].get_tag(ScalarYear).type
       handle_year_and_month(year, month)
     end
 
     # Handle scalar-year/scalar-month
-    def handle_sy_sm(tokens, options)
+    def handle_sy_sm(tokens, **options)
       year = tokens[0].get_tag(ScalarYear).type
       month = tokens[1].get_tag(ScalarMonth).type
       handle_year_and_month(year, month)
     end
 
     # Handle RepeaterDayName RepeaterMonthName OrdinalDay
-    def handle_rdn_rmn_od(tokens, options)
+    def handle_rdn_rmn_od(tokens, **options)
       month = tokens[1].get_tag(RepeaterMonthName)
       day = tokens[2].get_tag(OrdinalDay).type
       time_tokens = tokens.last(tokens.size - 3)
@@ -314,12 +314,12 @@ module Cronic
 
       begin
         if time_tokens.empty?
-          start_time = Cronic.time_class.local(year, month.index, day)
+          start_time = ::Time.local(year, month.index, day)
           end_time = time_with_rollover(year, month.index, day + 1)
-          Span.new(start_time, end_time)
+          SecSpan.new(start_time, end_time)
         else
-          day_start = Cronic.time_class.local(year, month.index, day)
-          day_or_time(day_start, time_tokens, options)
+          day_start = ::Time.local(year, month.index, day)
+          day_or_time(day_start, time_tokens, **options)
         end
       rescue ArgumentError
         nil
@@ -327,7 +327,7 @@ module Cronic
     end
 
     # Handle RepeaterDayName RepeaterMonthName OrdinalDay ScalarYear
-    def handle_rdn_rmn_od_sy(tokens, options)
+    def handle_rdn_rmn_od_sy(tokens, **options)
       month = tokens[1].get_tag(RepeaterMonthName)
       day = tokens[2].get_tag(OrdinalDay).type
       year = tokens[3].get_tag(ScalarYear).type
@@ -335,16 +335,16 @@ module Cronic
       return if month_overflow?(year, month.index, day)
 
       begin
-        start_time = Cronic.time_class.local(year, month.index, day)
+        start_time = ::Time.local(year, month.index, day)
         end_time = time_with_rollover(year, month.index, day + 1)
-        Span.new(start_time, end_time)
+        SecSpan.new(start_time, end_time)
       rescue ArgumentError
         nil
       end
     end
 
     # Handle RepeaterDayName OrdinalDay
-    def handle_rdn_od(tokens, options)
+    def handle_rdn_od(tokens, **options)
       day = tokens[1].get_tag(OrdinalDay).type
       time_tokens = tokens.last(tokens.size - 2)
       year = self.now.year
@@ -358,12 +358,12 @@ module Cronic
 
       begin
         if time_tokens.empty?
-          start_time = Cronic.time_class.local(year, month, day)
+          start_time = ::Time.local(year, month, day)
           end_time = time_with_rollover(year, month, day + 1)
-          Span.new(start_time, end_time)
+          SecSpan.new(start_time, end_time)
         else
-          day_start = Cronic.time_class.local(year, month, day)
-          day_or_time(day_start, time_tokens, options)
+          day_start = ::Time.local(year, month, day)
+          day_or_time(day_start, time_tokens, **options)
         end
       rescue ArgumentError
         nil
@@ -371,7 +371,7 @@ module Cronic
     end
 
     # Handle RepeaterDayName RepeaterMonthName ScalarDay
-    def handle_rdn_rmn_sd(tokens, options)
+    def handle_rdn_rmn_sd(tokens, **options)
       month = tokens[1].get_tag(RepeaterMonthName)
       day = tokens[2].get_tag(ScalarDay).type
       time_tokens = tokens.last(tokens.size - 3)
@@ -381,12 +381,12 @@ module Cronic
 
       begin
         if time_tokens.empty?
-          start_time = Cronic.time_class.local(year, month.index, day)
+          start_time = ::Time.local(year, month.index, day)
           end_time = time_with_rollover(year, month.index, day + 1)
-          Span.new(start_time, end_time)
+          SecSpan.new(start_time, end_time)
         else
-          day_start = Cronic.time_class.local(year, month.index, day)
-          day_or_time(day_start, time_tokens, options)
+          day_start = ::Time.local(year, month.index, day)
+          day_or_time(day_start, time_tokens, **options)
         end
       rescue ArgumentError
         nil
@@ -394,7 +394,7 @@ module Cronic
     end
 
     # Handle RepeaterDayName RepeaterMonthName ScalarDay ScalarYear
-    def handle_rdn_rmn_sd_sy(tokens, options)
+    def handle_rdn_rmn_sd_sy(tokens, **options)
       month = tokens[1].get_tag(RepeaterMonthName)
       day = tokens[2].get_tag(ScalarDay).type
       year = tokens[3].get_tag(ScalarYear).type
@@ -402,49 +402,49 @@ module Cronic
       return if month_overflow?(year, month.index, day)
 
       begin
-        start_time = Cronic.time_class.local(year, month.index, day)
+        start_time = ::Time.local(year, month.index, day)
         end_time = time_with_rollover(year, month.index, day + 1)
-        Span.new(start_time, end_time)
+        SecSpan.new(start_time, end_time)
       rescue ArgumentError
         nil
       end
     end
 
-    def handle_sm_rmn_sy(tokens, options)
+    def handle_sm_rmn_sy(tokens, **options)
       day = tokens[0].get_tag(ScalarDay).type
       month = tokens[1].get_tag(RepeaterMonthName).index
       year = tokens[2].get_tag(ScalarYear).type
       if tokens.size > 3
-        time = get_anchor([tokens.last], options).begin
+        time = get_anchor([tokens.last], **options).begin
         h, m, s = time.hour, time.min, time.sec
-        time = Cronic.time_class.local(year, month, day, h, m, s)
-        end_time = Cronic.time_class.local(year, month, day + 1, h, m, s)
+        time = ::Time.local(year, month, day, h, m, s)
+        end_time = ::Time.local(year, month, day + 1, h, m, s)
       else
-        time = Cronic.time_class.local(year, month, day)
+        time = ::Time.local(year, month, day)
         day += 1 unless day >= 31
-        end_time = Cronic.time_class.local(year, month, day)
+        end_time = ::Time.local(year, month, day)
       end
-      Span.new(time, end_time)
+      SecSpan.new(time, end_time)
     end
 
     # anchors
 
     # Handle repeaters
-    def handle_r(tokens, options)
-      dd_tokens = dealias_and_disambiguate_times(tokens, options)
-      get_anchor(dd_tokens, options)
+    def handle_r(tokens, **options)
+      dd_tokens = dealias_and_disambiguate_times(tokens, **options)
+      get_anchor(dd_tokens, **options)
     end
 
     # Handle repeater/grabber/repeater
-    def handle_r_g_r(tokens, options)
+    def handle_r_g_r(tokens, **options)
       new_tokens = [tokens[1], tokens[0], tokens[2]]
-      handle_r(new_tokens, options)
+      handle_r(new_tokens, **options)
     end
 
     # arrows
 
     # Handle scalar/repeater/pointer helper
-    def handle_srp(tokens, span, options)
+    def handle_srp(tokens, span, **options)
       distance = tokens[0].get_tag(Scalar).type
       repeater = tokens[1].get_tag(Repeater)
       pointer = tokens[2].get_tag(Pointer).type
@@ -453,40 +453,40 @@ module Cronic
     end
 
     # Handle scalar/repeater/pointer
-    def handle_s_r_p(tokens, options)
-      span = Span.new(self.now, self.now + 1)
+    def handle_s_r_p(tokens, **options)
+      span = SecSpan.new(self.now, self.now + 1)
 
-      handle_srp(tokens, span, options)
+      handle_srp(tokens, span, **options)
     end
 
     # Handle pointer/scalar/repeater
-    def handle_p_s_r(tokens, options)
+    def handle_p_s_r(tokens, **options)
       new_tokens = [tokens[1], tokens[2], tokens[0]]
-      handle_s_r_p(new_tokens, options)
+      handle_s_r_p(new_tokens, **options)
     end
 
     # Handle scalar/repeater/pointer/anchor
-    def handle_s_r_p_a(tokens, options)
-      anchor_span = get_anchor(tokens[3..tokens.size - 1], options)
-      handle_srp(tokens, anchor_span, options)
+    def handle_s_r_p_a(tokens, **options)
+      anchor_span = get_anchor(tokens[3..tokens.size - 1], **options)
+      handle_srp(tokens, anchor_span, **options)
     end
 
     # Handle repeater/scalar/repeater/pointer
-    def handle_rmn_s_r_p(tokens, options)
-      handle_s_r_p_a(tokens[1..3] + tokens[0..0], options)
+    def handle_rmn_s_r_p(tokens, **options)
+      handle_s_r_p_a(tokens[1..3] + tokens[0..0], **options)
     end
 
-    def handle_s_r_a_s_r_p_a(tokens, options)
-      anchor_span = get_anchor(tokens[4..tokens.size - 1], options)
+    def handle_s_r_a_s_r_p_a(tokens, **options)
+      anchor_span = get_anchor(tokens[4..tokens.size - 1], **options)
 
-      span = handle_srp(tokens[0..1]+tokens[4..6], anchor_span, options)
-      handle_srp(tokens[2..3]+tokens[4..6], span, options)
+      span = handle_srp(tokens[0..1]+tokens[4..6], anchor_span, **options)
+      handle_srp(tokens[2..3]+tokens[4..6], span, **options)
     end
 
     # narrows
 
     # Handle oridinal repeaters
-    def handle_orr(tokens, outer_span, options)
+    def handle_orr(tokens, outer_span, **options)
       repeater = tokens[1].get_tag(Repeater)
       repeater.start = outer_span.begin - 1
       ordinal = tokens[0].get_tag(Ordinal).type
@@ -505,38 +505,38 @@ module Cronic
     end
 
     # Handle ordinal/repeater/separator/repeater
-    def handle_o_r_s_r(tokens, options)
-      outer_span = get_anchor([tokens[3]], options)
-      handle_orr(tokens[0..1], outer_span, options)
+    def handle_o_r_s_r(tokens, **options)
+      outer_span = get_anchor([tokens[3]], **options)
+      handle_orr(tokens[0..1], outer_span, **options)
     end
 
     # Handle ordinal/repeater/grabber/repeater
-    def handle_o_r_g_r(tokens, options)
-      outer_span = get_anchor(tokens[2..3], options)
-      handle_orr(tokens[0..1], outer_span, options)
+    def handle_o_r_g_r(tokens, **options)
+      outer_span = get_anchor(tokens[2..3], **options)
+      handle_orr(tokens[0..1], outer_span, **options)
     end
 
     # support methods
 
-    def day_or_time(day_start, time_tokens, options)
-      outer_span = Span.new(day_start, day_start + (24 * 60 * 60))
+    def day_or_time(day_start, time_tokens, context : Symbol? = nil, **options)
+      outer_span = SecSpan.new(day_start, day_start + ::Time::Span.new(hours: 24))
 
       unless time_tokens.empty?
         self.now = outer_span.begin
-        get_anchor(dealias_and_disambiguate_times(time_tokens, options), options.merge(context: :future))
+        get_anchor(dealias_and_disambiguate_times(time_tokens, **options), context: context || :future)
       else
         outer_span
       end
     end
 
-    def get_anchor(tokens, options)
+    def get_anchor(tokens, context = :none, **options)
       grabber = Grabber.new(:this)
       pointer = :future
       repeaters = get_repeaters(tokens)
       repeaters.size.times { tokens.pop }
 
       if tokens.first && tokens.first.get_tag(Grabber)
-        grabber = tokens.shift.get_tag(Grabber)
+        grabber = tokens.shift.get_tag(Grabber).as(Grabber)
       end
 
       head = repeaters.shift
@@ -546,10 +546,10 @@ module Cronic
       when :last
         outer_span = head.next(:past)
       when :this
-        if (options[:context] != :past) && (repeaters.size > 0)
+        if (context != :past) && (repeaters.size > 0)
           outer_span = head.this(:none)
         else
-          outer_span = head.this(options[:context])
+          outer_span = head.this(context)
         end
       when :next
         outer_span = head.next(:future)
@@ -566,11 +566,11 @@ module Cronic
     end
 
     def get_repeaters(tokens)
-      tokens.map { |token| token.get_tag(Repeater) }.compact.sort.reverse
+      tokens.map { |token| token.get_tag(Repeater).as(Repeater) }.compact.sort.reverse
     end
 
     def month_overflow?(year, month, day)
-      if ::Date.leap?(year)
+      if ::Time.leap_year?(year)
         day > RepeaterMonth::MONTH_DAYS_LEAP[month - 1]
       else
         day > RepeaterMonth::MONTH_DAYS[month - 1]
@@ -580,7 +580,7 @@ module Cronic
     end
 
     # Recursively finds repeaters within other repeaters.
-    # Returns a Span representing the innermost time span
+    # Returns a SecSpan representing the innermost time span
     # or nil if no repeater union could be found
     def find_within(tags, span, pointer)
       puts "--#{span}" if Cronic.debug
@@ -606,10 +606,10 @@ module Cronic
         else
           [year, month, day]
         end
-      Cronic.time_class.local(*date_parts)
+      ::Time.local(*date_parts)
     end
 
-    def dealias_and_disambiguate_times(tokens, options)
+    def dealias_and_disambiguate_times(tokens, ambiguous_time_range : Int|Symbol = 6, **options)
       # handle aliases of am/pm
       # 5:00 in the morning -> 5:00 am
       # 7:00 in the evening -> 7:00 pm
@@ -632,7 +632,7 @@ module Cronic
 
       if day_portion_index && time_index
         t1 = tokens[day_portion_index]
-        t1tag = t1.get_tag(RepeaterDayPortion)
+        t1tag = t1.get_tag(RepeaterDayPortion).as(Tag)
 
         case t1tag.type
         when :morning
@@ -647,17 +647,17 @@ module Cronic
       end
 
       # handle ambiguous times if :ambiguous_time_range is specified
-      if options[:ambiguous_time_range] != :none
+      if ambiguous_time_range != :none
         ambiguous_tokens = [] of Token
 
         tokens.each_with_index do |token, i|
           ambiguous_tokens << token
           next_token = tokens[i + 1]
 
-          if token.get_tag(RepeaterTime) && token.get_tag(RepeaterTime).type.ambiguous? && (!next_token || !next_token.get_tag(RepeaterDayPortion))
+          if token.get_tag(RepeaterTime) && token.get_tag(RepeaterTime).as(RepeaterTime).type.as(Tick).ambiguous? && (!next_token || !next_token.get_tag(RepeaterDayPortion))
             distoken = Token.new("disambiguator")
 
-            distoken.tag(RepeaterDayPortion.new(options[:ambiguous_time_range]))
+            distoken.tag(RepeaterDayPortion.new(ambiguous_time_range))
             ambiguous_tokens << distoken
           end
         end

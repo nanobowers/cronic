@@ -1,18 +1,20 @@
 module Cronic
-  class Season
+  enum Season
 
-    getter :start
-    getter :end
+    Spring
+    Summer
+    Autumn
+    Winter
+    
 
-    def initialize(start_date, end_date)
-      @start = start_date
-      @end = end_date
+    def self.find_next_season(season : Symbol, pointer : Int32)
+      lookup = {:spring => Spring, :summer => Summer, :autumn => Autumn, :winter => Winter}
+      self.find_next_season(lookup[season], pointer)
     end
-
-    def self.find_next_season(season, pointer)
-      lookup = [:spring, :summer, :autumn, :winter]
-      next_season_num = (lookup.index(season) + 1 * pointer) % 4
-      lookup[next_season_num]
+    
+    def self.find_next_season(season : Season, pointer : Int32)
+      next_season_num = (season + 1 * pointer) % 4
+      Season.new(next_season_num)
     end
 
     def self.season_after(season)
@@ -23,4 +25,12 @@ module Cronic
       find_next_season(season, -1)
     end
   end
+  
+  class SeasonSpan
+    getter :start
+    getter :end
+    def initialize(@start : MiniDate, @end : MiniDate)
+    end
+  end
+    
 end

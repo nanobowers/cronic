@@ -1,6 +1,28 @@
 require "./handlers"
 
 module Cronic
+
+  #alias SeqList = Array(Tag.class) | Array(Tag.class | Or)
+
+  class Or(T)
+    getter? :maybe
+    def initialize(@items : Array(T), @maybe = false)
+    end
+  end
+  class Sequence(T)
+    def initialize(@items : Array(T) | Array(T | Or(T)) )
+    end
+    def empty?
+      @items.empty?
+    end
+    def first
+      @items[0]
+    end
+    def [](arg)
+      @items[arg]
+    end
+  end
+  
   # SpanDefinitions subclasses return definitions constructed by Handler instances (see handler.rb)
   # SpanDefinitions subclasses follow a <Type> + Definitions naming pattern
   # Types of Definitions are collected in Dictionaries (see dictionary.rb)

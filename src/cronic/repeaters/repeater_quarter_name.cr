@@ -8,12 +8,12 @@ module Cronic
     }
 
     def next(pointer)
-      unless @current_span
+      if @current_span.nil?
         @current_span = this(pointer)
       else
-        year_offset = pointer == :future ? 1 : -1
-        new_year = @current_span.begin.year + year_offset
-        time_basis = Cronic.construct(new_year, @current_span.begin.month)
+        year_offset = (pointer == :future) ? 1 : -1
+        new_year = @current_span.as(SecSpan).begin.year + year_offset
+        time_basis = Cronic.construct(new_year, @current_span.as(SecSpan).begin.month)
         @current_span = quarter(time_basis)
       end
 
