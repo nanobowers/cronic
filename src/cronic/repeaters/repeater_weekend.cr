@@ -1,8 +1,10 @@
 module Cronic
   class RepeaterWeekend < Repeater #:nodoc:
-    #WEEKEND_SECONDS = 172_800 # (2 * 24 * 60 * 60)
-    WEEKEND_SPAN = ::Time::Span.new(days: 2)
-    @current_week_start : ::Time?
+
+    WEEKEND_SECONDS = 172_800 # (2 * 24 * 60 * 60)
+    WEEKEND_SPAN = 2.days
+    
+    @current_week_start : Time?
     
     def initialize(type, width = nil, **kwargs)
       super
@@ -16,7 +18,7 @@ module Cronic
         case pointer
         when :past
           saturday_repeater = RepeaterDayName.new(:saturday)
-          saturday_repeater.start = (@now + ::Time::Span.new(days: 1))
+          saturday_repeater.start = (@now + 1.days)
           last_saturday_span = saturday_repeater.next(:past)
           @current_week_start = last_saturday_span.begin
         else # when :future
@@ -27,10 +29,10 @@ module Cronic
         end
       else
         direction = pointer == :future ? 1 : -1
-        @current_week_start = @current_week_start.as(::Time) + ::Time::Span.new(days: 7 * direction)
+        @current_week_start = @current_week_start.as(Time) + Time::Span.new(days: 7 * direction)
       end
-      cws = @current_week_start.as(::Time)
-      SecSpan.new(cws, cws + WEEKEND_SPAN)
+      cws = @current_week_start.as(Time)
+      SecSpan.new(cws, cws + 2.days)
     end
 
     def this(pointer = :future)
@@ -54,7 +56,7 @@ module Cronic
       direction = pointer == :future ? 1 : -1
       weekend = RepeaterWeekend.new(:weekend)
       weekend.start = span.begin
-      start = weekend.next(pointer).begin + ::Time::Span.new(days: 7 * direction * (amount - 1))
+      start = weekend.next(pointer).begin + Time::Span.new(days: 7 * direction * (amount - 1))
       SecSpan.new(start, start + (span.end - span.begin))
     end
 

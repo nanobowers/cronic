@@ -18,10 +18,12 @@ module Cronic
       unless @current_month_start
         @current_month_start = offset_by(Cronic.construct(@now.year, @now.month), 1, pointer)
       else
-        @current_month_start = offset_by(Cronic.construct(@current_month_start.year, @current_month_start.month), 1, pointer)
+        cms = @current_month_start.as(Time)
+        @current_month_start = offset_by(Cronic.construct(cms.year, cms.month), 1, pointer)
       end
 
-      SecSpan.new(@current_month_start, Cronic.construct(@current_month_start.year, @current_month_start.month + 1))
+      cms = @current_month_start.as(Time)
+      SecSpan.new(cms, Cronic.construct(cms.year, cms.month) + 1.month)
     end
 
     def this(pointer = :future)
@@ -34,7 +36,7 @@ module Cronic
       when :past
         month_start = Cronic.construct(@now.year, @now.month)
         month_end = Cronic.construct(@now.year, @now.month, @now.day)
-      when :none
+      else # when :none
         month_start = Cronic.construct(@now.year, @now.month)
         month_end = self.offset_by(Cronic.construct(@now.year, @now.month), 1, :future)
       end

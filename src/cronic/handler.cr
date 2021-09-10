@@ -83,9 +83,10 @@ module Cronic
       # No send, so have to define all of the handler method mappings here :(
       p! @handler_method
       case @handler_method
-      when :abc then Span.new(::Time.local, ::Time.local)
+      when :abc
+        SecSpan.new(::Time.local, ::Time.local)
       else
-        Span.new(::Time.local, ::Time.local)
+        SecSpan.new(::Time.local, ::Time.local)
       end
       #parser.send(@handler_method, tokens, options)
     end

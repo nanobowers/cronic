@@ -10,13 +10,13 @@ module Cronic
     property :width
 
     @width : Int32?
-    @now : ::Time
+    @now : Time
     
     #@options : NamedTuple(Symbol)
     # stype - The Symbol type of this tag.
     def initialize(@type : TagType, @width : Int32? = nil, **options)
       #@options = options
-      @now = ::Time.local
+      @now = Time.local
     end
 
     # time - Set the start Time for this Tag.

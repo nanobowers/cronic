@@ -1,9 +1,6 @@
-#require "time"
-#require "date"
 require "number_parser" # aka numerizer
 
 require "./cronic/version"
-
 require "./cronic/parser"
 require "./cronic/date"
 require "./cronic/time"
@@ -51,12 +48,12 @@ require "./cronic/repeaters/repeater_time"
 #
 #   require "cronic"
 #
-#   Time.now   #=> Sun Aug 27 23:18:25 PDT 2006
+#   Time.local   #=> Sun Aug 27 23:18:25 PDT 2006
 #
 #   Cronic.parse("tomorrow")
 #     #=> Mon Aug 28 12:00:00 PDT 2006
 #
-#   Cronic.parse("monday", :context => :past)
+#   Cronic.parse("monday", context: :past)
 #     #=> Mon Aug 21 12:00:00 PDT 2006
 module Cronic
 
@@ -70,32 +67,27 @@ module Cronic
     @@debug=val
   end
   
-  # Examples:
-  #
-  #   require "cronic"
-  #   require "active_support/time"
-  #
-  #   Time.zone = "UTC"
-  #   Cronic.time_class = Time.zone
-  #   Cronic.parse("June 15 2006 at 5:54 AM")
-  #     # => Thu, 15 Jun 2006 05:45:00 UTC +00:00
-  #
-  # Returns The Time class Cronic uses internally.
-  property :time_class
-
-  time_class = ::Time
+#KILL  property :time_class
+#K  time_class = ::Time
 
 
   # Parses a string containing a natural language date or time.
   #
-  # If the parser can find a date or time, either a Time or Cronic::Span
-  # will be returned (depending on the value of `:guess`). If no
-  # date or time can be found, `nil` will be returned.
+  # If the parser can find a date or time, a Time 
+  # will be returned (depending on the value of `guess:`). If no
+  # date/time can be found, `nil` will be returned.
   #
   # text - The String text to parse.
-  # opts - An optional Hash of configuration options passed to Parser::new.
-  def self.parse(text, **kwargs)
-    Parser.new(**kwargs).parse(text)
+  def self.parse(text, guess : Guess = Guess::Middle, **kwargs)
+    Parser.new(**kwargs).parse(text, guess: guess)
+  end
+
+  # Parses a String containing natural language date or time.
+  # Similar to self.parse, but returns a Cronic::SecSpan of the
+  # begin-end time for the generated time-span instead of guessing a
+  # specific time-point during that range.
+  def self.parse_span(text, **kwargs)
+    Parser.new(**kwargs).parse_span(text)
   end
 
   # Construct a new time object determining possible month overflows

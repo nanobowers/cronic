@@ -1,5 +1,12 @@
 module Cronic
-  class Time
+
+  enum Direction
+    Backward = -1
+    Forward = 1
+  end
+  
+  class TimeUtil
+    
     HOUR_SECONDS = 3600 # 60 * 60
     MINUTE_SECONDS = 60
     SECOND_SECONDS = 1 # haha, awesome
@@ -28,7 +35,7 @@ module Cronic
     # normalize offset in seconds to offset as string +mm:ss or -mm:ss
     def self.normalize_offset(offset)
       return offset if offset.is_a?(String)
-      offset = Cronic.time_class.now.to_time.utc_offset unless offset # get current system's UTC offset if offset is nil
+      offset = Time.now.to_time.utc_offset unless offset # get current system's UTC offset if offset is nil
       sign = '+'
       sign = '-' if offset < 0
       hours = (offset.abs / 3600).to_i.to_s.rjust(2,'0')

@@ -14,6 +14,10 @@ module Cronic
       (self.end - self.begin).to_i
     end
 
+    def includes?(val)
+      (@begin .. @end).includes?(val)
+    end
+      
     # Add a number of seconds to this span, returning the
     # resulting Span
     def +(seconds : Int32)

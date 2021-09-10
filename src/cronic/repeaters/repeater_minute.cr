@@ -17,7 +17,7 @@ module Cronic
         @current_minute_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute) + ::Time::Span.new(minutes: direction)
       else
         direction = pointer == :future ? 1 : -1
-        @current_minute_start = @current_minute_start.as(::Time) + ::Time::Span.new(seconds: direction * MINUTE_SECONDS)
+        @current_minute_start = @current_minute_start.as(::Time) + direction.minutes
       end
       cms = @current_minute_start.as(::Time)
       SecSpan.new(cms, cms + ::Time::Span.new(minutes: 1))
@@ -33,9 +33,9 @@ module Cronic
       when :past
         minute_begin = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute)
         minute_end = @now
-      when :none
+      else # when :none
         minute_begin = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute)
-        minute_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute) + MINUTE_SECONDS
+        minute_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute)  + 1.minute
       end
 
       SecSpan.new(minute_begin, minute_end)

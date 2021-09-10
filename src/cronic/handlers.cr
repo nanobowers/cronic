@@ -14,7 +14,7 @@ module Cronic
     end
 
     # Handle repeater-month-name/scalar-day
-    def handle_rmn_sd(tokens, **options)
+    def handle_rmn_sd(tokens, **options) : SecSpan
       month = tokens[0].get_tag(RepeaterMonthName)
       day = tokens[1].get_tag(ScalarDay).type
 
@@ -58,7 +58,7 @@ module Cronic
     end
 
     # Handle ordinal-day/repeater-month-name
-    def handle_od_rmn(tokens, **options)
+    def handle_od_rmn(tokens, **options) : SecSpan?
       month = tokens[1].get_tag(RepeaterMonthName).as(RepeaterMonthName)
       day = tokens[0].get_tag(OrdinalDay).as(OrdinalDay).type.as(Int)
       return if month_overflow?(self.now.year, month.index, day)
@@ -431,7 +431,7 @@ module Cronic
 
     # Handle repeaters
     def handle_r(tokens, **options)
-      dd_tokens = dealias_and_disambiguate_times(tokens, **options)
+      dd_tokens = Handlers.dealias_and_disambiguate_times(tokens, **options)
       get_anchor(dd_tokens, **options)
     end
 
@@ -523,7 +523,7 @@ module Cronic
 
       unless time_tokens.empty?
         self.now = outer_span.begin
-        get_anchor(dealias_and_disambiguate_times(time_tokens, **options), context: context || :future)
+        get_anchor(Handlers.dealias_and_disambiguate_times(time_tokens, **options), context: context || :future)
       else
         outer_span
       end
@@ -582,17 +582,21 @@ module Cronic
     # Recursively finds repeaters within other repeaters.
     # Returns a SecSpan representing the innermost time span
     # or nil if no repeater union could be found
-    def find_within(tags, span, pointer)
+    def find_within(tags, span : SecSpan, pointer : Symbol)
       puts "--#{span}" if Cronic.debug
       return span if tags.empty?
 
       head = tags.shift
-      head.start = (pointer == :future ? span.begin : span.end)
-      h = head.this(:none)
+      head.start = (pointer == :future) ? span.begin : span.end
+      h = head.this(:none).as(SecSpan)
 
-      if span.cover?(h.begin) || span.cover?(h.end)
+      if span.includes?(h.begin) || span.includes?(h.end)
         find_within(tags, h, pointer)
       end
+    end
+    
+    def find_within(tags, span : Nil, pointer : Symbol)
+      return nil
     end
 
     def time_with_rollover(year, month, day)
@@ -609,7 +613,7 @@ module Cronic
       ::Time.local(*date_parts)
     end
 
-    def dealias_and_disambiguate_times(tokens, ambiguous_time_range : Int|Symbol = 6, **options)
+    def self.dealias_and_disambiguate_times(tokens, ambiguous_time_range : Int|Symbol = 6, **options)
       # handle aliases of am/pm
       # 5:00 in the morning -> 5:00 am
       # 7:00 in the evening -> 7:00 pm
@@ -652,9 +656,9 @@ module Cronic
 
         tokens.each_with_index do |token, i|
           ambiguous_tokens << token
-          next_token = tokens[i + 1]
+          next_token = tokens[i + 1]?
 
-          if token.get_tag(RepeaterTime) && token.get_tag(RepeaterTime).as(RepeaterTime).type.as(Tick).ambiguous? && (!next_token || !next_token.get_tag(RepeaterDayPortion))
+          if token.get_tag(RepeaterTime) && token.get_tag(RepeaterTime).as(RepeaterTime).tagtype.ambiguous? && (!next_token || !next_token.get_tag(RepeaterDayPortion))
             distoken = Token.new("disambiguator")
 
             distoken.tag(RepeaterDayPortion.new(ambiguous_time_range))

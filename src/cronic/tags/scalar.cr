@@ -22,10 +22,10 @@ module Cronic
             scalar = token.word.to_i
             token.tag(Scalar.new(scalar, width))
             token.tag(ScalarWide.new(token.word, width)) if width == 4
-            token.tag(ScalarSubsecond.new(scalar, width)) if Cronic::Time.could_be_subsecond?(scalar, width)
-            token.tag(ScalarSecond.new(scalar, width)) if Cronic::Time.could_be_second?(scalar, width)
-            token.tag(ScalarMinute.new(scalar, width)) if Cronic::Time.could_be_minute?(scalar, width)
-            token.tag(ScalarHour.new(scalar, width)) if Cronic::Time.could_be_hour?(scalar, width, hours24 == false)
+            token.tag(ScalarSubsecond.new(scalar, width)) if Cronic::TimeUtil.could_be_subsecond?(scalar, width)
+            token.tag(ScalarSecond.new(scalar, width)) if Cronic::TimeUtil.could_be_second?(scalar, width)
+            token.tag(ScalarMinute.new(scalar, width)) if Cronic::TimeUtil.could_be_minute?(scalar, width)
+            token.tag(ScalarHour.new(scalar, width)) if Cronic::TimeUtil.could_be_hour?(scalar, width, hours24 == false)
             unless post_token && DAY_PORTIONS.includes?(post_token.word)
               token.tag(ScalarDay.new(scalar, width)) if Cronic::Date.could_be_day?(scalar, width)
               token.tag(ScalarMonth.new(scalar, width)) if Cronic::Date.could_be_month?(scalar, width)

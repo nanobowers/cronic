@@ -5,11 +5,26 @@ module Cronic
     Summer
     Autumn
     Winter
-    
 
-    def self.find_next_season(season : Symbol, pointer : Int32)
-      lookup = {:spring => Spring, :summer => Summer, :autumn => Autumn, :winter => Winter}
-      self.find_next_season(lookup[season], pointer)
+    def next : Season
+      nextval = self + 1
+      Season.valid?(nextval) ? nextval : Season::Spring
+    end
+
+    def prev : Season
+      prevval = self - 1
+      Season.valid?(prevval) ? prevval : Season::Winter
+    end
+
+    def adjust(dir : Direction) : Season
+      case dir
+      in Direction::Forward then self.next
+      in Direction::Backward then self.prev
+      end
+    end
+          
+    def self.find_next_season(sym : Symbol, pointer : Int32)
+      self.find_next_season(symbol_to_season(sym), pointer)
     end
     
     def self.find_next_season(season : Season, pointer : Int32)
@@ -24,6 +39,12 @@ module Cronic
     def self.season_before(season)
       find_next_season(season, -1)
     end
+    
+    def self.symbol_to_season(sym : Symbol) : Season
+      lookup = {:spring => Spring, :summer => Summer, :autumn => Autumn, :winter => Winter}
+      lookup[sym]
+    end
+    
   end
   
   class SeasonSpan

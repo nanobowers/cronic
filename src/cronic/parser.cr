@@ -2,6 +2,13 @@ require "./dictionary"
 require "./handlers"
 
 module Cronic
+  
+  enum Guess
+    Middle
+    End
+    Begin
+  end
+  
   class Parser
     include Handlers
 
@@ -44,11 +51,11 @@ module Cronic
     #                 future, `now - x years` is assumed to be the past.
     def initialize(
           @context : Symbol = :future,
-          @now : ::Time = ::Time.local,
+          @now : Time = Time.local,
           @hours24 : Bool? = nil,
-          @week_start : Symbol = :sunday,
-          @guess : Bool | Symbol = true,
-          @ambiguous_time_range : Int = 6,
+          @week_start : Time::DayOfWeek = Time::DayOfWeek::Sunday,
+          #@guess : Cronic::Guess::Middle,
+          @ambiguous_time_range : Int32|Symbol = 6,
           @endian_precedence : Array(Symbol) = [:middle, :little],
           @ambiguous_year_future_bias : Int = 50
         )
@@ -57,7 +64,12 @@ module Cronic
 
     # Parse "text" with the given options
     # Returns either a Time or Cronic::Span, depending on the value of options[:guess]
-    def parse(text)
+    def parse(text, guess = Cronic::Guess::Middle)
+      span = parse_span(text)
+      guess(span, guess)
+    end
+
+    def parse_span(text) : SecSpan
       tokens = tokenize(text) # , options
       span = tokens_to_span(tokens, text: text) # options.merge(text: text))
       if Cronic.debug
@@ -66,9 +78,9 @@ module Cronic
         puts "| #{tokens}"
         puts sepline
       end
-      guess(span, @guess) if span
+      span
     end
-
+    
     # Clean up the specified text ready for parsing.
     #
     # Clean up the string by stripping unwanted characters, converting
@@ -141,18 +153,15 @@ module Cronic
       text
     end
 
-    # Guess a specific time within the given span.
-    #
-    # span - The Cronic::Span object to calcuate a guess from.
-    #
-    # Returns a new Time object.
-    def guess(span : SecSpan, mode = :middle)
-      return span unless mode
-      if (span.width > 1) && (mode == true || mode == :middle)
-        return span.begin + ::Time::Span.new(seconds: span.width // 2)
+    # Guess a specific time within the given `span`.
+    def guess(span : SecSpan, mode : Guess = Guess::Middle) : Time
+      if (span.width > 1) && (mode == Guess::Middle)
+        span.begin + Time::Span.new(seconds: span.width // 2)
+      elsif mode == Guess::End
+        span.end
+      else
+        span.begin
       end
-      return span.end if mode == :end
-      span.begin
     end
 
     # List of Handler definitions. See Cronic.parse for a list of options this
@@ -226,51 +235,54 @@ module Cronic
   
     
     
-    private def tokens_to_span(tokens, **options) : SecSpan?
+    private def tokens_to_span(tokens, **options) : SecSpan
       definitions = definitions(**options)
 
       good_tokens = tokens.select { |o| !o.get_tag Separator }
       #Handler.new(["ordinal_day", "repeater_month_name", "separator_at?", "time?"], "handle_od_rmn"),
 
       if seqmatch([OrdinalDay, RepeaterMonthName, maybe(SeparatorAt), maybe(Time)], tokens)
-        return handle_od_rmn(tokens, **options)
-      elsif
-        p :elseif
-      end  
-         
-      
-      (definitions["endian"] + definitions["date"]).each do |handler|
-
-        #pp! tokens
-        
-        if handler.match(tokens, definitions)
-          good_tokens = tokens.select { |o| !o.get_tag Separator }
-          return handler.invoke(:date, good_tokens, self, options)
-        end
+        span = handle_od_rmn(tokens, **options)
       end
 
-      definitions["anchor"].each do |handler|
-        if handler.match(tokens, definitions)
-          good_tokens = tokens.select { |o| !o.get_tag Separator }
-          return handler.invoke(:anchor, good_tokens, self, options)
-        end
+      if span.is_a?(SecSpan)
+        return span
+      else
+        raise Exception.new("Failed to match tokens against any known patterns")
       end
-
-      definitions["arrow"].each do |handler|
-        if handler.match(tokens, definitions)
-          good_tokens = tokens.reject { |o| o.get_tag(SeparatorAt) || o.get_tag(SeparatorSlash) || o.get_tag(SeparatorDash) || o.get_tag(SeparatorComma) || o.get_tag(SeparatorAnd) }
-           return handler.invoke(:arrow, good_tokens, self, options)
-        end
-      end
-
-      definitions["narrow"].each do |handler|
-        if handler.match(tokens, definitions)
-          return handler.invoke(:narrow, tokens, self, options)
-        end
-      end
-
-      puts "-none" if Cronic.debug
-      return nil
+#      
+#      (definitions["endian"] + definitions["date"]).each do |handler|
+#
+#        #pp! tokens
+#        
+#        if handler.match(tokens, definitions)
+#          good_tokens = tokens.select { |o| !o.get_tag Separator }
+#          return handler.invoke(:date, good_tokens, self, options)
+#        end
+#      end
+#
+#      definitions["anchor"].each do |handler|
+#        if handler.match(tokens, definitions)
+#          good_tokens = tokens.select { |o| !o.get_tag Separator }
+#          return handler.invoke(:anchor, good_tokens, self, options)
+#        end
+#      end
+#
+#      definitions["arrow"].each do |handler|
+#        if handler.match(tokens, definitions)
+#          good_tokens = tokens.reject { |o| o.get_tag(SeparatorAt) || o.get_tag(SeparatorSlash) || o.get_tag(SeparatorDash) || o.get_tag(SeparatorComma) || o.get_tag(SeparatorAnd) }
+#           return handler.invoke(:arrow, good_tokens, self, options)
+#        end
+#      end
+#
+#      definitions["narrow"].each do |handler|
+#        if handler.match(tokens, definitions)
+#          return handler.invoke(:narrow, tokens, self, options)
+#        end
+#      end
+#
+#      puts "-none" if Cronic.debug
+#      return nil
     end
   end
 end

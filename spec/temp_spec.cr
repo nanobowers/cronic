@@ -12,4 +12,5 @@ describe Cronic::Token do
     #p! Cronic.parse("15th of january")
     p! Cronic.parse("15th of jan")
   end
+
 end

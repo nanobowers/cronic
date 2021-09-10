@@ -2,20 +2,20 @@ module Cronic
   class RepeaterDay < Repeater #:nodoc:
     DAY_SECONDS = 86_400 # (24 * 60 * 60)
 
-    @current_day_start : ::Time
+    @current_day_start : Time
     
     def initialize(type, width = nil, **kwargs)
       super
-      @current_day_start = ::Time.local(@now.year, @now.month, @now.day)
+      @current_day_start = Time.local(@now.year, @now.month, @now.day)
     end
 
     def next(pointer)
       super
 
       direction = (pointer == :future) ? 1 : -1
-      @current_day_start += ::Time::Span.new(days: direction)
+      @current_day_start += Time::Span.new(days: direction)
 
-      SecSpan.new(@current_day_start, @current_day_start + ::Time::Span.new(days: 1))
+      SecSpan.new(@current_day_start, @current_day_start + 1.day)
     end
 
     def this(pointer = :future)
@@ -24,13 +24,13 @@ module Cronic
       case pointer
       when :future
         day_begin = Cronic.construct(@now.year, @now.month, @now.day, @now.hour)
-        day_end = Cronic.construct(@now.year, @now.month, @now.day) + DAY_SECONDS
+        day_end = Cronic.construct(@now.year, @now.month, @now.day) + 1.day
       when :past
         day_begin = Cronic.construct(@now.year, @now.month, @now.day)
         day_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour)
-      when :none
+      else # when :none
         day_begin = Cronic.construct(@now.year, @now.month, @now.day)
-        day_end = Cronic.construct(@now.year, @now.month, @now.day) + DAY_SECONDS
+        day_end = Cronic.construct(@now.year, @now.month, @now.day) + 1.day
       end
 
       SecSpan.new(day_begin, day_end)

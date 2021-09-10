@@ -77,7 +77,7 @@ module Cronic
     def this(context = :future)
       super
 
-      range_start = Cronic.construct(@now.year, @now.month, @now.day) + @range.begin
+      range_start = Cronic.construct(@now.year, @now.month, @now.day) + @range.begin.seconds
       range_end = construct_date_from_reference_and_offset(range_start)
       @current_span = SecSpan.new(range_start, range_end)
     end
