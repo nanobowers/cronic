@@ -68,7 +68,7 @@ module Cronic
     end
 
     def to_s
-      super << "-fortnight"
+      super + "-fortnight"
     end
   end
 end

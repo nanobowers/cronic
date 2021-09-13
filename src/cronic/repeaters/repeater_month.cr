@@ -72,7 +72,7 @@ module Cronic
     end
 
     def to_s
-      super << "-month"
+      super + "-month"
     end
 
     private def month_days(year, month)

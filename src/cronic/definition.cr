@@ -2,15 +2,53 @@ require "./handlers"
 
 module Cronic
 
-  #alias SeqList = Array(Tag.class) | Array(Tag.class | Or)
+  alias AnyTagKlass = Tag.class | Separator.class | Time.class
 
-  class Or(T)
+  alias SeqType = Array(Tag.class) |
+                  Array(Tag.class | Or) |
+                  Array(Tag.class | Time.class) |
+                  Array(Tag.class | Time.class | Or) |
+                  Array(SeparatorAt.class) |
+                  Array(Separator.class) |
+                  Array(Scalar.class | Or) |
+                  Array(OrdinalDay.class)
+                  Array(Time.class)
+                  
+  
+
+  alias OrSeqType = Array(Tag.class) |
+                    Array(Grabber.class) |
+                    Array(Repeater.class) |
+                    Array(RepeaterDayPortion.class) |
+                    Array(RepeaterTime.class) |
+                    Array(Scalar.class) |
+                    Array(Separator.class) |
+                    Array(SeparatorAnd.class) |
+                    Array(SeparatorSlash.class) |
+                    Array(SeparatorDash.class) |
+                    Array(SeparatorAt.class) |
+                    Array(SeparatorOn.class) |
+                    Array(Or | Tag.class) |
+                    Array(Or | Scalar.class) |
+                    Array(Or | Repeater.class) |
+                    Array(Tag.class | Time.class | Or) |
+                    Array(Tag.class | Time.class) |
+                    Array(Time.class)
+  
+  
+  class Or #(T)
+    
+    getter :items
     getter? :maybe
-    def initialize(@items : Array(T), @maybe = false)
+    
+    def initialize(@items : OrSeqType , @maybe = false)
     end
+    
   end
-  class Sequence(T)
-    def initialize(@items : Array(T) | Array(T | Or(T)) )
+
+  class Sequence #(T)
+    getter :items
+    def initialize(@items : SeqType )
     end
     def empty?
       @items.empty?
@@ -27,10 +65,8 @@ module Cronic
   # SpanDefinitions subclasses follow a <Type> + Definitions naming pattern
   # Types of Definitions are collected in Dictionaries (see dictionary.rb)
   class Definitions
-    #getter :options
 
     def initialize(**options)
-      #@options = options
     end
 
     def definitions
@@ -122,14 +158,9 @@ module Cronic
 
   class EndianDefinitions < SpanDefinitions
     def initialize(@endian_precedence : Array(Symbol) = [] of Symbol)
-      #@options = options
     end
 
     def definitions
-#      prefered_endian
-#    end
-#
-#    def prefered_endian
       @endian_precedence = ["middle", "little"] if @endian_precedence.empty?
 
       definitions = [

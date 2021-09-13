@@ -44,13 +44,19 @@ module Cronic
     # Returns The first Tag that matches the given class.
     def get_tag(tg_class : Class)
       @tags.find { |m|
-        m.class == tg_class
+        m.class <= tg_class
+      }
+    end
+
+    def has_tag(tg_class : Class)
+      @tags.any? { |m|
+        m.class <= tg_class
       }
     end
 
     # Print this Token in a pretty way
     def to_s : String
-      @word + "(" + @tags.join(", ") + ") "
+      @word + "(" + @tags.map(&.to_s).join(", ") + ") "
     end
 
     def inspect

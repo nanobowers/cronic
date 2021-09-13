@@ -43,23 +43,23 @@ module Cronic
     end
 
     def to_s
-      super << "-dayname-" << @type.to_s
+      super + "-dayname-" + @type.to_s
     end
-
-      private def symbol_to_day_of_the_week(sym)
-        lookup = {:sunday => ::Time::DayOfWeek::Sunday,
-                  :monday => ::Time::DayOfWeek::Monday,
-                  :tuesday => ::Time::DayOfWeek::Tuesday,
-                  :wednesday => ::Time::DayOfWeek::Wednesday,
-                  :thursday => ::Time::DayOfWeek::Thursday,
-                  :friday => ::Time::DayOfWeek::Friday,
-                  :saturday => ::Time::DayOfWeek::Saturday}
-        lookup[sym]
-      end
       
-    private def symbol_to_number(sym) : Int32
-      lookup = {:sunday => 0, :monday => 1, :tuesday => 2, :wednesday => 3, :thursday => 4, :friday => 5, :saturday => 6}
-      lookup[sym] || raise RuntimeError.new("Invalid symbol specified")
+    private def symbol_to_day_of_the_week(sym)
+      lookup = {:sunday => ::Time::DayOfWeek::Sunday,
+                :monday => ::Time::DayOfWeek::Monday,
+                :tuesday => ::Time::DayOfWeek::Tuesday,
+                :wednesday => ::Time::DayOfWeek::Wednesday,
+                :thursday => ::Time::DayOfWeek::Thursday,
+                :friday => ::Time::DayOfWeek::Friday,
+                :saturday => ::Time::DayOfWeek::Saturday}
+      lookup[sym]
     end
+    
+#    private def symbol_to_number(sym) : Int32
+#      lookup = {:sunday => 0, :monday => 1, :tuesday => 2, :wednesday => 3, :thursday => 4, :friday => 5, :saturday => 6}
+#      lookup[sym] || raise RuntimeError.new("Invalid symbol specified")
+#    end
   end
 end

@@ -59,12 +59,12 @@ module Cronic
     end
 
     def offset(span, amount, pointer)
-      Span.new(offset_by(span.begin, amount, pointer), offset_by(span.end, amount, pointer))
+      SecSpan.new(offset_by(span.begin, amount, pointer), offset_by(span.end, amount, pointer))
     end
 
     def offset_by(time, amount, pointer)
       direction = pointer == :future ? 1 : -1
-      time + amount * direction * SEASON_SECONDS
+      time + (amount * direction * SEASON_SECONDS).seconds
     end
 
     def width
@@ -72,7 +72,7 @@ module Cronic
     end
 
     def to_s
-      super << "-season"
+      super + "-season"
     end
 
     private def find_next_season_span(direction : Direction, next_season)

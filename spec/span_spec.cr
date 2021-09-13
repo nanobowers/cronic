@@ -7,10 +7,14 @@ describe "TestSpan" do
     span.width.should eq ((60 * 60) * 24)
   end
   it("span math") do
-    s = Cronic::SecSpan.new(Time.local(2001,1,1,1), Time.local(2001,1,1,2))
-    (s + 1.minute).begin.should eq 2.minutes
-    (s + 1.minute).end.should eq 3.minutes
-    (s - 1.minute).begin.should eq 0.minutes
-    (s - 1.minute).end.should eq 1.minute
+    t1 = Time.local(2001, 1, 1, 0, 0, 1)
+    t2 = Time.local(2001, 1, 1, 0, 0, 2)
+    s = Cronic::SecSpan.new(t1, t2)
+    
+    (s + 1.second).begin.second.should eq 2
+    (s + 1.second).end.second.should eq 3
+    
+    (s - 1.second).begin.second.should eq 0
+    (s - 1.second).end.second.should eq 1
   end
 end

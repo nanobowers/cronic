@@ -35,7 +35,7 @@ module Cronic
       @now = time
     end
     
-    def initialize(time, width = nil, @hours24 : Bool? = nil)
+    def initialize(time, width = nil, @hours24 : Bool? = nil, **kwargs)
       @type = :badness
       @current_time = nil
       @now = Time.local
@@ -142,7 +142,7 @@ module Cronic
     end
 
     def to_s
-      super << "-time-" << tagtype.to_s
+      super + "-time-" + tagtype.to_s
     end
   end
 end

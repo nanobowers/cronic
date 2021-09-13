@@ -40,7 +40,7 @@ module Cronic
     end
 
     def to_s
-      super << "-second"
+      super + "-second"
     end
   end
 end

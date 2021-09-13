@@ -25,7 +25,7 @@ module Cronic
     end
 
     def to_s
-      super << "-quarter"
+      super + "-quarter"
     end
 
 

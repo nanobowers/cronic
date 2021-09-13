@@ -22,13 +22,13 @@ module Cronic
 
   class SignPlus < Sign #:nodoc:
     def to_s
-      super << "-plus"
+      super + "-plus"
     end
   end
 
   class SignMinus < Sign #:nodoc:
     def to_s
-      super << "-minus"
+      super + "-minus"
     end
   end
 

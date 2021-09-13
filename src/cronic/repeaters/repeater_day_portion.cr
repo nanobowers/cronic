@@ -102,7 +102,7 @@ module Cronic
     end
 
     def to_s
-      super << "-dayportion-" << @type.to_s
+      super + "-dayportion-" + @type.to_s
     end
 
       private def construct_date_from_reference_and_offset(reference, offset = nil)

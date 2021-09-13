@@ -60,10 +60,10 @@ module Cronic
     #   make_year(00, 50) #=> 2000
     #
     # Returns The Integer 4 digit year.
-    def self.make_year(year, bias)
+    def self.make_year(year : Int32, bias)
       return year if year.to_s.size > 2
-      start_year = ::Time.local.year - bias
-      century = (start_year / 100) * 100
+      start_year = Time.local.year - bias
+      century = (start_year // 100) * 100
       full_year = century + year
       full_year += 100 if full_year < start_year
       full_year

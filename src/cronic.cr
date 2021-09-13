@@ -1,7 +1,6 @@
 require "number_parser" # aka numerizer
 
 require "./cronic/version"
-require "./cronic/parser"
 require "./cronic/date"
 require "./cronic/time"
 
@@ -41,6 +40,8 @@ require "./cronic/repeaters/repeater_hour"
 require "./cronic/repeaters/repeater_minute"
 require "./cronic/repeaters/repeater_second"
 require "./cronic/repeaters/repeater_time"
+
+require "./cronic/parser"
 
 # Parse natural language dates and times into Time or Cronic::Span objects.
 #
@@ -101,7 +102,7 @@ module Cronic
   # second - Integer second.
   #
   # Returns a new Time object constructed from these params.
-  def self.construct(year, month : Int32 = 1, day : Int32  = 1, hour : Int32  = 0, minute : Int32  = 0, second : Int32  = 0, offset = nil) : ::Time
+  def self.construct(year : Int32, month : Int32 = 1, day : Int32  = 1, hour : Int32  = 0, minute : Int32  = 0, second : Int32  = 0, offset = nil) : ::Time
     if second >= 60
       minute += second // 60
       second = second % 60
@@ -121,7 +122,7 @@ module Cronic
     # system (non-constant number of days per month)
     day <= 56 || raise("day must be no more than 56 (makes month resolution easier)")
     if day > 28 # no month ever has fewer than 28 days, so only do this if necessary
-      days_this_month = ::Time.leap_year?(year) ? Date::MONTH_DAYS_LEAP[month] : Date::MONTH_DAYS[month]
+      days_this_month = Time.leap_year?(year) ? Date::MONTH_DAYS_LEAP[month] : Date::MONTH_DAYS[month]
       days_this_month = days_this_month.as(Int32)
       if day > days_this_month
         month += day // days_this_month

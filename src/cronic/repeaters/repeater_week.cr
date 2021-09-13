@@ -73,7 +73,7 @@ module Cronic
     end
 
     def to_s
-      super << "-week"
+      super + "-week"
     end
   end
 end

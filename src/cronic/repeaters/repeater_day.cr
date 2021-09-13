@@ -36,9 +36,9 @@ module Cronic
       SecSpan.new(day_begin, day_end)
     end
 
-    def offset(span, amount, pointer)
+    def offset(span : SecSpan, amount : Int32, pointer)
       direction = pointer == :future ? 1 : -1
-      span + direction * amount * DAY_SECONDS
+      span + (direction * amount).days #  * DAY_SECONDS
     end
 
     def width
@@ -46,7 +46,7 @@ module Cronic
     end
 
     def to_s
-      super << "-day"
+      super + "-day"
     end
   end
 end

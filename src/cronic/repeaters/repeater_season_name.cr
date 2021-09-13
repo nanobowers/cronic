@@ -31,12 +31,12 @@ module Cronic
     end
 
     def offset(span, amount, pointer)
-      Span.new(offset_by(span.begin, amount, pointer), offset_by(span.end, amount, pointer))
+      SecSpan.new(offset_by(span.begin, amount, pointer), offset_by(span.end, amount, pointer))
     end
 
-    def offset_by(time, amount, pointer)
+    def offset_by(time, amount : Int32, pointer : Symbol)
       direction = pointer == :future ? 1 : -1
-      time + amount * direction * RepeaterYear::YEAR_SECONDS
+      time + (amount * direction).years #  * RepeaterYear::YEAR_SECONDS
     end
 
   end

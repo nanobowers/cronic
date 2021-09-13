@@ -40,79 +40,79 @@ module Cronic
 
   class SeparatorComma < Separator #:nodoc:
     def to_s
-      super << "-comma"
+      super + "-comma"
     end
   end
 
   class SeparatorDot < Separator #:nodoc:
     def to_s
-      super << "-dot"
+      super + "-dot"
     end
   end
 
   class SeparatorColon < Separator #:nodoc:
     def to_s
-      super << "-colon"
+      super + "-colon"
     end
   end
 
   class SeparatorSpace < Separator #:nodoc:
     def to_s
-      super << "-space"
+      super + "-space"
     end
   end
 
   class SeparatorSlash < Separator #:nodoc:
     def to_s
-      super << "-slash"
+      super + "-slash"
     end
   end
 
   class SeparatorDash < Separator #:nodoc:
     def to_s
-      super << "-dash"
+      super + "-dash"
     end
   end
 
   class SeparatorQuote < Separator #:nodoc:
     def to_s
-      super << "-quote-" << @type.to_s
+      super + "-quote-" + @type.to_s
     end
   end
 
   class SeparatorAt < Separator #:nodoc:
     def to_s
-      super << "-at"
+      super + "-at"
     end
   end
 
   class SeparatorIn < Separator #:nodoc:
     def to_s
-      super << "-in"
+      super + "-in"
     end
   end
 
   class SeparatorOn < Separator #:nodoc:
     def to_s
-      super << "-on"
+      super + "-on"
     end
   end
 
   class SeparatorAnd < Separator #:nodoc:
     def to_s
-      super << "-and"
+      super + "-and"
     end
   end
 
   class SeparatorT < Separator #:nodoc:
     def to_s
-      super << "-T"
+      super + "-T"
     end
   end
 
   class SeparatorW < Separator #:nodoc:
     def to_s
-      super << "-W"
+      super + "-W"
     end
   end
 

@@ -14,18 +14,20 @@ def pre_normalize(str)
   Cronic::Parser.new.pre_normalize(str)
 end
 
-describe "Parsing" do
+describe Cronic::Parser do
 
-  it("handle generic") do
+  it("parses generics") do
     time = Cronic.parse("2012-08-02T13:00:00")
     time.should eq Time.local(2012, 8, 2, 13)
     time = Cronic.parse("2012-08-02T13:00:00+01:00")
     time.should eq Time.utc(2012, 8, 2, 12)
     time = Cronic.parse("2012-08-02T08:00:00-04:00")
     time.should eq Time.utc(2012, 8, 2, 12)
+  end
 
+  it "parses rfc3339" do
     time = Cronic.parse("2013-08-01T19:30:00.345-07:00")
-    time2 = Time.parse_rfc3339("2013-08-01 019:30:00.345-07:00")
+    time2 = Time.parse_rfc3339("2013-08-01T19:30:00.345-07:00")
     (time - time2).abs.to_f.should be_close(0, 0.001)
 
     time = Cronic.parse("2013-08-01T19:30:00.34-07:00")
@@ -35,50 +37,65 @@ describe "Parsing" do
     time = Cronic.parse("2013-08-01T19:30:00.3456789-07:00")
     time2 = Time.parse_rfc3339("2013-08-01T19:30:00.3456789-07:00")
     (time - time2).abs.to_f.should be_close(0, 0.001)
-
+  end
+  
+  it "parses generics (2)" do
     time = Cronic.parse("2012-08-02T12:00:00Z")
     time.should eq Time.utc(2012, 8, 2, 12)
 
     time = Cronic.parse("2012-01-03 01:00:00.100")
-    time2 = Time.parse_rfc3339("2012-01-03 01:00:00.100")
+    time2 = Time.parse_rfc3339("2012-01-03T01:00:00.100")
     (time - time2).abs.to_f.should be_close(0, 0.001)
 
     time = Cronic.parse("2012-01-03 01:00:00.234567")
-    time2 = Time.parse_rfc3339("2012-01-03 01:00:00.234567")
+    time2 = Time.parse_rfc3339("2012-01-03T01:00:00.234567")
     (time - time2).abs.to_f.should be_close(0, 1.0e-06)
 
     Cronic.parse("1/1/32.1").should be_nil
     time = Cronic.parse("28th", guess: Cronic::Guess::Begin)
     time.should eq Time.local(Time.local.year, Time.local.month, 28)
   end
-  it("handle rmn sd") do
-    time = parse_now("aug 3")
-    time.should eq Time.local(2007, 8, 3, 12)
-    time = parse_now("aug 3", context: :past)
-    time.should eq Time.local(2006, 8, 3, 12)
-    time = parse_now("aug. 3")
-    time.should eq Time.local(2007, 8, 3, 12)
-    time = parse_now("aug 20")
-    time.should eq Time.local(2006, 8, 20, 12)
-    time = parse_now("aug-20")
-    time.should eq Time.local(2006, 8, 20, 12)
-    time = parse_now("aug 20", context: :future)
-    time.should eq Time.local(2006, 8, 20, 12)
-    time = parse_now("may 27")
-    time.should eq Time.local(2007, 5, 27, 12)
-    time = parse_now("may 28", context: :past)
-    time.should eq Time.local(2006, 5, 28, 12)
-    time = parse_now("may 28 5pm", context: :past)
-    time.should eq Time.local(2006, 5, 28, 17)
-    time = parse_now("may 28 at 5pm", context: :past)
-    time.should eq Time.local(2006, 5, 28, 17)
-    time = parse_now("may 28 at 5:32.19pm", context: :past)
-    time.should eq Time.local(2006, 5, 28, 17, 32, 19)
-    time = parse_now("may 28 at 5:32:19.764")
-    #time.should be_close(Time.local(2007, 5, 28, 17, 32, 19, 764000), 0.001)
-    reftime = Time.local(2007, 5, 28, 17, 32, 19, nanosecond: 764000)
-    (time - reftime).abs.to_f.should be_close(0, 0.001)
+  
+  describe "RepeaterMonthName ScalarDay" do
+    
+    it("handles basic cases") do
+      time = parse_now("aug 3")
+      time.should eq Time.local(2007, 8, 3, 12)
+      time = parse_now("aug. 3")
+      time.should eq Time.local(2007, 8, 3, 12)
+      time = parse_now("aug 20")
+      time.should eq Time.local(2006, 8, 20, 12)
+      time = parse_now("aug-20")
+      time.should eq Time.local(2006, 8, 20, 12)
+      time = parse_now("may 27")
+      time.should eq Time.local(2007, 5, 27, 12)
+    end
+    it "handles past context" do
+      time = parse_now("aug 3", context: :past)
+      time.should eq Time.local(2006, 8, 3, 12)
+      time = parse_now("may 28", context: :past)
+      time.should eq Time.local(2006, 5, 28, 12)
+    end
+    it "handles future context" do
+      time = parse_now("aug 20", context: :future)
+      time.should eq Time.local(2006, 8, 20, 12)
+    end
+    it "also accepts a time" do
+      time = parse_now("may 28 5pm", context: :past)
+      time.should eq Time.local(2006, 5, 28, 17)
+      time = parse_now("may 28 at 5pm", context: :past)
+      time.should eq Time.local(2006, 5, 28, 17)
+      time = parse_now("may 28 at 5:32.19pm", context: :past)
+      time.should eq Time.local(2006, 5, 28, 17, 32, 19)
+    end
+    it "handles nanoseconds" do
+      time = parse_now("may 28 at 5:32:19.764")
+      #time.should be_close(Time.local(2007, 5, 28, 17, 32, 19, 764000), 0.001)
+      reftime = Time.local(2007, 5, 28, 17, 32, 19, nanosecond: 764000)
+      (time - reftime).abs.to_f.should be_close(0, 0.001)
+    end
   end
+  
   it("handle rmn sd on") do
     time = parse_now("5pm on may 28")
     time.should eq Time.local(2007, 5, 28, 17)
@@ -87,70 +104,110 @@ describe "Parsing" do
     time = parse_now("5 on may 28", ambiguous_time_range: :none)
     time.should eq Time.local(2007, 5, 28, 5)
   end
-  it("handle rmn od") do
-    time = parse_now("may 27th")
-    time.should eq Time.local(2007, 5, 27, 12)
-    time = parse_now("may 27th", context: :past)
-    time.should eq Time.local(2006, 5, 27, 12)
-    time = parse_now("may 27th 5:00 pm", context: :past)
-    time.should eq Time.local(2006, 5, 27, 17)
-    time = parse_now("may 27th at 5pm", context: :past)
-    time.should eq Time.local(2006, 5, 27, 17)
-    time = parse_now("may 27th at 5", ambiguous_time_range: :none)
-    time.should eq Time.local(2007, 5, 27, 5)
+  
+  describe "RepeaterMonthName OrdinalDay" do
+    it "parses a date" do
+      time = parse_now("may 27th")
+      time.should eq Time.local(2007, 5, 27, 12)
+    end
+    it "parses a date in the past" do
+      time = parse_now("may 27th", context: :past)
+      time.should eq Time.local(2006, 5, 27, 12)
+    end
+    it "parses a date in the past with a time" do
+      time = parse_now("may 27th 5:00 pm", context: :past)
+      time.should eq Time.local(2006, 5, 27, 17)
+    end
+    it "parses a date in the past with a time (2)" do    
+      time = parse_now("may 27th at 5pm", context: :past)
+      time.should eq Time.local(2006, 5, 27, 17)
+    end
+    it "parses a date in the past with a time (3)" do    
+      time = parse_now("may 27th at 5", ambiguous_time_range: :none)
+      time.should eq Time.local(2007, 5, 27, 5)
+    end
   end
-  it("handle od rm") do
+  
+  describe "OrdinalDay RepeaterMonthName" do
+    it("handles relative to the now-month") do
     time = parse_now("fifteenth of this month")
     time.should eq Time.local(2007, 8, 15, 12)
+    end
   end
-  it("handle od rmn") do
-    time = parse_now("22nd February")
-    time.should eq Time.local(2007, 2, 22, 12)
-    time = parse_now("31st of may at 6:30pm")
-    time.should eq Time.local(2007, 5, 31, 18, 30)
-    time = parse_now("11th december 8am")
-    time.should eq Time.local(2006, 12, 11, 8)
+
+  describe "ordinal day repeater month name" do
+    it "handles od rmn" do
+      time = parse_now("22nd February")
+      time.should eq Time.local(2007, 2, 22, 12)
+    end
+    it "handles od rmn with time" do
+      time = parse_now("31st of may at 6:30pm")
+      time.should eq Time.local(2007, 5, 31, 18, 30)
+    end
+    it "handles od rmn with time (2)" do
+      time = parse_now("11th december 8am")
+      time.should eq Time.local(2006, 12, 11, 8)
+    end
   end
-  it("handle sy rmn od") do
-    time = parse_now("2009 May 22nd")
-    time.should eq Time.local(2009, 5, 22, 12)
+  
+  describe "ScalarYear-RepeaterMonthName-OrdinalDay" do
+    it "parses" do
+      time = parse_now("2009 May 22nd")
+      time.should eq Time.local(2009, 5, 22, 12)
+    end
   end
-  it("handle sd rmn") do
+  describe "ScalarDay-RepeaterMonthName" do
+    it("parses basic cases") do
     time = parse_now("22 February")
     time.should eq Time.local(2007, 2, 22, 12)
     time = parse_now("22 feb")
     time.should eq Time.local(2007, 2, 22, 12)
     time = parse_now("22-feb")
     time.should eq Time.local(2007, 2, 22, 12)
+    end
+    it "parses cases with times" do
     time = parse_now("31 of may at 6:30pm")
     time.should eq Time.local(2007, 5, 31, 18, 30)
     time = parse_now("11 december 8am")
     time.should eq Time.local(2006, 12, 11, 8)
+    end
   end
-  it("handle rmn od on") do
-    time = parse_now("5:00 pm may 27th", context: :past)
-    time.should eq Time.local(2006, 5, 27, 17)
-    time = parse_now("05:00 pm may 27th", context: :past)
-    time.should eq Time.local(2006, 5, 27, 17)
-    time = parse_now("5pm on may 27th", context: :past)
-    time.should eq Time.local(2006, 5, 27, 17)
-    time = parse_now("5 on may 27th", ambiguous_time_range: :none)
-    time.should eq Time.local(2007, 5, 27, 5)
+  describe "RepeaterMonthName-ScalarDay-ON" do
+    it "parses" do
+      time = parse_now("5:00 pm may 27th", context: :past)
+      time.should eq Time.local(2006, 5, 27, 17)
+      time = parse_now("05:00 pm may 27th", context: :past)
+      time.should eq Time.local(2006, 5, 27, 17)
+      time = parse_now("5pm on may 27th", context: :past)
+      time.should eq Time.local(2006, 5, 27, 17)
+      time = parse_now("5 on may 27th", ambiguous_time_range: :none)
+      time.should eq Time.local(2007, 5, 27, 5)
+    end
   end
-  it("handle rmn sy") do
-    time = parse_now("may 97")
-    time.should eq Time.local(1997, 5, 16, 12)
-    time = parse_now("may 33", ambiguous_year_future_bias: 10)
-    time.should eq Time.local(2033, 5, 16, 12)
-    time = parse_now("may 32")
-    time.should eq Time.local(2032, 5, 16, 12, 0, 0)
-    time = parse_now("may '01")
-    time.should eq Time.local(2001, 5, 16, 12, 0, 0)
+
+  describe "RepeaterMonthName-ScalarYear" do
+    it "parses 1997" do
+      time = parse_now("may 97")
+      time.should eq Time.local(1997, 5, 16, 12)
+    end
+    it "parses 2030s" do
+      time = parse_now("may 33", ambiguous_year_future_bias: 10)
+      time.should eq Time.local(2033, 5, 16, 12)
+      time = parse_now("may 32")
+      time.should eq Time.local(2032, 5, 16, 12, 0, 0)
+    end
+    it "parses tick-year" do
+      time = parse_now("may '01")
+      time.should eq Time.local(2001, 5, 16, 12, 0, 0)
+    end
   end
+
+  
   it("handle rdn rmn sd t tz sy") do
     time = parse_now("Mon Apr 02 17:00:00 PDT 2007")
     time.to_unix.should eq 1175558400
   end
+  
   it("handle sy sm sd t tz") do
     time = parse_now("2011-07-03 22:11:35 +0100")
     time.to_unix.should eq 1309727495
@@ -163,7 +220,10 @@ describe "Parsing" do
     time = parse_now("2011-07-03 21:11:35.362 UTC")
     time.to_unix_f.should be_close(1309727495.362, 0.001)
   end
-  it("handle rmn sd sy") do
+  
+  describe "RepeaterMonthName-ScalarDay-ScalarYear" do
+    
+  it("parses basic cases") do
     time = parse_now("November 18, 2010")
     time.should eq Time.local(2010, 11, 18, 12)
     time = parse_now("Jan 1,2010")
@@ -172,32 +232,52 @@ describe "Parsing" do
     time.should eq Time.local(2004, 2, 14, 12)
     time = parse_now("jan 3 2010")
     time.should eq Time.local(2010, 1, 3, 12)
+  end
+  it "parses with times" do
     time = parse_now("jan 3 2010 midnight")
     time.should eq Time.local(2010, 1, 4, 0)
     time = parse_now("jan 3 2010 at midnight")
     time.should eq Time.local(2010, 1, 4, 0)
     time = parse_now("jan 3 2010 at 4", ambiguous_time_range: :none)
     time.should eq Time.local(2010, 1, 3, 4)
+  end
+  
+  it "parses in the past" do
     time = parse_now("may 27, 1979")
     time.should eq Time.local(1979, 5, 27, 12)
+  end
+  
+  it "parses in the past (shortyear)" do
     time = parse_now("may 27 79")
     time.should eq Time.local(1979, 5, 27, 12)
+  end
+  
+  it "parses in the past with times" do
     time = parse_now("may 27 79 4:30")
     time.should eq Time.local(1979, 5, 27, 16, 30)
     time = parse_now("may 27 79 at 4:30", ambiguous_time_range: :none)
     time.should eq Time.local(1979, 5, 27, 4, 30)
-    time = parse_now("may 27 32")
-    time.should eq Time.local(2032, 5, 27, 12, 0, 0)
     time = parse_now("oct 5 2012 1045pm")
     time.should eq Time.local(2012, 10, 5, 22, 45)
   end
-  it("handle rmn od sy") do
-    time = parse_now("may 1st 01")
-    time.should eq Time.local(2001, 5, 1, 12)
+  it "parses in the future" do
+    time = parse_now("may 27 32")
+    time.should eq Time.local(2032, 5, 27, 12, 0, 0)
+  end
+  end
+
+  describe "RepeaterMonthName-OrdinalDay-ScalarYear" do
+    it "parses short-year" do
+      time = parse_now("may 1st 01")
+      time.should eq Time.local(2001, 5, 1, 12)
+    end
+    it "parses basic cases" do
     time = parse_now("November 18th 2010")
     time.should eq Time.local(2010, 11, 18, 12)
     time = parse_now("November 18th, 2010")
     time.should eq Time.local(2010, 11, 18, 12)
+    end
+    it "parses cases with time" do
     time = parse_now("November 18th 2010 midnight")
     time.should eq Time.local(2010, 11, 19, 0)
     time = parse_now("November 18th 2010 at midnight")
@@ -206,20 +286,31 @@ describe "Parsing" do
     time.should eq Time.local(2010, 11, 18, 16)
     time = parse_now("November 18th 2010 at 4", ambiguous_time_range: :none)
     time.should eq Time.local(2010, 11, 18, 4)
-    time = parse_now("March 30th, 1979")
-    time.should eq Time.local(1979, 3, 30, 12)
-    time = parse_now("March 30th 79")
-    time.should eq Time.local(1979, 3, 30, 12)
-    time = parse_now("March 30th 79 4:30")
-    time.should eq Time.local(1979, 3, 30, 16, 30)
-    time = parse_now("March 30th 79 at 4:30", ambiguous_time_range: :none)
-    time.should eq Time.local(1979, 3, 30, 4, 30)
+    end
+    it "parses cases in the past" do
+      time = parse_now("March 30th, 1979")
+      time.should eq Time.local(1979, 3, 30, 12)
+    end
+    it "parses cases in the past with short-year" do
+      time = parse_now("March 30th 79")
+      time.should eq Time.local(1979, 3, 30, 12)
+    end
+    it "parses cases in the past with time" do
+      time = parse_now("March 30th 79 4:30")
+      time.should eq Time.local(1979, 3, 30, 16, 30)
+      time = parse_now("March 30th 79 at 4:30", ambiguous_time_range: :none)
+      time.should eq Time.local(1979, 3, 30, 4, 30)
+    end
   end
-  it("handle od rmn sy") do
+  describe "OrdinalDay-RepeaterMonthName-ScalarYear" do
+    it "parses with a longyear" do
     time = parse_now("22nd February 2012")
     time.should eq Time.local(2012, 2, 22, 12)
+    end
+    it "parses with a shortyear" do
     time = parse_now("11th december 79")
     time.should eq Time.local(1979, 12, 11, 12)
+    end
   end
   it("handle sd rmn sy") do
     time = parse_now("3 jan 2010")

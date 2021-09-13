@@ -55,7 +55,7 @@ module Cronic
     end
 
     def to_s
-      super << "-weekday"
+      super + "-weekday"
     end
 
 #    private def is_weekend?(time)

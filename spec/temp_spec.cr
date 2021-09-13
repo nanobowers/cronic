@@ -9,8 +9,15 @@ describe Cronic::Token do
   #  end
   
   it "parses something" do
-    #p! Cronic.parse("15th of january")
-    p! Cronic.parse("15th of jan")
+    zz = Cronic.parse("15th of january")
+    p zz
+    #p! Cronic.parse("15th of jan")
+  end
+
+  it "parses something2" do
+    zz = Cronic.parse("22-feb")
+    p zz
+    #p! Cronic.parse("15th of jan")
   end
 
 end

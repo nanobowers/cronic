@@ -98,7 +98,7 @@ module Cronic
     end
 
     def to_s
-      super << "-monthname-" << @type.to_s
+      super + "-monthname-" + @type.to_s
     end
   end
 end
