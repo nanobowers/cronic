@@ -1,6 +1,7 @@
 module Cronic
   class RepeaterSeason < Repeater #:nodoc:
     SEASON_SECONDS = 7_862_400 # 91 * 24 * 60 * 60
+
     SEASONS = {
       Season::Spring => SeasonSpan.new(MiniDate.new(3,20), MiniDate.new(6,20)),
       Season::Summer => SeasonSpan.new(MiniDate.new(6,21), MiniDate.new(9,22)),

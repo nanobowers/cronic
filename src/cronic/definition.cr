@@ -6,13 +6,12 @@ module Cronic
 
   alias SeqType = Array(Tag.class) |
                   Array(Tag.class | Or) |
-                  Array(Tag.class | Time.class) |
-                  Array(Tag.class | Time.class | Or) |
                   Array(SeparatorAt.class) |
                   Array(Separator.class) |
                   Array(Scalar.class | Or) |
-                  Array(OrdinalDay.class)
-                  Array(Time.class)
+                  Array(Repeater.class | Or) |
+                  Array(OrdinalDay.class) 
+  #Array(Time.class)
                   
   
 
@@ -28,12 +27,12 @@ module Cronic
                     Array(SeparatorDash.class) |
                     Array(SeparatorAt.class) |
                     Array(SeparatorOn.class) |
+                    Array(TimeZone.class) |
                     Array(Or | Tag.class) |
                     Array(Or | Scalar.class) |
                     Array(Or | Repeater.class) |
-                    Array(Tag.class | Time.class | Or) |
-                    Array(Tag.class | Time.class) |
-                    Array(Time.class)
+                    Array(Tag.class | Or) 
+
   
   
   class Or #(T)

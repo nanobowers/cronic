@@ -77,7 +77,15 @@ module Cronic
                         endian_precedence: @endian_precedence,
                         ambiguous_year_future_bias: @ambiguous_year_future_bias,
                        )
-      span = tokens_to_span(tokens, text: text, context: @context) # options.merge(text: text))
+      span = tokens_to_span(tokens, text: text,
+                            context: @context,
+                            now: @now,
+                            hours24: @hours24,
+                            #week_start: @week_start,
+                            ambiguous_time_range: @ambiguous_time_range,
+                            endian_precedence: @endian_precedence,
+                            ambiguous_year_future_bias: @ambiguous_year_future_bias,
+                           )
       if Cronic.debug
         sepline = "+" + ("-" * 51)
         puts sepline
@@ -112,6 +120,8 @@ module Cronic
       text = text.to_s.downcase
       text = text.gsub(/\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/, "\\3 / \\2 / \\1")
       text = text.gsub(/\b([ap])\.m\.?/, "\\1m")
+
+      text = text.gsub(/t ( \d{2}:\d{2}:\d{2} (?:\.\d+)? )/xi, " \\1 ") # separate out T##:##:## ala rfc3339
       text = text.gsub(/(\s+|:\d{2}|:\d{2}\.\d+)\-(\d{2}:?\d{2})\b/, "\\1tzminus\\2")
       text = text.gsub(/\./, ":")
       text = text.gsub(/([ap]):m:?/, "\\1m")
@@ -156,6 +166,10 @@ module Cronic
       text = text.gsub(/^\s?an? /i, "1 ")
       text = text.gsub(/\b(\d{4}):(\d{2}):(\d{2})\b/, "\\1 / \\2 / \\3") # DTOriginal
       text = text.gsub(/\b0(\d+):(\d{2}):(\d{2}) ([ap]m)\b/, "\\1:\\2:\\3 \\4")
+
+      # improperly formatted -0100, +0500 tz adjusts
+      text = text.gsub(/([+-]) (0[0-9]|1[0-2]) (\d{2})/x, " \\1\\2:\\3")
+
       text
     end
 
@@ -190,11 +204,6 @@ module Cronic
       tokens.select { |token| token.tagged? }
     end
 
-
-#    def tokens_to_span(tokens, **options) : Span?
-#      parse_endian_tokens || nil
-#    end
-
     def maybe(item)
       Or.new([item], maybe: true)
     end
@@ -213,8 +222,14 @@ module Cronic
       match(seq, tokens)
     end
     
-    def match_one(pat, tok)
-      return tok.tags.any? {|x| x.class == pat }
+    def match_one(pat, tok : Token)
+      if pat.is_a?(Or)
+        #puts ">> checking #{tok.inspect} against #{pat}"
+        return pat.items.any? {|x| match_one(x, tok) }
+      else
+        #puts ">> checking #{tok.inspect} against #{pat}"
+        return tok.tags.any? { |t| pat >= t.class }
+      end
     end
     
     def match_maybe(pattern, tokens) : Bool
@@ -228,7 +243,8 @@ module Cronic
     def match(pattern, tokens) : Bool
       #puts ">> matching #{pattern.inspect}<<"
       if pattern.empty?
-        return true
+        return true if tokens.empty?
+        return false
       elsif pattern.first.is_a?(Or)
         firstpat = pattern.first.as(Or)
         oritems = firstpat.items
@@ -262,12 +278,16 @@ module Cronic
       slashdash = or(SeparatorSlash, SeparatorDash)
       maybetime = [maybe(RepeaterTime), maybe(RepeaterDayPortion)]
 
-      # TODO: Generic needs to be replaced with a real handler for Crystal since we do not have
-      # Ruby's Date.parse
+      # TODO: Generic needs to be replaced with a real handler for
+      # Crystal since we do not have Ruby's Date.parse
       
       ## DATES
       date_defs = [
-      {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay, RepeaterTime, ormaybe(SeparatorSlash,SeparatorDash), TimeZone, ScalarYear]), proc: ->(toks : Array(Token)){ handle_generic(toks, **opts) }},
+        {match: Sequence.new( [ScalarYear, SeparatorDash, ScalarMonth, SeparatorDash, ScalarDay, RepeaterTime, TimeZone] ), proc: ->(toks : Array(Token)){ handle_rfc3339(toks, **opts) }},
+        {match: Sequence.new( [ScalarYear, SeparatorDash, ScalarMonth, SeparatorDash, ScalarDay, RepeaterTime] ), proc: ->(toks : Array(Token)){ handle_rfc3339_no_tz(toks, **opts) }},
+
+      
+      {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay, RepeaterTime, ormaybe(SeparatorSlash,SeparatorDash), TimeZone, ScalarYear]), proc: ->(toks : Array(Token)){ handle_rfc2822(toks, **opts) }},
       {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay, ScalarYear]), proc: ->(toks : Array(Token)){ handle_rdn_rmn_sd_sy(toks, **opts) }},
       {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay]), proc: ->(toks : Array(Token)){ handle_rdn_rmn_sd(toks, **opts) }},
 
@@ -306,11 +326,11 @@ module Cronic
       ]
       
       ## ANCHORS
-      #anchor_defs = [
-      #{match: Sequence.new([maybe(SeparatorOn), maybe(Grabber), Repeater, maybe(SeparatorAt), maybe(Repeater), maybe(Repeater)]), proc: ->(toks : Array(Token)){ handle_r(toks, **opts) }},
-      # {match: Sequence.new([maybe(Grabber), Repeater, Repeater, maybe(Separator), maybe(Repeater), maybe(Repeater)]), proc: ->(toks : Array(Token)){ handle_r(toks, **opts) }},
-      # {match: Sequence.new([Repeater, Grabber, Repeater]), proc: ->(toks : Array(Token)){ handle_r_g_r(toks, **opts) }},
-      #]
+      anchor_defs = [
+      {match: Sequence.new([maybe(SeparatorOn), maybe(Grabber), Repeater, maybe(SeparatorAt), maybe(Repeater), maybe(Repeater)]), proc: ->(toks : Array(Token)){ handle_r(toks, **opts) }},
+      {match: Sequence.new([maybe(Grabber), Repeater, Repeater, maybe(Separator), maybe(Repeater), maybe(Repeater)]), proc: ->(toks : Array(Token)){ handle_r(toks, **opts) }},
+      {match: Sequence.new([Repeater, Grabber, Repeater]), proc: ->(toks : Array(Token)){ handle_r_g_r(toks, **opts) }},
+      ]
       
       arrow_defs = [
       {match: Sequence.new([RepeaterMonthName, Scalar, Repeater, Pointer]), proc: ->(toks : Array(Token)){ handle_rmn_s_r_p(toks, **opts) }},
@@ -338,20 +358,28 @@ module Cronic
       span : SecSpan? = nil
       
       ordered_endian_defs = @endian_precedence.first == :little ? endian_defs.reverse : endian_defs
-      defs = ordered_endian_defs + date_defs + #anchor_defs
-             arrow_defs + narrow_defs
-      
+      defs = ordered_endian_defs + date_defs + anchor_defs
+
       defs.each_with_index do |defn, idx|
-        hadmatch = match(defn[:match], tokens)
-        if span.nil? && hadmatch
+        if span.nil? && (hadmatch = match(defn[:match], tokens))
           puts "#{idx} #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n"
           span = defn[:proc].call(good_tokens)
         end
       end
+
+      arrow_defs.each do |defn|
+        if span.nil? && ( hadmatch = match(defn[:match], tokens) )
+          arrow_good_tokens = tokens.reject { |o| o.get_tag(SeparatorAt) || o.get_tag(SeparatorSlash) || o.get_tag(SeparatorDash) || o.get_tag(SeparatorComma) || o.get_tag(SeparatorAnd) }
+          span = defn[:proc].call(arrow_good_tokens)
+        end
+      end
+      narrow_defs.each do |defn|
+        if span.nil? && ( hadmatch = match(defn[:match], tokens) )
+          puts "NARROW #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n"
+          span = defn[:proc].call(tokens)
+        end
+      end
       
-      #if span.nil? && seqmatch([OrdinalDay, RepeaterMonthName, maybe(SeparatorAt), maybe(Time)])
-      #  span = handle_od_rmn(good_tokens, **opts)
-      #end
       
       if span.is_a?(SecSpan)
         return span

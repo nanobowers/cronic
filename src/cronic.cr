@@ -1,5 +1,11 @@
 require "number_parser" # aka numerizer
 
+module Cronic
+  # Raised when we try to parse an invalid date or time
+  class InvalidParseError < Exception
+  end
+end
+
 require "./cronic/version"
 require "./cronic/date"
 require "./cronic/time"

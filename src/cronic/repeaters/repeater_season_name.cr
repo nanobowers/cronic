@@ -3,17 +3,21 @@ module Cronic
     SEASON_SECONDS = 7_862_400 # 91 * 24 * 60 * 60
     DAY_SECONDS = 86_400 # (24 * 60 * 60)
 
+    def initialize(typ, wid, @season : Season)
+      super(typ, wid) # useless superclass stuff.
+    end
+    
     def next(pointer)
       direction = pointer == :future ? Direction::Forward : Direction::Backward
-      find_next_season_span(direction, @type)
+      find_next_season_span(direction, @season)
     end
 
     def this(pointer = :future)
       direction = pointer == :future ? Direction::Forward : Direction::Backward
 
       today = Cronic.construct(@now.year, @now.month, @now.day)
-      goal_ssn_start = today + (direction.value * num_seconds_til_start(@type, direction)).seconds
-      goal_ssn_end = today + (direction.value * num_seconds_til_end(@type, direction)).seconds
+      goal_ssn_start = today + (direction.value * num_seconds_til_start(@season, direction)).seconds
+      goal_ssn_end = today + (direction.value * num_seconds_til_end(@season, direction)).seconds
       curr_ssn = find_current_season(MiniDate.from_time(@now))
       case pointer
       when :past

@@ -145,9 +145,42 @@ module Cronic
       end
     end
 
+    def handle_rfc3339(tokens, text = "", **options)
+      # reconstruct rfc3339 in case it's malformatted
+      raise Exception.new("Expected 5 tokens, busted..") unless tokens.size == 5
+      # date: YYYY-MM-DD
+      date = tokens[0].word + "-" + tokens[1].word + "-" + tokens[2].word
+      # time (incl subseconds) is separated by ":", so fix to "." for subseconds
+      timetoks = tokens[3].word.split(":")
+      time = if timetoks.size == 4
+               timetoks[0..-2].join(":") + "." + timetoks[-1]
+             else
+               tokens[3].word
+             end
+      # query timezone format from tag
+      tz = tokens[4].get_tag(TimeZone).as(TimeZone).zone.format
+      newtext = date + "T" + time + tz
+      #p ["full-rfc3339!!", text, newtext]
+      t = Time.parse_rfc3339(newtext)
+      SecSpan.new(t, t + 1.second)
+    end
+
+    # timestamp similar to rfc3339 but without trailing timezone
+    def handle_rfc3339_no_tz(tokens, text = "", **options)
+      p ["part-rfc3339!!", text]
+      t = Time.parse(text, "%Y-%m-%dT%H:%M:%S", Time::Location.local)
+      SecSpan.new(t, t + 1.second)
+    end
+
+    # Handle RFC 2822
+    def handle_rfc2822(tokens, text = "", **options)
+      t = Time.parse_rfc2822(text)
+      SecSpan.new(t, t + 1.second)
+    end
+    
     # Handle generic timestamp
     def handle_generic(tokens, text = "", **options)
-      p! text
+      p! ["generic!!", text]
       # guaranteed to not work since Crystal Time.parse way diff than ruby Time.parse
       t = Time.parse!(text, "%Y-%m-%d")
       SecSpan.new(t, t + 1.second)
@@ -459,7 +492,7 @@ module Cronic
     def handle_srp(tokens, span : SecSpan, **options)
       distance = tokens[0].get_tag(Scalar).as(Scalar).type.as(Int32)
       repeater = tokens[1].get_tag(Repeater).as(Repeater)
-      pointer = tokens[2].get_tag(Pointer).as(Pointer).type.as(Int32)
+      pointer = tokens[2].get_tag(Pointer).as(Pointer).type
 
       repeater.offset(span, distance, pointer) if repeater.responds_to?(:offset)
     end
@@ -496,19 +529,24 @@ module Cronic
 
     # narrows
 
-    # Handle oridinal repeaters
+    # Handle ordinal repeaters
     def handle_orr(tokens, outer_span, **options)
+
+      ordinal = tokens[0].get_tag(Ordinal).as(Ordinal).type
       repeater = tokens[1].get_tag(Repeater).as(Repeater)
       repeater.start = outer_span.as(SecSpan).begin - 1.second
-      ordinal = tokens[0].get_tag(Ordinal).as(Ordinal).type
+
+
+      p "ORR!! #{ordinal} #{repeater}"
       span = nil
 
       ordinal.as(Int32).times do
         span = repeater.next(:future).as(SecSpan)
-
+        p! [span, outer_span]
         if span.begin >= outer_span.as(SecSpan).end
-          span = nil
-          break
+          raise Cronic::InvalidParseError.new("Cannot find Date/Time in span #{outer_span.inspect}")
+          #span = nil
+          #break
         end
       end
 

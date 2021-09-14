@@ -36,7 +36,7 @@ module Cronic
     end
     
     def initialize(time, width = nil, @hours24 : Bool? = nil, **kwargs)
-      @type = :badness
+      @type = :time
       @current_time = nil
       @now = Time.local
       time_parts = time.split(":")
@@ -72,7 +72,7 @@ module Cronic
       subseconds = time_parts[3].to_f / (10 ** time_parts[3].size) if time_parts.size > 3
 
       @tagtype = Tick.new(hours + minutes + seconds + subseconds, ambiguous)
-    end
+       end
 
     def update_current_time(pointer)
         half_day = 12.hours
