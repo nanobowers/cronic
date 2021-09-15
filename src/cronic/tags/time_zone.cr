@@ -33,7 +33,6 @@ module Cronic
                    else raise Exception.new("bad zone #{mat["zone"]}") ; end
           daylight = mat["daystd"].downcase == "d"
           offset += 3600 if daylight
-          pp [offset, mat["zone"], daylight]
           token.tag( TimeZone.new( Time::Location::Zone.new(zonename, offset, dst: daylight)))
         elsif token.word =~ /utc/i
           token.tag( TimeZone.new( Time::Location::Zone::UTC))

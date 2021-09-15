@@ -20,8 +20,8 @@ module Cronic
       @time.to_s + (@ambiguous ? "?" : "")
     end
 
-    def timespan
-      Time::Span.new(seconds: @time.to_i)
+    def timespan : Time::Span
+      @time.seconds
     end
   end
 

@@ -340,18 +340,33 @@ module Cronic
       ]
       
       ## ANCHORS
-      anchor_defs = [
-      {match: Sequence.new([maybe(SeparatorOn), maybe(Grabber), Repeater, maybe(SeparatorAt), maybe(Repeater), maybe(Repeater)]), proc: ->(toks : Array(Token)){ handle_r(toks, **opts) }},
-      {match: Sequence.new([maybe(Grabber), Repeater, Repeater, maybe(Separator), maybe(Repeater), maybe(Repeater)]), proc: ->(toks : Array(Token)){ handle_r(toks, **opts) }},
-      {match: Sequence.new([Repeater, Grabber, Repeater]), proc: ->(toks : Array(Token)){ handle_r_g_r(toks, **opts) }},
+      anchor1 = [maybe(SeparatorOn), maybe(Grabber), Repeater, maybe(SeparatorAt), maybe(Repeater), maybe(Repeater)]
+      anchor2 = [maybe(Grabber), Repeater, Repeater, maybe(Separator), maybe(Repeater), maybe(Repeater)]
+      anchor3 = [Repeater, Grabber, Repeater]
+      anchor_defs = [ 
+      
+      {match: Sequence.new(anchor1), proc: ->(toks : Array(Token)){ handle_r(toks, **opts) }},
+      {match: Sequence.new(anchor2), proc: ->(toks : Array(Token)){ handle_r(toks, **opts) }},
+      {match: Sequence.new(anchor3), proc: ->(toks : Array(Token)){ handle_r_g_r(toks, **opts) }},
       ]
+
+      sr_and_srp_at = [Scalar, Repeater, maybe(SeparatorAnd), Scalar, Repeater, Pointer, maybe(SeparatorAt)]
       
       arrow_defs = [
       {match: Sequence.new([RepeaterMonthName, Scalar, Repeater, Pointer]), proc: ->(toks : Array(Token)){ handle_rmn_s_r_p(toks, **opts) }},
       {match: Sequence.new([Scalar, Repeater, Pointer]), proc: ->(toks : Array(Token)){ handle_s_r_p(toks, **opts) }},
-#      {match: Sequence.new([Scalar, Repeater, maybe(SeparatorAnd), Scalar, Repeater, Pointer, maybe(SeparatorAt), Anchor]), proc: ->(toks : Array(Token)){ handle_s_r_a_s_r_p_a(toks, **opts) }},
+      # {match: Sequence.new([Scalar, Repeater, maybe(SeparatorAnd), Scalar, Repeater, Pointer, maybe(SeparatorAt), Anchor]), proc: ->(toks : Array(Token)){ handle_s_r_a_s_r_p_a(toks, **opts) }},
+      {match: Sequence.new( sr_and_srp_at + anchor1), proc: ->(toks : Array(Token)){ handle_s_r_a_s_r_p_a(toks, **opts) }},
+      {match: Sequence.new( sr_and_srp_at + anchor2), proc: ->(toks : Array(Token)){ handle_s_r_a_s_r_p_a(toks, **opts) }},
+      {match: Sequence.new( sr_and_srp_at + anchor3), proc: ->(toks : Array(Token)){ handle_s_r_a_s_r_p_a(toks, **opts) }},
+      
       {match: Sequence.new([Pointer, Scalar, Repeater]), proc: ->(toks : Array(Token)){ handle_p_s_r(toks, **opts) }},
-      #      {match: Sequence.new([Scalar, Repeater, Pointer, maybe(SeparatorAt), Anchor]), proc: ->(toks : Array(Token)){ handle_s_r_p_a(toks, **opts) }},
+
+      # {match: Sequence.new([Scalar, Repeater, Pointer, maybe(SeparatorAt), Anchor]), proc: ->(toks : Array(Token)){ handle_s_r_p_a(toks, **opts) }},
+      {match: Sequence.new([Scalar, Repeater, Pointer, maybe(SeparatorAt), *anchor1]), proc: ->(toks : Array(Token)){ handle_s_r_p_a(toks, **opts) }},
+      {match: Sequence.new([Scalar, Repeater, Pointer, maybe(SeparatorAt), *anchor2]), proc: ->(toks : Array(Token)){ handle_s_r_p_a(toks, **opts) }},
+      {match: Sequence.new([Scalar, Repeater, Pointer, maybe(SeparatorAt), *anchor3]), proc: ->(toks : Array(Token)){ handle_s_r_p_a(toks, **opts) }},
+      
       ]
       
       narrow_defs = [

@@ -11,7 +11,7 @@ module Cronic
 
     def start=(time)
       super
-      @current_day_start = time
+      @current_day_start = Time.local(time.year, time.month, time.day)
     end
     
     def next(pointer)
@@ -19,7 +19,6 @@ module Cronic
 
       direction = (pointer == :future) ? 1 : -1
       @current_day_start += Time::Span.new(days: direction)
-
       SecSpan.new(@current_day_start, @current_day_start + 1.day)
     end
 
@@ -43,7 +42,7 @@ module Cronic
 
     def offset(span : SecSpan, amount : Int32, pointer)
       direction = pointer == :future ? 1 : -1
-      span + (direction * amount).days #  * DAY_SECONDS
+      span + (direction * amount).days
     end
 
     def width

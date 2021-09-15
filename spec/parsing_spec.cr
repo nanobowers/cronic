@@ -98,8 +98,7 @@ describe Cronic::Parser do
     end
     it "handles nanoseconds" do
       time = parse_now("may 28 at 5:32:19.764")
-      #time.should be_close(Time.local(2007, 5, 28, 17, 32, 19, 764000), 0.001)
-      reftime = Time.local(2007, 5, 28, 17, 32, 19, nanosecond: 764000)
+      reftime = Time.local(2007, 5, 28, 17, 32, 19, nanosecond: 764000000)
       (time - reftime).abs.to_f.should be_close(0, 0.001)
     end
   end
@@ -312,6 +311,7 @@ describe Cronic::Parser do
       time.should eq Time.local(1979, 3, 30, 4, 30)
     end
   end
+  
   describe "OrdinalDay-RepeaterMonthName-ScalarYear" do
     it "parses with a longyear" do
     time = parse_now("22nd February 2012")
@@ -322,7 +322,8 @@ describe Cronic::Parser do
     time.should eq Time.local(1979, 12, 11, 12)
     end
   end
-  it("handle sd rmn sy") do
+  
+  it "handle sd rmn sy" do
     time = parse_now("3 jan 2010")
     time.should eq Time.local(2010, 1, 3, 12)
     time = parse_now("3 jan 2010 4pm")
@@ -336,7 +337,7 @@ describe Cronic::Parser do
     time = parse_now("3 jan 10", endian_precedence: [:middle])
     time.should eq Time.local(2010, 1, 3, 12)
   end
-  it("handle sm sd sy") do
+  it "handle sm sd sy" do
     time = parse_now("5/27/1979")
     time.should eq Time.local(1979, 5, 27, 12)
     time = parse_now("5/27/1979 4am")
@@ -347,12 +348,17 @@ describe Cronic::Parser do
     time.should eq Time.local(2011, 12, 7, 12)
     time = parse_now("9/19/2011 6:05:57 PM")
     time.should eq Time.local(2011, 9, 19, 18, 5, 57)
-    time = parse_now("30/2/2000")
-    time.should be_nil
+    expect_raises(Cronic::UnknownParseError) {
+      time = parse_now("30/2/2000")
+      time.should be_nil
+    }
+  end
+  it "handles something like rfc3339 but not really" do
     time = parse_now("2013-03-12 17:00", context: :past)
     time.should eq Time.local(2013, 3, 12, 17, 0, 0)
   end
-  it("handle sd sm sy") do
+  
+  it "handle sd sm sy" do
     time = parse_now("27/5/1979")
     time.should eq Time.local(1979, 5, 27, 12)
     time = parse_now("27/5/1979 @ 0700")
@@ -384,7 +390,7 @@ describe Cronic::Parser do
     time = parse_now("2006-08-20 15:30.30")
     time.should eq Time.local(2006, 8, 20, 15, 30, 30)
     time = parse_now("2006-08-20 15:30:30:000536")
-    reftime = Time.local(2006, 8, 20, 15, 30, 30, nanosecond: 536)
+    reftime = Time.local(2006, 8, 20, 15, 30, 30, nanosecond: 536000)
     (time-reftime).abs.to_f.should be_close(0.0 , 1.0e-06)
     time = parse_now("1902-08-20")
     time.should eq Time.local(1902, 8, 20, 12, 0, 0)
@@ -495,72 +501,76 @@ describe Cronic::Parser do
       parse_now("10th wednesday in november")
     }
   end
-  it("handle o r g r") do
-    time = parse_now_span("3rd month next year")
-    time.begin.should eq Time.local(2007, 3, 1)
-    time = parse_now("3rd thursday this september")
-    time.should eq Time.local(2006, 9, 21, 12)
-    now = Time.parse("01/10/2010", "%d/%m/%Y", Time::Location::UTC)
-    time = Cronic.parse("3rd thursday this november", now: now)
-    time.should eq Time.local(2010, 11, 18, 12)
-    time = parse_now("4th day last week")
-    time.should eq Time.local(2006, 8, 9, 12)
-  end
-  it("handle sm rmn sy") do
+  it "parses ScalarMonth-RepeaterMonthName-ScalarYear(2-digit)" do
     time = parse_now("30-Mar-11")
     time.should eq Time.local(2011, 3, 30, 12)
     time = parse_now("31-Aug-12")
     time.should eq Time.local(2012, 8, 31)
   end
-  it("parse guess r") do
-    time = parse_now("friday")
-    time.should eq Time.local(2006, 8, 18, 12)
-    time = parse_now("tue")
-    time.should eq Time.local(2006, 8, 22, 12)
-    time = parse_now("5")
-    time.should eq Time.local(2006, 8, 16, 17)
-    time = Cronic.parse("5", now: Time.local(2006, 8, 16, 3, 0, 0), ambiguous_time_range: :none)
-    time.should eq Time.local(2006, 8, 16, 5)
-    time = parse_now("13:00")
-    time.should eq Time.local(2006, 8, 17, 13)
-    time = parse_now("13:45")
-    time.should eq Time.local(2006, 8, 17, 13, 45)
-    time = parse_now("1:01pm")
-    time.should eq Time.local(2006, 8, 16, 13, 1)
-    time = parse_now("2:01pm")
-    time.should eq Time.local(2006, 8, 16, 14, 1)
-    time = parse_now("november")
-    time.should eq Time.local(2006, 11, 16)
+
+  describe "single Repeater" do
+    it "parses a DayName" do
+      time = parse_now("friday")
+      time.should eq Time.local(2006, 8, 18, 12)
+      time = parse_now("tue")
+      time.should eq Time.local(2006, 8, 22, 12)
+    end
+    it "parses an hour" do
+      time = parse_now("5")
+      time.should eq Time.local(2006, 8, 16, 17)
+      time = Cronic.parse("5", now: Time.local(2006, 8, 16, 3, 0, 0), ambiguous_time_range: :none)
+      time.should eq Time.local(2006, 8, 16, 5)
+    end
+    it "parses a time within a day" do
+      time = parse_now("13:00")
+      time.should eq Time.local(2006, 8, 17, 13)
+      time = parse_now("13:45")
+      time.should eq Time.local(2006, 8, 17, 13, 45)
+      time = parse_now("1:01pm")
+      time.should eq Time.local(2006, 8, 16, 13, 1)
+      time = parse_now("2:01pm")
+      time.should eq Time.local(2006, 8, 16, 14, 1)
+    end
+    it "parses a month" do
+      time = parse_now("november")
+      time.should eq Time.local(2006, 11, 16)
+    end
   end
-  it("parse guess rr") do
-    time = parse_now("friday 13:00")
-    time.should eq Time.local(2006, 8, 18, 13)
-    time = parse_now("monday 4:00")
-    time.should eq Time.local(2006, 8, 21, 16)
-    time = parse_now("sat 4:00", ambiguous_time_range: :none)
-    time.should eq Time.local(2006, 8, 19, 4)
-    time = parse_now("sunday 4:20", ambiguous_time_range: :none)
-    time.should eq Time.local(2006, 8, 20, 4, 20)
-    time = parse_now("4 pm")
-    time.should eq Time.local(2006, 8, 16, 16)
-    time = parse_now("4 am", ambiguous_time_range: :none)
-    time.should eq Time.local(2006, 8, 16, 4)
-    time = parse_now("12 pm")
-    time.should eq Time.local(2006, 8, 16, 12)
-    time = parse_now("12:01 pm")
-    time.should eq Time.local(2006, 8, 16, 12, 1)
-    time = parse_now("12:01 am")
-    time.should eq Time.local(2006, 8, 16, 0, 1)
-    time = parse_now("12 am")
-    time.should eq Time.local(2006, 8, 16)
-    time = parse_now("4:00 in the morning")
-    time.should eq Time.local(2006, 8, 16, 4)
-    time = parse_now("0:10")
-    time.should eq Time.local(2006, 8, 17, 0, 10)
-    time = parse_now("november 4")
-    time.should eq Time.local(2006, 11, 4, 12)
-    time = parse_now("aug 24")
-    time.should eq Time.local(2006, 8, 24, 12)
+  describe "double Repeater" do
+    it "parses day and time" do
+      time = parse_now("friday 13:00")
+      time.should eq Time.local(2006, 8, 18, 13)
+      time = parse_now("monday 4:00")
+      time.should eq Time.local(2006, 8, 21, 16)
+      time = parse_now("sat 4:00", ambiguous_time_range: :none)
+      time.should eq Time.local(2006, 8, 19, 4)
+      time = parse_now("sunday 4:20", ambiguous_time_range: :none)
+      time.should eq Time.local(2006, 8, 20, 4, 20)
+    end
+    it "parses time with am/pm" do
+      time = parse_now("4 pm")
+      time.should eq Time.local(2006, 8, 16, 16)
+      time = parse_now("4 am", ambiguous_time_range: :none)
+      time.should eq Time.local(2006, 8, 16, 4)
+      time = parse_now("12 pm")
+      time.should eq Time.local(2006, 8, 16, 12)
+      time = parse_now("12:01 pm")
+      time.should eq Time.local(2006, 8, 16, 12, 1)
+      time = parse_now("12:01 am")
+      time.should eq Time.local(2006, 8, 16, 0, 1)
+      time = parse_now("12 am")
+      time.should eq Time.local(2006, 8, 16)
+      time = parse_now("4:00 in the morning")
+      time.should eq Time.local(2006, 8, 16, 4)
+      time = parse_now("0:10")
+      time.should eq Time.local(2006, 8, 17, 0, 10)
+    end
+    it "parses month and day" do
+      time = parse_now("november 4")
+      time.should eq Time.local(2006, 11, 4, 12)
+      time = parse_now("aug 24")
+      time.should eq Time.local(2006, 8, 24, 12)
+    end
   end
   it("parse guess rrr") do
     time = parse_now("friday 1 pm")
@@ -744,6 +754,7 @@ describe Cronic::Parser do
     time = parse_now("sunday at 8:15pm", context: :past)
     time.should eq Time.local(2006, 8, 13, 20, 15)
   end
+
   it("parse guess rgr") do
     time = parse_now("afternoon yesterday")
     time.should eq Time.local(2006, 8, 15, 15)
@@ -790,6 +801,7 @@ describe Cronic::Parser do
       time = parse_now("20 seconds before now")
       time.should eq Time.local(2006, 8, 16, 13, 59, 40)
     end
+
     it "parses from now" do
       time = parse_now("3 years from now")
       time.should eq Time.local(2009, 8, 16, 14, 0, 0)
@@ -804,6 +816,7 @@ describe Cronic::Parser do
       time = parse_now("20 seconds from now")
       time.should eq Time.local(2006, 8, 16, 14, 0, 20)
     end
+    
     it "parses hence" do
       time = parse_now("6 months hence")
       time.should eq Time.local(2007, 2, 16, 14)
@@ -816,6 +829,7 @@ describe Cronic::Parser do
       time = parse_now("20 minutes hence")
       time.should eq Time.local(2006, 8, 16, 14, 20)
     end
+    
     it "parses more complex clauses" do
       time = Cronic.parse("2 months ago", now: Time.parse("2007-03-07 23:30", "%Y-%m-%d %H:%M", Time::Location::UTC))
       time.should eq Time.local(2007, 1, 7, 23, 30)

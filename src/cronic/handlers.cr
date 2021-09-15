@@ -167,7 +167,7 @@ module Cronic
 
 
     # timestamp similar to rfc3339 but without trailing timezone
-    def handle_rfc3339_no_tz(tokens, text = "", **options)
+    def xxhandle_rfc3339_no_tz(tokens, text = "", **options) 
       date = tokens[0].word + "-" + tokens[1].word + "-" + tokens[2].word
       # time (incl subseconds) is separated by ":", so fix to "." for subseconds
       timetoks = tokens[3].word.split(":")
@@ -181,7 +181,18 @@ module Cronic
       SecSpan.new(t, t + 1.second)
     end
 
+    # Actually SY-SM-SD-RT
+    def handle_rfc3339_no_tz(tokens, text = "", **options)
+      year = tokens[0].get_tag(ScalarYear).as(ScalarYear).type.as(Int32)
+      month = tokens[1].get_tag(ScalarMonth).as(ScalarMonth).type.as(Int32)
+      day = tokens[2].get_tag(ScalarDay).as(ScalarDay).type.as(Int32)
+      timesecs = tokens[3].get_tag(RepeaterTime).as(RepeaterTime).tagtype.as(Tick).timespan
+      p timesecs
+      t = Time.local(year, month, day) + timesecs
+      SecSpan.new(t, t + 1.second)
+    end
 
+    
     def handle_rdn_rmn_sd_t_tz_sy(tokens, text = "", **opts)
       year = tokens[5].get_tag(ScalarYear).as(ScalarYear).type.as(Int32)
       month = tokens[1].get_tag(RepeaterMonthName).as(RepeaterMonthName).index
@@ -543,8 +554,8 @@ module Cronic
     def handle_s_r_a_s_r_p_a(tokens, **options)
       anchor_span = get_anchor(tokens[4..tokens.size - 1], **options)
 
-      span = handle_srp(tokens[0..1]+tokens[4..6], anchor_span, **options)
-      handle_srp(tokens[2..3]+tokens[4..6], span, **options)
+      span = handle_srp(tokens[0..1]+tokens[4..6], anchor_span.as(SecSpan), **options)
+      handle_srp(tokens[2..3]+tokens[4..6], span.as(SecSpan), **options)
     end
 
     # narrows
@@ -557,7 +568,7 @@ module Cronic
       repeater.start = outer_span.as(SecSpan).begin - 1.second
 
 
-      p "ORR!! #{ordinal} #{repeater}"
+      p "O/R/R!! #{ordinal} #{repeater}"
       span = nil
 
       ordinal.as(Int32).times do

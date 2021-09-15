@@ -15,7 +15,6 @@ module Cronic
       direction = (pointer == :future) ? 1 : -1
 
       if @current_date.nil?
-        p "moving some arbitrary amt"
         @current_date = ::Time.local(@now.year, @now.month, @now.day) + direction.days
 
         day_of_the_week = symbol_to_day_of_the_week(@type)
@@ -23,13 +22,10 @@ module Cronic
         while @current_date.as(Time).day_of_week != day_of_the_week
           @current_date = @current_date.as(Time) + direction.days
         end
-        p "cd: #{@current_date}"
-        p "cd: #{@current_date.as(Time).to_unix}"
       else
-        # move by a week
-        p "moving by a week"
+        # move by a week.. This gets a bit wonky around daylight savings time
+        # where adding 7 days sometimes adds only 6 days & 23hrs but switches timezones
         @current_date = @current_date.as(Time) + (direction * 7).days
-        p "cd: #{@current_date}"
       end
       cdate = @current_date.as(Time)
       next_date = cdate + 1.day
