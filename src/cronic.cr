@@ -1,8 +1,12 @@
 require "number_parser" # aka numerizer
 
 module Cronic
-  # Raised when we try to parse an invalid date or time
+  # Raised when we try to parse an invalid date or time, mostly because
+  # a certain span was exceeded.  e.g. "10th tuesday in january"
   class InvalidParseError < Exception
+  end
+  # Raised when we try to parse an unknown string
+  class UnknownParseError < Exception
   end
 end
 

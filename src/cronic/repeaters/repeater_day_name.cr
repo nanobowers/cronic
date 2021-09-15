@@ -15,18 +15,24 @@ module Cronic
       direction = (pointer == :future) ? 1 : -1
 
       if @current_date.nil?
-        @current_date = ::Time.local(@now.year, @now.month, @now.day) + ::Time::Span.new(days: direction)
+        p "moving some arbitrary amt"
+        @current_date = ::Time.local(@now.year, @now.month, @now.day) + direction.days
 
         day_of_the_week = symbol_to_day_of_the_week(@type)
         
-        while @current_date.as(::Time).day_of_week != day_of_the_week
-          @current_date = @current_date.as(::Time) + ::Time::Span.new(days: direction)
+        while @current_date.as(Time).day_of_week != day_of_the_week
+          @current_date = @current_date.as(Time) + direction.days
         end
+        p "cd: #{@current_date}"
+        p "cd: #{@current_date.as(Time).to_unix}"
       else
-        @current_date = @current_date.as(::Time) + ::Time::Span.new(days: direction * 7)
+        # move by a week
+        p "moving by a week"
+        @current_date = @current_date.as(Time) + (direction * 7).days
+        p "cd: #{@current_date}"
       end
-      cdate = @current_date.as(::Time)
-      next_date = cdate + ::Time::Span.new(days: 1)
+      cdate = @current_date.as(Time)
+      next_date = cdate + 1.day
       
       SecSpan.new(Cronic.construct(cdate.year, cdate.month, cdate.day), Cronic.construct(next_date.year, next_date.month, next_date.day))
     end

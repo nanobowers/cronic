@@ -160,21 +160,35 @@ module Cronic
       # query timezone format from tag
       tz = tokens[4].get_tag(TimeZone).as(TimeZone).zone.format
       newtext = date + "T" + time + tz
-      #p ["full-rfc3339!!", text, newtext]
+      p ["full-rfc3339!!", text, newtext]
       t = Time.parse_rfc3339(newtext)
       SecSpan.new(t, t + 1.second)
     end
 
+
     # timestamp similar to rfc3339 but without trailing timezone
     def handle_rfc3339_no_tz(tokens, text = "", **options)
-      p ["part-rfc3339!!", text]
-      t = Time.parse(text, "%Y-%m-%dT%H:%M:%S", Time::Location.local)
+      date = tokens[0].word + "-" + tokens[1].word + "-" + tokens[2].word
+      # time (incl subseconds) is separated by ":", so fix to "." for subseconds
+      timetoks = tokens[3].word.split(":")
+      newtext = date + "T" + tokens[3].word
+      t = if timetoks.size == 4
+            Time.parse(newtext, "%Y-%m-%dT%H:%M:%S:%N", Time::Location.local)
+          else
+            Time.parse(newtext, "%Y-%m-%dT%H:%M:%S", Time::Location.local)
+          end
+      p ["part-rfc3339!!", text, newtext]
       SecSpan.new(t, t + 1.second)
     end
 
-    # Handle RFC 2822
-    def handle_rfc2822(tokens, text = "", **options)
-      t = Time.parse_rfc2822(text)
+
+    def handle_rdn_rmn_sd_t_tz_sy(tokens, text = "", **opts)
+      year = tokens[5].get_tag(ScalarYear).as(ScalarYear).type.as(Int32)
+      month = tokens[1].get_tag(RepeaterMonthName).as(RepeaterMonthName).index
+      day = tokens[2].get_tag(ScalarDay).as(ScalarDay).type.as(Int32)
+      timesecs = tokens[3].get_tag(RepeaterTime).as(RepeaterTime).tagtype.as(Tick).timespan
+      tz = tokens[4].get_tag(TimeZone).as(TimeZone).zone
+      t = Time.utc(year, month, day) + timesecs - tz.offset.seconds
       SecSpan.new(t, t + 1.second)
     end
     
@@ -190,6 +204,12 @@ module Cronic
       raise e unless e.message =~ /out of range/
     end
 
+    def handle_ordday(tokens, text = "", **options)
+      day_num = tokens[0].get_tag(OrdinalDay).as(OrdinalDay).type.as(Int32)
+      t = Time.local(Time.local.year, Time.local.month, day_num)
+      SecSpan.new(t, t + 1.second)
+    end
+    
     # Handle repeater-month-name/scalar-day/scalar-year
     def handle_rmn_sd_sy(tokens, **options)
       month = tokens[0].get_tag(RepeaterMonthName).as(RepeaterMonthName).index

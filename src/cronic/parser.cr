@@ -118,11 +118,25 @@ module Cronic
     # Returns a new String ready for Cronic to parse.
     def pre_normalize(text)
       text = text.to_s.downcase
+
+
       text = text.gsub(/\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/, "\\3 / \\2 / \\1")
+
+      # a.m, p.m. => am, pm
       text = text.gsub(/\b([ap])\.m\.?/, "\\1m")
 
-      text = text.gsub(/t ( \d{2}:\d{2}:\d{2} (?:\.\d+)? )/xi, " \\1 ") # separate out T##:##:## ala rfc3339
+      text = text.gsub(/t ( \d{2}:\d{2}:\d{2} (?:\.\d+)? ) (\S*) /xi) {
+        ttime, zone = $1, $2
+        # separate out T##:##:## ala rfc3339.  Convert "Z" to UTC
+        fixzone = case zone
+                  when "z", "Z" then "utc"
+                  else zone
+                  end
+        " #{ttime} " + fixzone
+      }
+
       text = text.gsub(/(\s+|:\d{2}|:\d{2}\.\d+)\-(\d{2}:?\d{2})\b/, "\\1tzminus\\2")
+      text = text.gsub(/(\s+|:\d{2}|:\d{2}\.\d+)Z\b/, "\\1 utc")
       text = text.gsub(/\./, ":")
       text = text.gsub(/([ap]):m:?/, "\\1m")
       text = text.gsub(/'(\d{2})\b/) do
@@ -169,7 +183,7 @@ module Cronic
 
       # improperly formatted -0100, +0500 tz adjusts
       text = text.gsub(/([+-]) (0[0-9]|1[0-2]) (\d{2})/x, " \\1\\2:\\3")
-
+      p! text
       text
     end
 
@@ -287,7 +301,7 @@ module Cronic
         {match: Sequence.new( [ScalarYear, SeparatorDash, ScalarMonth, SeparatorDash, ScalarDay, RepeaterTime] ), proc: ->(toks : Array(Token)){ handle_rfc3339_no_tz(toks, **opts) }},
 
       
-      {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay, RepeaterTime, ormaybe(SeparatorSlash,SeparatorDash), TimeZone, ScalarYear]), proc: ->(toks : Array(Token)){ handle_rfc2822(toks, **opts) }},
+      {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay, RepeaterTime, ormaybe(SeparatorSlash,SeparatorDash), TimeZone, ScalarYear]), proc: ->(toks : Array(Token)){ handle_rdn_rmn_sd_t_tz_sy(toks, **opts) }},
       {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay, ScalarYear]), proc: ->(toks : Array(Token)){ handle_rdn_rmn_sd_sy(toks, **opts) }},
       {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay]), proc: ->(toks : Array(Token)){ handle_rdn_rmn_sd(toks, **opts) }},
 
@@ -298,7 +312,7 @@ module Cronic
       {match: Sequence.new([RepeaterDayName, RepeaterMonthName, OrdinalDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)){ handle_rdn_rmn_od(toks, **opts) }},
       {match: Sequence.new([RepeaterDayName, OrdinalDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)){ handle_rdn_od(toks, **opts) }},
       {match: Sequence.new([ScalarYear, slashdash, ScalarMonth, slashdash, ScalarDay, RepeaterTime, TimeZone]), proc: ->(toks : Array(Token)){ handle_generic(toks, **opts) }},
-      {match: Sequence.new([OrdinalDay]), proc: ->(toks : Array(Token)){ handle_generic(toks, **opts) }},
+      {match: Sequence.new([OrdinalDay]), proc: ->(toks : Array(Token)){ handle_ordday(toks, **opts) }},
       {match: Sequence.new([RepeaterMonthName, ScalarDay, ScalarYear]), proc: ->(toks : Array(Token)){ handle_rmn_sd_sy(toks, **opts) }},
       {match: Sequence.new([RepeaterMonthName, OrdinalDay, ScalarYear]), proc: ->(toks : Array(Token)){ handle_rmn_od_sy(toks, **opts) }},
       {match: Sequence.new([RepeaterMonthName, ScalarDay, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)){ handle_rmn_sd_sy(toks, **opts) }},
@@ -384,7 +398,7 @@ module Cronic
       if span.is_a?(SecSpan)
         return span
       else
-        raise Exception.new("Failed to match tokens against any known patterns")
+        raise UnknownParseError.new("Failed to match tokens against any known patterns")
       end
 #      
 #      (definitions["endian"] + definitions["date"]).each do |handler|

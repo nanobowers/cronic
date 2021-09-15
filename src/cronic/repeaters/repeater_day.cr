@@ -9,6 +9,11 @@ module Cronic
       @current_day_start = Time.local(@now.year, @now.month, @now.day)
     end
 
+    def start=(time)
+      super
+      @current_day_start = time
+    end
+    
     def next(pointer)
       super
 
