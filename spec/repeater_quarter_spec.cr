@@ -16,7 +16,7 @@ describe Cronic::RepeaterQuarter do
   it("this") do
     quarter = Cronic::RepeaterQuarter.new(:quarter)
     quarter.start = now_time
-    time = quarter.this
+    time = quarter.this(nil)
     time.begin.should eq Time.local(2006, 7, 1)
     time.end.should eq Time.local(2006, 10, 1)
   end

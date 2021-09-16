@@ -623,16 +623,13 @@ module Cronic
       head = repeaters.shift
       head.start = self.now
 
-      p! grabber.type
       case grabber.type
       when :last
         outer_span = head.next(:past)
       when :this
         if (context != :past) && (repeaters.size > 0)
-          p :z1
           outer_span = head.this(:none)
         else
-          p! context
           outer_span = head.this(context)
         end
       when :next

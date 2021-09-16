@@ -82,16 +82,16 @@ module Cronic
     #
     # Returns a new Repeater object.
     def self.scan_for_day_names(token, **kwargs)
-      scan_for token, RepeaterDayName,
-      {
-        /^m[ou]n(day)?$/ => :monday,
-        /^t(ue|eu|oo|u)s?(day)?$/ => :tuesday,
-        /^we(d|dnes|nds|nns)(day)?$/ => :wednesday,
-        /^th(u|ur|urs|ers)(day)?$/ => :thursday,
-        /^fr[iy](day)?$/ => :friday,
-        /^sat(t?[ue]rday)?$/ => :saturday,
-        /^su[nm](day)?$/ => :sunday
-      }, **kwargs
+      case token.word
+      when /^m[ou]n(day)?$/ then RepeaterDayName.new(Time::DayOfWeek::Monday)
+      when /^t(ue|eu|oo|u)s?(day)?$/ then RepeaterDayName.new(Time::DayOfWeek::Tuesday)
+      when /^we(d|dnes|nds|nns)(day)?$/ then RepeaterDayName.new(Time::DayOfWeek::Wednesday)
+      when /^th(u|ur|urs|ers)(day)?$/ then RepeaterDayName.new(Time::DayOfWeek::Thursday)
+      when /^fr[iy](day)?$/ then RepeaterDayName.new(Time::DayOfWeek::Friday)
+      when /^sat(t?[ue]rday)?$/ then RepeaterDayName.new(Time::DayOfWeek::Saturday)
+      when /^su[nm](day)?$/ then RepeaterDayName.new(Time::DayOfWeek::Sunday)
+      else nil
+      end
     end
 
     # token - The Token object we want to scan.

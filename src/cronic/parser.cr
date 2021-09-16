@@ -72,7 +72,7 @@ module Cronic
       tokens = tokenize(text, context: @context,
                         now: @now,
                         hours24: @hours24,
-                        #week_start: @week_start,
+                        week_start: @week_start,
                         ambiguous_time_range: @ambiguous_time_range,
                         endian_precedence: @endian_precedence,
                         ambiguous_year_future_bias: @ambiguous_year_future_bias,
@@ -81,7 +81,6 @@ module Cronic
                             context: @context,
                             now: @now,
                             hours24: @hours24,
-                            #week_start: @week_start,
                             ambiguous_time_range: @ambiguous_time_range,
                             endian_precedence: @endian_precedence,
                             ambiguous_year_future_bias: @ambiguous_year_future_bias,
@@ -154,7 +153,8 @@ module Cronic
       text = text.gsub(/\bthird quarter\b/, "3rd q")
       text = text.gsub(/\bfourth quarter\b/, "4th q")
       text = text.gsub(/quarters?(\s+|$)(?!to|till|past|after|before)/, "q\\1")
-      text = NumberParser.parse(text)
+
+      text = NumberParser.parse(text, bias: :ordinal, ignore: ["second", "quarter", "half"])
       text = text.gsub(/\b(\d)(?:st|nd|rd|th)\s+q\b/, "q\\1")
       text = text.gsub(/([\/\-\,\@])/) { " " + $1 + " " }
       text = text.gsub(/(?:^|\s)0(\d+:\d+\s*pm?\b)/, " \\1")

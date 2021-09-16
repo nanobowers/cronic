@@ -10,11 +10,11 @@ describe Cronic::RepeaterDayName do
     token = Cronic::Token.new("saturday")
     repeater = Cronic::Repeater.scan_for_day_names(token)
     repeater.class.should eq Cronic::RepeaterDayName
-    repeater.try(&.type).should eq :saturday
+    repeater.try(&.day).should eq Time::DayOfWeek::Saturday
     token = Cronic::Token.new("sunday")
     repeater = Cronic::Repeater.scan_for_day_names(token)
     repeater.class.should eq Cronic::RepeaterDayName
-    repeater.try(&.type).should eq :sunday
+    repeater.try(&.day).should eq Time::DayOfWeek::Sunday
   end
   it("next future") do
     mondays = Cronic::RepeaterDayName.new(:monday)
