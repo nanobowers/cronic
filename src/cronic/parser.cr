@@ -409,11 +409,11 @@ module Cronic
         end
       end
       
-      
       if span.is_a?(SecSpan)
         return span
       else
-        raise UnknownParseError.new("Failed to match tokens against any known patterns")
+        
+        raise UnknownParseError.new("Failed to match tokens against any known patterns #{tokens.map(&.to_s)}")
       end
 #      
 #      (definitions["endian"] + definitions["date"]).each do |handler|

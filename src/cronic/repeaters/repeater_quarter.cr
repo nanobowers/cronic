@@ -11,7 +11,8 @@ module Cronic
       @current_span = offset_quarter(@current_span.as(SecSpan).begin, offset_quarter_amount)
     end
 
-    def this
+    # For some reason we do not use the context (:future/:past/:none)
+    def this(context : _)
       @current_span = quarter(@now)
     end
 
