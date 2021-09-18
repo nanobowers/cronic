@@ -32,7 +32,7 @@ module Cronic
       when :past
         day_begin = Cronic.construct(@now.year, @now.month, @now.day)
         day_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour)
-      else # when :none
+      else
         day_begin = Cronic.construct(@now.year, @now.month, @now.day)
         day_end = Cronic.construct(@now.year, @now.month, @now.day) + 1.day
       end

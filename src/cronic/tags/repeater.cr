@@ -113,7 +113,8 @@ module Cronic
     #
     # Returns a new Repeater object.
     def self.scan_for_times(token, **kwargs)
-      scan_for token, RepeaterTime, /^\d{1,2}(:?\d{1,2})?([\.:]?\d{1,2}([\.:]\d{1,6})?)?$/, **kwargs
+      # hour, min, seconds, and fractions of a second down to nanoseconds
+      scan_for token, RepeaterTime, /^\d{1,2}(:?\d{1,2})?([\.:]?\d{1,2}([\.:]\d{1,9})?)?$/, **kwargs
     end
 
     # token - The Token object we want to scan.

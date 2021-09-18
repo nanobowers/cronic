@@ -17,7 +17,7 @@ module Cronic
       direction = (pointer == :future) ? 1 : -1
 
       if @current_date.nil?
-        @current_date = ::Time.local(@now.year, @now.month, @now.day) + direction.days
+        @current_date = Time.local(@now.year, @now.month, @now.day) + direction.days
 
         while @current_date.as(Time).day_of_week != @day
           @current_date = @current_date.as(Time) + direction.days
@@ -25,12 +25,11 @@ module Cronic
       else
         # move by a week.. This gets a bit wonky around daylight savings time
         # where adding 7 days sometimes adds only 6 days & 23hrs but switches timezones
-        @current_date = @current_date.as(Time) + (direction * 7).days
+        @current_date = TimeUtil.add_days(@current_date.as(Time), direction*7)
       end
       cdate = @current_date.as(Time)
-      next_date = cdate + 1.day
-      
-      SecSpan.new(Cronic.construct(cdate.year, cdate.month, cdate.day), Cronic.construct(next_date.year, next_date.month, next_date.day))
+      ndate = TimeUtil.add_days(cdate, 1)
+      SecSpan.new(cdate, ndate)
     end
 
     def this(pointer = :future)

@@ -154,7 +154,13 @@ module Cronic
       text = text.gsub(/\bfourth quarter\b/, "4th q")
       text = text.gsub(/quarters?(\s+|$)(?!to|till|past|after|before)/, "q\\1")
 
-      text = NumberParser.parse(text, bias: :ordinal, ignore: ["second", "quarter", "half"])
+      # Before NumberParser so that half/quarter is not converted to "1/2" or "1/4"
+      text = text.gsub(/quarter (to|till|prior to|before)\b/, "15 minutes past")
+      text = text.gsub(/quarter (after|past)\b/, "15 minutes future")
+      text = text.gsub(/half (to|till|prior to|before)\b/, "30 minutes past")
+      text = text.gsub(/half (after|past)\b/, "30 minutes future")
+
+      text = NumberParser.parse(text, bias: :ordinal, ignore: ["second", "quarter"])
       text = text.gsub(/\b(\d)(?:st|nd|rd|th)\s+q\b/, "q\\1")
       text = text.gsub(/([\/\-\,\@])/) { " " + $1 + " " }
       text = text.gsub(/(?:^|\s)0(\d+:\d+\s*pm?\b)/, " \\1")
@@ -164,8 +170,7 @@ module Cronic
       text = text.gsub(/\bnoon|midday\b/, "12:00pm")
       text = text.gsub(/\bmidnight\b/, "24:00")
       text = text.gsub(/\bnow\b/, "this second")
-      text = text.gsub("quarter", "15")
-      text = text.gsub("half", "30")
+
       text = text.gsub(/(\d{1,2}) (to|till|prior to|before)\b/, "\\1 minutes past")
       text = text.gsub(/(\d{1,2}) (after|past)\b/, "\\1 minutes future")
       text = text.gsub(/\b(?:ago|before(?: now)?)\b/, "past")
@@ -190,7 +195,7 @@ module Cronic
     # Guess a specific time within the given `span`.
     def guess(span : SecSpan, mode : Guess = Guess::Middle) : Time
       if (span.width > 1) && (mode == Guess::Middle)
-        span.begin + Time::Span.new(seconds: span.width // 2)
+        span.middle
       elsif mode == Guess::End
         span.end
       else

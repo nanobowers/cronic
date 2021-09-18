@@ -43,5 +43,16 @@ module Cronic
       sign + hours + minutes
     end
 
+    # add days, with adjustment for timezone offset
+    # and daylight savings time when incrementing
+    def self.add_days(time : Time, num : Int32)
+      newtime = time + num.days
+      if newtime.zone != time.zone
+        diff = time.zone.offset - newtime.zone.offset
+        newtime = newtime + diff.seconds
+      end
+      newtime
+    end
+    
   end
 end

@@ -60,21 +60,12 @@ module Cronic
       super + "-year"
     end
 
-
-
     private def build_offset_time(time, amount, direction)
       year = time.year + (amount * direction)
-      days = month_days(year, time.month)
+      days = Date.days_in_month(year, time.month)
       day = time.day > days ? days : time.day
       Cronic.construct(year, time.month, day, time.hour, time.minute, time.second)
     end
 
-    private def month_days(year, month)
-      if ::Time.leap_year?(year)
-        RepeaterMonth::MONTH_DAYS_LEAP[month - 1]
-      else
-        RepeaterMonth::MONTH_DAYS[month - 1]
-      end
-    end
   end
 end

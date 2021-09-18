@@ -1,4 +1,4 @@
-arequire "spec"
+require "spec"
 require "../src/cronic"
 
 TIME_2006_08_16_14_00_00 = Time.local(2006, 8, 16, 14, 0, 0)
@@ -916,7 +916,7 @@ describe Cronic::Parser do
   it("parse words") do
     parse_now("thirty-three days from now").should eq parse_now("33 days from now")
     parse_now("two million eight hundred and sixty seven thousand five hundred and thirty two seconds from now").should eq parse_now("2867532 seconds from now")
-    #parse_now("may tenth").should eq parse_now("may 10th")
+    parse_now("may tenth").should eq parse_now("may 10th")
     parse_now("2nd monday in january").should eq parse_now("second monday in january")
   end
   
@@ -1153,6 +1153,12 @@ describe Cronic::Parser do
     t1 = Cronic.parse("1st saturday in november", now: Time.local(2007,1,1))
     t1.should eq Time.local(2007, 11, 3, 12)
   end
+  pending "days in november around daylight savings" do
+    t1 = Cronic.parse("1st sunday in november", now: Time.local(2007,1,1))
+    t1.should eq Time.local(2007, 11, 4, 12)
+    t1 = Cronic.parse("1st monday in november", now: Time.local(2007,1,1))
+    t1.should eq Time.local(2007, 11, 5, 12)
+  end
   it("now changes") do
     t1 = Cronic.parse("now")
     sleep(0.1)
@@ -1214,13 +1220,13 @@ describe Cronic::Parser do
     time.should eq Time.local(2006, 12, 31, 12)
   end
   it("handle rdn rmn od sy") do
-    time = parse_now("Thu Aug 10th 2005")
+    time = parse_now("Wed Aug 10th 2005")
     time.should eq Time.local(2005, 8, 10, 12)
-    time = parse_now("Thursday July 31st 2005")
+    time = parse_now("Sun July 31st 2005")
     time.should eq Time.local(2005, 7, 31, 12)
-    time = parse_now("Thursday December 31st 2005")
+    time = parse_now("Sat December 31st 2005")
     time.should eq Time.local(2005, 12, 31, 12)
-    time = parse_now("Thursday December 30th 2005")
+    time = parse_now("Fri December 30th 2005")
     time.should eq Time.local(2005, 12, 30, 12)
   end
   it("normalizing day portions") do

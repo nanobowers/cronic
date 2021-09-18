@@ -18,7 +18,7 @@ module Cronic
       month = tokens[0].get_tag(RepeaterMonthName).as(RepeaterMonthName)
       day = tokens[1].get_tag(ScalarDay).as(ScalarDay).type.as(Int32)
 
-      return if month_overflow?(self.now.year, month.index, day)
+      return nil if Date.month_overflow?(self.now.year, month.index, day)
 
       handle_m_d(month, day, tokens[2..], **options)
     end
@@ -35,7 +35,7 @@ module Cronic
         token_range = 0..0
       end
 
-      return if month_overflow?(self.now.year, month.index, day)
+      return nil if Date.month_overflow?(self.now.year, month.index, day)
 
       handle_m_d(month, day, tokens[token_range], **options)
     end
@@ -45,7 +45,7 @@ module Cronic
       month = tokens[0].get_tag(RepeaterMonthName).as(RepeaterMonthName)
       day = tokens[1].get_tag(OrdinalDay).as(OrdinalDay).type.as(Int32)
 
-      return if month_overflow?(self.now.year, month.index, day)
+      return nil if Date.month_overflow?(self.now.year, month.index, day)
 
       handle_m_d(month, day, tokens[2..tokens.size], **options)
     end
@@ -61,7 +61,7 @@ module Cronic
     def handle_od_rmn(tokens, **options) : SecSpan?
       month = tokens[1].get_tag(RepeaterMonthName).as(RepeaterMonthName)
       day = tokens[0].get_tag(OrdinalDay).as(OrdinalDay).type.as(Int32)
-      return if month_overflow?(self.now.year, month.index, day)
+      return nil if Date.month_overflow?(self.now.year, month.index, day)
 
       handle_m_d(month, day, tokens[2..tokens.size], **options)
       #nil
@@ -73,7 +73,7 @@ module Cronic
       day = tokens[2].get_tag(OrdinalDay).as(OrdinalDay).type.as(Int32)
       time_tokens = tokens.last(tokens.size - 3)
 
-      return if month_overflow?(year, month, day)
+      return nil if Date.month_overflow?(year, month, day)
 
       begin
         day_start = ::Time.local(year, month, day)
@@ -89,7 +89,7 @@ module Cronic
       day = tokens[0].get_tag(ScalarDay).as(ScalarDay).type.as(Int32)
       month = tokens[1].get_tag(RepeaterMonthName).as(RepeaterMonthName)
 
-      return if month_overflow?(self.now.year, month.index, day)
+      return nil if Date.month_overflow?(self.now.year, month.index, day)
 
       handle_m_d(month, day, tokens[2..tokens.size], **options)
     end
@@ -106,7 +106,7 @@ module Cronic
         token_range = 0..0
       end
 
-      return if month_overflow?(self.now.year, month.index, day)
+      return nil if Date.month_overflow?(self.now.year, month.index, day)
 
       handle_m_d(month, day, tokens[token_range], **options)
     end
@@ -228,7 +228,7 @@ module Cronic
       year = tokens[2].get_tag(ScalarYear).as(ScalarYear).type.as(Int32)
       time_tokens = tokens.last(tokens.size - 3)
 
-      return if month_overflow?(year, month, day)
+      return nil if Date.month_overflow?(year, month, day)
 
       begin
         day_start = ::Time.local(year, month, day)
@@ -245,7 +245,7 @@ module Cronic
       year = tokens[2].get_tag(ScalarYear).as(ScalarYear).type.as(Int32)
       time_tokens = tokens.last(tokens.size - 3)
 
-      return if month_overflow?(year, month, day)
+      return nil if Date.month_overflow?(year, month, day)
 
       begin
         day_start = ::Time.local(year, month, day)
@@ -262,7 +262,7 @@ module Cronic
       year = tokens[2].get_tag(ScalarYear).as(ScalarYear).type.as(Int32)
       time_tokens = tokens.last(tokens.size - 3)
 
-      return if month_overflow?(year, month, day)
+      return nil if Date.month_overflow?(year, month, day)
 
       begin
         day_start = ::Time.local(year, month, day)
@@ -286,7 +286,7 @@ module Cronic
       year = tokens[2].get_tag(ScalarYear).as(ScalarYear).type.as(Int32)
       time_tokens = tokens[3..] # tokens.last(tokens.size - 3)
 
-      return if month_overflow?(year, month, day)
+      return nil if Date.month_overflow?(year, month, day)
 
       begin
         day_start = ::Time.local(year, month, day)
@@ -317,7 +317,7 @@ module Cronic
       year = self.now.year
       time_tokens = tokens.last(tokens.size - 2)
 
-      return if month_overflow?(year, month, day)
+      return nil if Date.month_overflow?(year, month, day)
 
       begin
         day_start = ::Time.local(year, month, day)
@@ -379,7 +379,7 @@ module Cronic
       time_tokens = tokens.last(tokens.size - 3)
       year = self.now.year
 
-      return if month_overflow?(year, month.index, day)
+      return nil if Date.month_overflow?(year, month.index, day)
 
       begin
         if time_tokens.empty?
@@ -402,7 +402,7 @@ module Cronic
       day = tokens[2].get_tag(OrdinalDay).as(OrdinalDay).type.as(Int32)
       year = tokens[3].get_tag(ScalarYear).as(ScalarYear).type.as(Int32)
 
-      return if month_overflow?(year, month.index, day)
+      return nil if Date.month_overflow?(year, month.index, day)
 
       begin
         start_time = ::Time.local(year, month.index, day)
@@ -430,7 +430,7 @@ module Cronic
         end
       end
 
-      return if month_overflow?(year, month, day)
+      return nil if Date.month_overflow?(year, month, day)
 
       begin
         if time_tokens.empty?
@@ -453,7 +453,7 @@ module Cronic
       time_tokens = tokens.last(tokens.size - 3)
       year = self.now.year
 
-      return if month_overflow?(year, month.index, day)
+      return nil if Date.month_overflow?(year, month.index, day)
 
       begin
         if time_tokens.empty?
@@ -475,7 +475,7 @@ module Cronic
       day = tokens[2].get_tag(ScalarDay).as(ScalarDay).type.as(Int32)
       year = tokens[3].get_tag(ScalarYear).as(ScalarYear).type.as(Int32)
 
-      return if month_overflow?(year, month.index, day)
+      return nil if Date.month_overflow?(year, month.index, day)
 
       begin
         start_time = ::Time.local(year, month.index, day)
@@ -654,16 +654,6 @@ module Cronic
       repeaters.sort.reverse
     end
 
-    def month_overflow?(year : Int32, month : Int32, day : Int32)
-      if Time.leap_year?(year)
-        day > RepeaterMonth::MONTH_DAYS_LEAP[month - 1]
-      else
-        day > RepeaterMonth::MONTH_DAYS[month - 1]
-      end
-    rescue ArgumentError
-      false
-    end
-
     # Recursively finds repeaters within other repeaters.
     # Returns a SecSpan representing the innermost time span
     # or nil if no repeater union could be found
@@ -685,7 +675,7 @@ module Cronic
     end
 
     def time_with_rollover(year, month, day)
-      if month_overflow?(year, month, day)
+      if Date.month_overflow?(year, month, day)
         if month == 12
           Time.local(year + 1, 1, 1)
         else
