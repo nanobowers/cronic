@@ -27,10 +27,10 @@ module Cronic
     def self.scan_for_quarter_names(token, **kwargs)
       scan_for token, RepeaterQuarterName,
         {
-          /^q1$/ => :q1,
-          /^q2$/ => :q2,
-          /^q3$/ => :q3,
-          /^q4$/ => :q4,
+          /^q1$/ => QuarterNames::Q1,
+          /^q2$/ => QuarterNames::Q2,
+          /^q3$/ => QuarterNames::Q3,
+          /^q4$/ => QuarterNames::Q4,
         }, **kwargs
     end
 
@@ -62,18 +62,18 @@ module Cronic
     def self.scan_for_month_names(token, **kwargs)
       scan_for token, RepeaterMonthName,
         {
-          /^jan[:\.]?(uary)?$/           => :january,
-          /^feb[:\.]?(ruary)?$/          => :february,
-          /^mar[:\.]?(ch)?$/             => :march,
-          /^apr[:\.]?(il)?$/             => :april,
-          /^may$/                        => :may,
-          /^jun[:\.]?e?$/                => :june,
-          /^jul[:\.]?y?$/                => :july,
-          /^aug[:\.]?(ust)?$/            => :august,
-          /^sep[:\.]?(t[:\.]?|tember)?$/ => :september,
-          /^oct[:\.]?(ober)?$/           => :october,
-          /^nov[:\.]?(ember)?$/          => :november,
-          /^dec[:\.]?(ember)?$/          => :december,
+          /^jan[:\.]?(uary)?$/           => MonthNames::January,
+          /^feb[:\.]?(ruary)?$/          => MonthNames::February,
+          /^mar[:\.]?(ch)?$/             => MonthNames::March,
+          /^apr[:\.]?(il)?$/             => MonthNames::April,
+          /^may$/                        => MonthNames::May,
+          /^jun[:\.]?e?$/                => MonthNames::June,
+          /^jul[:\.]?y?$/                => MonthNames::July,
+          /^aug[:\.]?(ust)?$/            => MonthNames::August,
+          /^sep[:\.]?(t[:\.]?|tember)?$/ => MonthNames::September,
+          /^oct[:\.]?(ober)?$/           => MonthNames::October,
+          /^nov[:\.]?(ember)?$/          => MonthNames::November,
+          /^dec[:\.]?(ember)?$/          => MonthNames::December,
         }, **kwargs
     end
 

@@ -1,28 +1,24 @@
 module Cronic
   class RepeaterMonth < Repeater # :nodoc:
-    MONTH_SECONDS = 2_592_000    # 30 * 24 * 60 * 60
     YEAR_MONTHS   =        12
-    # MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    # MONTH_DAYS_LEAP = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-    @current_month_start : Time?
+    @current_month_start : Time
 
     def initialize(type, width = nil, **kwargs)
       super
-      @current_month_start = nil
+      @current_month_start = Cronic.construct(@now.year, @now.month)
+    end
+    
+    def start=(time)
+      super
+      @current_month_start = Cronic.construct(@now.year, @now.month)
     end
 
     def next(pointer)
       super
-
-      unless @current_month_start
-        @current_month_start = offset_by(Cronic.construct(@now.year, @now.month), 1, pointer)
-      else
-        cms = @current_month_start.as(Time)
-        @current_month_start = offset_by(Cronic.construct(cms.year, cms.month), 1, pointer)
-      end
-
-      cms = @current_month_start.as(Time)
+      cms = @current_month_start
+      @current_month_start = offset_by(Cronic.construct(cms.year, cms.month), 1, pointer)
+      cms = @current_month_start
       SecSpan.new(cms, Cronic.construct(cms.year, cms.month) + 1.month)
     end
 
@@ -68,7 +64,7 @@ module Cronic
     end
 
     def width
-      MONTH_SECONDS
+      Date::MONTH_SECONDS
     end
 
     def to_s

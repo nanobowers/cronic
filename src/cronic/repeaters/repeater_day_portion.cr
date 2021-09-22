@@ -1,4 +1,5 @@
 module Cronic
+  
   class RepeaterDayPortion < Repeater # :nodoc:
 
     PORTIONS = {
@@ -30,8 +31,8 @@ module Cronic
 
     def next(pointer)
       super
-      range_begin = Time::Span.new(seconds: @range.begin)
-      range_end = Time::Span.new(seconds: @range.end)
+      range_begin = @range.begin.seconds
+      range_end = @range.end.seconds
       unless @current_span
         now_seconds = @now - Cronic.construct(@now.year, @now.month, @now.day)
         if now_seconds < range_begin
@@ -60,14 +61,7 @@ module Cronic
         range_end = construct_date_from_reference_and_offset(range_start, offset)
         @current_span = SecSpan.new(range_start, range_end)
       else
-        days_to_shift_window =
-          case pointer
-          when :past
-            -1
-          else # when :future
-            1
-          end
-
+        days_to_shift_window = (pointer == :past) ? -1 : 1
         cspan = @current_span.as(SecSpan)
         new_begin = Cronic.construct(cspan.begin.year, cspan.begin.month, cspan.begin.day + days_to_shift_window, cspan.begin.hour, cspan.begin.minute, cspan.begin.second)
         new_end = Cronic.construct(cspan.end.year, cspan.end.month, cspan.end.day + days_to_shift_window, cspan.end.hour, cspan.end.minute, cspan.end.second)

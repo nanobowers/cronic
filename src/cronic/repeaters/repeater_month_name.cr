@@ -1,28 +1,30 @@
 module Cronic
+  enum MonthNames
+    January = 1
+    February = 2
+    March = 3
+    April = 4
+    May = 5
+    June = 6
+    July = 7
+    August = 8
+    September = 9
+    October = 10
+    November = 11
+    December = 12
+  end
+  
   class RepeaterMonthName < Repeater # :nodoc:
-    MONTH_SECONDS = 2_592_000        # 30 * 24 * 60 * 60
-    MONTHS        = {
-      :january   => 1,
-      :february  => 2,
-      :march     => 3,
-      :april     => 4,
-      :may       => 5,
-      :june      => 6,
-      :july      => 7,
-      :august    => 8,
-      :september => 9,
-      :october   => 10,
-      :november  => 11,
-      :december  => 12,
-    }
 
+    # TODO: remove nilability on current-month-begin
     @current_month_begin : Time?
 
-    def initialize(type, width = nil, **kwargs)
-      super
+    def initialize(@month : MonthNames , width = nil, **kwargs)
+      super(@month.to_s, width)
       @current_month_begin = nil
     end
-
+    
+    
     def next(pointer) : SecSpan
       super
 
@@ -47,11 +49,12 @@ module Cronic
             @current_month_begin = Cronic.construct(@now.year - 1, index)
           end
         end
+
         @current_month_begin || raise RuntimeError.new("Current month should be set by now")
       else
         cmb = @current_month_begin.as(Time)
         case pointer
-        when :future
+        when :future, :none
           @current_month_begin = Cronic.construct(cmb.year + 1, cmb.month)
         when :past
           @current_month_begin = Cronic.construct(cmb.year - 1, cmb.month)
@@ -90,11 +93,11 @@ module Cronic
     end
 
     def width
-      MONTH_SECONDS
+      Date::MONTH_SECONDS
     end
 
     def index
-      MONTHS[@type]
+      @month.value
     end
 
     def to_s

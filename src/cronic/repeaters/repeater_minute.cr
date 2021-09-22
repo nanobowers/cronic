@@ -1,22 +1,22 @@
 module Cronic
   class RepeaterMinute < Repeater # :nodoc:
-    @current_minute_start : Time?
+    @current_minute_start : Time
 
     def initialize(type, width = nil, **kwargs)
       super
-      @current_minute_start = nil
+      @current_minute_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute)
     end
 
+    def start=(time : Time)
+      super
+      @current_minute_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute)
+    end
+    
     def next(pointer = :future)
       super
       direction = pointer == :future ? 1 : -1
-      if @current_minute_start.nil?
-        @current_minute_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute) + direction.minutes
-      else
-        @current_minute_start = @current_minute_start.as(Time) + direction.minutes
-      end
-      cms = @current_minute_start.as(Time)
-      SecSpan.new(cms, cms + 1.minute)
+      @current_minute_start += direction.minutes
+      SecSpan.new(@current_minute_start, @current_minute_start + 1.minute)
     end
 
     def this(pointer = :future)
@@ -38,7 +38,7 @@ module Cronic
 
     def offset(span, amount, pointer)
       direction = pointer == :future ? 1 : -1
-      span + direction * amount * TimeUtil::MINUTE_SECONDS
+      span + (direction * amount).minutes
     end
 
     def width

@@ -1,12 +1,18 @@
 module Cronic
-  class RepeaterQuarterName < RepeaterQuarter # :nodoc:
-    QUARTERS = {
-      :q1 => 0,
-      :q2 => 1,
-      :q3 => 2,
-      :q4 => 3,
-    }
-
+  
+  enum QuarterNames
+    Q1 = 0
+    Q2 = 1
+    Q3 = 2
+    Q4 = 3
+  end
+  
+  class RepeaterQuarterName < RepeaterQuarter
+    
+    def initialize(@quarter : QuarterNames, width=nil, **opts)
+      super(@quarter.to_s, width)
+    end
+    
     def next(pointer)
       if @current_span.nil?
         @current_span = this(pointer)
@@ -22,7 +28,7 @@ module Cronic
 
     def this(pointer = :future)
       current_quarter_index = quarter_index(@now.month)
-      target_quarter_index = QUARTERS[type]
+      target_quarter_index = @quarter.value
 
       year_basis_offset = case pointer
                           when :past   then current_quarter_index > target_quarter_index ? 0 : -1

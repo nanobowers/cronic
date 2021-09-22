@@ -6,31 +6,31 @@ end
 
 describe Cronic::RepeaterQuarterName do
   it "matches quarter names" do
-    [:q1, :q2, :q3, :q4].each do |sym|
-      token = Cronic::Token.new(sym.to_s)
+    %w[q1 q2 q3 q4].each do |qtr|
+      token = Cronic::Token.new(qtr)
       repeater = Cronic::Repeater.scan_for_quarter_names(token)
       repeater.class.should eq Cronic::RepeaterQuarterName
-      repeater.try(&.type).should eq sym
+      repeater.try(&.type).should eq qtr.upcase
     end
   end
 
   it "gets this quarter" do
-    quarter = Cronic::RepeaterQuarterName.new(:q1)
+    quarter = Cronic::RepeaterQuarterName.new(Cronic::QuarterNames::Q1)
     quarter.start = now_time
     time = quarter.this(:none)
     time.try(&.begin).should eq Time.local(2006, 1, 1)
     time.try(&.end).should eq Time.local(2006, 4, 1)
-    quarter = Cronic::RepeaterQuarterName.new(:q2)
+    quarter = Cronic::RepeaterQuarterName.new(Cronic::QuarterNames::Q2)
     quarter.start = now_time
     time = quarter.this(:none)
     time.try(&.begin).should eq Time.local(2006, 4, 1)
     time.try(&.end).should eq Time.local(2006, 7, 1)
-    quarter = Cronic::RepeaterQuarterName.new(:q3)
+    quarter = Cronic::RepeaterQuarterName.new(Cronic::QuarterNames::Q3)
     quarter.start = now_time
     time = quarter.this(:none)
     time.try(&.begin).should eq Time.local(2006, 7, 1)
     time.try(&.end).should eq Time.local(2006, 10, 1)
-    quarter = Cronic::RepeaterQuarterName.new(:q4)
+    quarter = Cronic::RepeaterQuarterName.new(Cronic::QuarterNames::Q4)
     quarter.start = now_time
     time = quarter.this(:none)
     time.try(&.begin).should eq Time.local(2006, 10, 1)

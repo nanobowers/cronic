@@ -1,7 +1,6 @@
 module Cronic
-  class RepeaterQuarter < Repeater # :nodoc:
-    MONTHS_PER_QUARTER =         3
-    QUARTER_SECONDS    = 7_776_000 # 3 * 30 * 24 * 60 * 60
+  class RepeaterQuarter < Repeater
+    MONTHS_PER_QUARTER = 3
 
     @current_span : SecSpan?
 
@@ -22,7 +21,7 @@ module Cronic
     end
 
     def width
-      @current_span ? @current_span.as(SecSpan).width : QUARTER_SECONDS
+      @current_span ? @current_span.as(SecSpan).width : Date::QUARTER_SECONDS
     end
 
     def to_s
