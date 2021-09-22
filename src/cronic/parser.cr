@@ -42,7 +42,7 @@ module Cronic
       @now : Time = Time.local,
       @hours24 : Bool? = nil,
       @week_start : Time::DayOfWeek = Time::DayOfWeek::Sunday,
-      @ambiguous_time_range : Int32 | Symbol = 6,
+      @ambiguous_time_range : Int32? = 6,
       @endian_precedence : Array(Symbol) = [:middle, :little],
       @ambiguous_year_future_bias : Int = 50
     )

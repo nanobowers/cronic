@@ -101,59 +101,59 @@ module Cronic
       day > days_in_month(year, month)
     end
 
-    def self.add_season(year, season, modifier = 1)
-      index = SEASONS.index(season) + modifier
-      year += index // SEASONS.count
-      season = SEASONS[index % SEASONS.count]
-      [year, season]
-    end
-
-    def self.add_quarter(year, quarter, amount = 1)
-      quarter += amount
-      if quarter > YEAR_QUARTERS || quarter < 1
-        year += (quarter - 1) // YEAR_QUARTERS
-        quarter = (quarter - 1) % YEAR_QUARTERS + 1
-      end
-      [year, quarter]
-    end
-
-    def self.add_month(year, month, amount = 1)
-      month += amount
-      if month > YEAR_MONTHS || month < 1
-        year += (month - 1) // YEAR_MONTHS
-        month = (month - 1) % YEAR_MONTHS + 1
-      end
-      [year, month]
-    end
-
-    def self.add_day(year, month, day, amount = 1)
-      day += amount
-      days_month = self.days_in_month(year, month)
-      while day > days_month
-        day -= days_month
-        year, month = add_month(year, month, 1)
-        days_month = self.days_in_month(year, month)
-      end
-      days_prev_month = self.days_in_month(year, (month - 2) % YEAR_MONTHS + 1)
-      while day < 1
-        day += days_prev_month
-        year, month = add_month(year, month, -1)
-        days_prev_month = self.days_in_month(year, month)
-      end
-      [year, month, day]
-    end
-
-    def self.get_quarter_index(month)
-      (month - 1) // QUARTER_MONTHS + 1
-    end
-
-    def self.get_quarter_month(month)
-      (get_quarter_index(month) - 1) * QUARTER_MONTHS + 1
-    end
-
-    def self.get_quarter_end(quarter)
-      QUARTERS[(quarter - 1) % YEAR_QUARTERS + 1]
-    end
+#    def self.xxadd_season(year, season, modifier = 1)
+#      index = SEASONS.index(season) + modifier
+#      year += index // SEASONS.count
+#      season = SEASONS[index % SEASONS.count]
+#      [year, season]
+#    end
+#
+#    def self.xxadd_quarter(year, quarter, amount = 1)
+#      quarter += amount
+#      if quarter > YEAR_QUARTERS || quarter < 1
+#        year += (quarter - 1) // YEAR_QUARTERS
+#        quarter = (quarter - 1) % YEAR_QUARTERS + 1
+#      end
+#      [year, quarter]
+#    end
+#
+#    def self.xxadd_month(year, month, amount = 1)
+#      month += amount
+#      if month > YEAR_MONTHS || month < 1
+#        year += (month - 1) // YEAR_MONTHS
+#        month = (month - 1) % YEAR_MONTHS + 1
+#      end
+#      [year, month]
+#    end
+#
+#    def self.add_day(year, month, day, amount = 1)
+#      day += amount
+#      days_month = self.days_in_month(year, month)
+#      while day > days_month
+#        day -= days_month
+#        year, month = add_month(year, month, 1)
+#        days_month = self.days_in_month(year, month)
+#      end
+#      days_prev_month = self.days_in_month(year, (month - 2) % YEAR_MONTHS + 1)
+#      while day < 1
+#        day += days_prev_month
+#        year, month = add_month(year, month, -1)
+#        days_prev_month = self.days_in_month(year, month)
+#      end
+#      [year, month, day]
+#    end
+#
+#    def self.get_quarter_index(month)
+#      (month - 1) // QUARTER_MONTHS + 1
+#    end
+#
+#    def self.get_quarter_month(month)
+#      (get_quarter_index(month) - 1) * QUARTER_MONTHS + 1
+#    end
+#
+#    def self.get_quarter_end(quarter)
+#      QUARTERS[(quarter - 1) % YEAR_QUARTERS + 1]
+#    end
 
     def self.normalize(year, month, day)
       year, month = add_month(year, month, 0)

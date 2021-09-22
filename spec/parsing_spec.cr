@@ -106,7 +106,7 @@ describe Cronic::Parser do
     time.should eq Time.local(2007, 5, 28, 17)
     time = parse_now("5pm may 28")
     time.should eq Time.local(2007, 5, 28, 17)
-    time = parse_now("5 on may 28", ambiguous_time_range: :none)
+    time = parse_now("5 on may 28", ambiguous_time_range: nil)
     time.should eq Time.local(2007, 5, 28, 5)
   end
 
@@ -128,7 +128,7 @@ describe Cronic::Parser do
       time.should eq Time.local(2006, 5, 27, 17)
     end
     it "parses a date in the past with a time (3)" do
-      time = parse_now("may 27th at 5", ambiguous_time_range: :none)
+      time = parse_now("may 27th at 5", ambiguous_time_range: nil)
       time.should eq Time.local(2007, 5, 27, 5)
     end
   end
@@ -185,7 +185,7 @@ describe Cronic::Parser do
       time.should eq Time.local(2006, 5, 27, 17)
       time = parse_now("5pm on may 27th", context: :past)
       time.should eq Time.local(2006, 5, 27, 17)
-      time = parse_now("5 on may 27th", ambiguous_time_range: :none)
+      time = parse_now("5 on may 27th", ambiguous_time_range: nil)
       time.should eq Time.local(2007, 5, 27, 5)
     end
   end
@@ -241,7 +241,7 @@ describe Cronic::Parser do
       time.should eq Time.local(2010, 1, 4, 0)
       time = parse_now("jan 3 2010 at midnight")
       time.should eq Time.local(2010, 1, 4, 0)
-      time = parse_now("jan 3 2010 at 4", ambiguous_time_range: :none)
+      time = parse_now("jan 3 2010 at 4", ambiguous_time_range: nil)
       time.should eq Time.local(2010, 1, 3, 4)
     end
 
@@ -258,7 +258,7 @@ describe Cronic::Parser do
     it "parses in the past with times" do
       time = parse_now("may 27 79 4:30")
       time.should eq Time.local(1979, 5, 27, 16, 30)
-      time = parse_now("may 27 79 at 4:30", ambiguous_time_range: :none)
+      time = parse_now("may 27 79 at 4:30", ambiguous_time_range: nil)
       time.should eq Time.local(1979, 5, 27, 4, 30)
       time = parse_now("oct 5 2012 1045pm")
       time.should eq Time.local(2012, 10, 5, 22, 45)
@@ -287,7 +287,7 @@ describe Cronic::Parser do
       time.should eq Time.local(2010, 11, 19, 0)
       time = parse_now("November 18th 2010 at 4")
       time.should eq Time.local(2010, 11, 18, 16)
-      time = parse_now("November 18th 2010 at 4", ambiguous_time_range: :none)
+      time = parse_now("November 18th 2010 at 4", ambiguous_time_range: nil)
       time.should eq Time.local(2010, 11, 18, 4)
     end
     it "parses cases in the past" do
@@ -301,7 +301,7 @@ describe Cronic::Parser do
     it "parses cases in the past with time" do
       time = parse_now("March 30th 79 4:30")
       time.should eq Time.local(1979, 3, 30, 16, 30)
-      time = parse_now("March 30th 79 at 4:30", ambiguous_time_range: :none)
+      time = parse_now("March 30th 79 at 4:30", ambiguous_time_range: nil)
       time.should eq Time.local(1979, 3, 30, 4, 30)
     end
   end
@@ -512,7 +512,7 @@ describe Cronic::Parser do
     it "parses an hour" do
       time = parse_now("5")
       time.should eq Time.local(2006, 8, 16, 17)
-      time = Cronic.parse("5", now: Time.local(2006, 8, 16, 3, 0, 0), ambiguous_time_range: :none)
+      time = Cronic.parse("5", now: Time.local(2006, 8, 16, 3, 0, 0), ambiguous_time_range: nil)
       time.should eq Time.local(2006, 8, 16, 5)
     end
     it "parses a time within a day" do
@@ -536,15 +536,15 @@ describe Cronic::Parser do
       time.should eq Time.local(2006, 8, 18, 13)
       time = parse_now("monday 4:00")
       time.should eq Time.local(2006, 8, 21, 16)
-      time = parse_now("sat 4:00", ambiguous_time_range: :none)
+      time = parse_now("sat 4:00", ambiguous_time_range: nil)
       time.should eq Time.local(2006, 8, 19, 4)
-      time = parse_now("sunday 4:20", ambiguous_time_range: :none)
+      time = parse_now("sunday 4:20", ambiguous_time_range: nil)
       time.should eq Time.local(2006, 8, 20, 4, 20)
     end
     it "parses time with am/pm" do
       time = parse_now("4 pm")
       time.should eq Time.local(2006, 8, 16, 16)
-      time = parse_now("4 am", ambiguous_time_range: :none)
+      time = parse_now("4 am", ambiguous_time_range: nil)
       time.should eq Time.local(2006, 8, 16, 4)
       time = parse_now("12 pm")
       time.should eq Time.local(2006, 8, 16, 12)
@@ -712,7 +712,7 @@ describe Cronic::Parser do
     time.should eq Time.local(2006, 8, 17, 9)
     time = parse_now("yesterday at 4:00")
     time.should eq Time.local(2006, 8, 15, 16)
-    time = parse_now("yesterday at 4:00", ambiguous_time_range: :none)
+    time = parse_now("yesterday at 4:00", ambiguous_time_range: nil)
     time.should eq Time.local(2006, 8, 15, 4)
     time = parse_now("last friday at 4:00")
     time.should eq Time.local(2006, 8, 11, 16)
@@ -1158,7 +1158,7 @@ describe Cronic::Parser do
     t2.should_not eq t1
   end
   it("noon") do
-    t1 = Cronic.parse("2011-01-01 at noon", ambiguous_time_range: :none)
+    t1 = Cronic.parse("2011-01-01 at noon", ambiguous_time_range: nil)
     t1.should eq Time.local(2011, 1, 1, 12, 0)
   end
   it("handle rdn rmn sd") do

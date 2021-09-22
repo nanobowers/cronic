@@ -1,5 +1,5 @@
 module Cronic
-  alias TagType = Int32 | Symbol | String | Tick
+  alias TagType = Int32 | Symbol | String
 
   # Tokens are tagged with subclassed instances of this class when
   # they match specific criteria.

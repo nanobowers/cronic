@@ -4,7 +4,7 @@ require "../src/cronic"
 # TODO: all of these will pend until I work out how to
 #  redo the handler interface, but what is here is no good at all.
 
-describe Cronic::Handler do
+describe Cronic::Handlers do
   pending "handler class 1" do
     definitions = Cronic::SpanDictionary.new.definitions
     handler = Cronic::Handler.new(["repeater"], "handler")

@@ -1,24 +1,28 @@
 module Cronic
+  enum GrabberEnum
+    Last = -1
+    This = 0
+    Next = 1
+  end
+  
   class Grabber < Tag
+    getter :grab
+    
+    def initialize(@grab : GrabberEnum, width = nil, **opts)
+      super(@grab.to_s, width, **opts)
+    end
+                   
     # Scan an Array of Tokens and apply any necessary Grabber tags to
     # each token.
-    #
-    # tokens  - An Array of Token objects to scan.
-    # options - The Hash of options specified in Cronic::parse.
-    #
-    # Returns an Array of Token objects.
-    def self.scan(tokens, **options)
+    def self.scan(tokens : Array(Token), **options) : Void
       tokens.each do |token|
-        token.tag scan_for(token, self, patterns, **options)
+        token.tag case token.word
+                  when "last" then Grabber.new(GrabberEnum::Last)
+                  when "this" then Grabber.new(GrabberEnum::This)
+                  when "next" then Grabber.new(GrabberEnum::Next)
+                  else nil
+                  end
       end
-    end
-
-    def self.patterns
-      @@patterns ||= {
-        "last" => :last,
-        "this" => :this,
-        "next" => :next,
-      }
     end
 
     def to_s

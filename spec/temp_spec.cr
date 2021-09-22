@@ -1,6 +1,6 @@
 require "./spec_helper"
 
-# Cronic.debug = true
+#Cronic.debug = true
 
 describe Cronic::Token do
   #  it "tokenizes something" do

@@ -1,26 +1,23 @@
 module Cronic
-  class RepeaterSecond < Repeater # :nodoc:
+  class RepeaterSecond < Repeater
 
-    @second_start : Time?
+    @second_start : Time
 
     def initialize(type, width = nil, **kwargs)
       super
-      @second_start = nil
+      @second_start = @now
+    end
+    
+    def start=(time)
+      super
+      @second_start = @now
     end
 
     def next(pointer = :future)
       super
-
       direction = pointer == :future ? 1 : -1
-      posnegsecond = direction.seconds
-
-      if @second_start.nil?
-        @second_start = @now + posnegsecond
-      else
-        @second_start = @second_start.as(Time) + posnegsecond
-      end
-      second_start = @second_start.as(Time)
-      SecSpan.new(second_start, second_start + 1.second)
+      @second_start += direction.seconds
+      SecSpan.new(@second_start, @second_start + 1.second)
     end
 
     def this(pointer = :future)

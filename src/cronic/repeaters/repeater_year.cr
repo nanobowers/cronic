@@ -1,28 +1,22 @@
 module Cronic
-  class RepeaterYear < Repeater # :nodoc:
-    @current_year_start : Time?
+  class RepeaterYear < Repeater
+    @current_year_start : Time
 
     def initialize(type, width = nil, **kwargs)
       super
-      @current_year_start = nil
+      @current_year_start = Cronic.construct(@now.year)
+    end
+    
+    def start=(time)
+      super
+      @current_year_start = Cronic.construct(@now.year)
     end
 
     def next(pointer)
       super
-
-      unless @current_year_start
-        case pointer
-        when :future
-          @current_year_start = Cronic.construct(@now.year + 1)
-        when :past
-          @current_year_start = Cronic.construct(@now.year - 1)
-        end
-      else
-        diff = pointer == :future ? 1 : -1
-        @current_year_start = Cronic.construct(@current_year_start.as(Time).year + diff)
-      end
-      cys = @current_year_start.as(Time)
-      SecSpan.new(cys, Cronic.construct(cys.year + 1))
+      diff = pointer == :future ? 1 : -1
+      @current_year_start += diff.years
+      SecSpan.new(@current_year_start, @current_year_start + 1.year)
     end
 
     def this(pointer = :future)

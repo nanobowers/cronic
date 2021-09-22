@@ -603,7 +603,7 @@ module Cronic
     end
 
     def get_anchor(tokens, context = :none, **options)
-      grabber = Grabber.new(:this)
+      grabber = Grabber.new(GrabberEnum::This)
       pointer = :future
       repeaters = get_repeaters(tokens)
 
@@ -616,19 +616,17 @@ module Cronic
       head = repeaters.shift
       head.start = self.now
 
-      case grabber.type
-      when :last
+      case grabber.grab
+      in GrabberEnum::Last
         outer_span = head.next(:past)
-      when :this
+      in GrabberEnum::This
         if (context != :past) && (repeaters.size > 0)
           outer_span = head.this(:none)
         else
           outer_span = head.this(context)
         end
-      when :next
+      in GrabberEnum::Next
         outer_span = head.next(:future)
-      else
-        raise RuntimeError.new("Invalid grabber")
       end
 
       raise Exception.new("Invalid nil for outer_span") if outer_span.nil?
@@ -679,7 +677,7 @@ module Cronic
       end
     end
 
-    def self.dealias_and_disambiguate_times(tokens, ambiguous_time_range : Int | Symbol = 6, **options)
+    def self.dealias_and_disambiguate_times(tokens, ambiguous_time_range : Int32? = 6, **options)
       # handle aliases of am/pm
       # 5:00 in the morning -> 5:00 am
       # 7:00 in the evening -> 7:00 pm
@@ -717,7 +715,7 @@ module Cronic
       end
 
       # handle ambiguous times if :ambiguous_time_range is specified
-      if ambiguous_time_range != :none
+      if ambiguous_time_range.is_a?(Int32)
         ambiguous_tokens = [] of Token
 
         tokens.each_with_index do |token, i|
@@ -727,7 +725,7 @@ module Cronic
           if token.get_tag(RepeaterTime) && token.get_tag(RepeaterTime).as(RepeaterTime).tagtype.ambiguous? && (!next_token || !next_token.get_tag(RepeaterDayPortion))
             distoken = Token.new("disambiguator")
 
-            distoken.tag(RepeaterDayPortion.new(ambiguous_time_range.as(Int32)))
+            distoken.tag(RepeaterDayPortion.new(ambiguous_time_range))
             ambiguous_tokens << distoken
           end
         end

@@ -16,12 +16,12 @@ module Cronic
       unless @current_week_start
         case pointer
         when :past
-          saturday_repeater = RepeaterDayName.new(:saturday)
+          saturday_repeater = RepeaterDayName.new(Time::DayOfWeek::Saturday)
           saturday_repeater.start = (@now + 1.days)
           last_saturday_span = saturday_repeater.next(:past)
           @current_week_start = last_saturday_span.begin
         else # when :future
-          saturday_repeater = RepeaterDayName.new(:saturday)
+          saturday_repeater = RepeaterDayName.new(Time::DayOfWeek::Saturday)
           saturday_repeater.start = @now
           next_saturday_span = saturday_repeater.next(:future)
           @current_week_start = next_saturday_span.begin
@@ -39,12 +39,12 @@ module Cronic
 
       case pointer
       when :future, :none
-        saturday_repeater = RepeaterDayName.new(:saturday)
+        saturday_repeater = RepeaterDayName.new(Time::DayOfWeek::Saturday)
         saturday_repeater.start = @now
         this_saturday_span = saturday_repeater.this(:future)
         SecSpan.new(this_saturday_span.begin, this_saturday_span.begin + WEEKEND_SPAN)
       when :past
-        saturday_repeater = RepeaterDayName.new(:saturday)
+        saturday_repeater = RepeaterDayName.new(Time::DayOfWeek::Saturday)
         saturday_repeater.start = @now
         last_saturday_span = saturday_repeater.this(:past)
         SecSpan.new(last_saturday_span.begin, last_saturday_span.begin + WEEKEND_SPAN)
