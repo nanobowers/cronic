@@ -106,6 +106,8 @@ module Cronic
   class DateDefinitions < SpanDefinitions
     def definitions(**opts)
       [
+        {match: Sequence.new([ScalarDay, RepeaterMonthName, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_rmn_sy(toks, **opts) }},
+
         {match: Sequence.new([ScalarYear, SeparatorDash, ScalarMonth, SeparatorDash, ScalarDay, RepeaterTime, TimeZone]), proc: ->(toks : Array(Token)) { handle_rfc3339(toks, **opts) }},
         {match: Sequence.new([ScalarYear, SeparatorDash, ScalarMonth, SeparatorDash, ScalarDay, RepeaterTime]), proc: ->(toks : Array(Token)) { handle_rfc3339_no_tz(toks, **opts) }},
 
@@ -189,24 +191,36 @@ module Cronic
   end
 
   class EndianDefinitions < SpanDefinitions
-    def definitions(endian_precedence : Array(Symbol) = [:middle, :little], **opts)
 
-      definitions = [
+
+    def month_day(**opts)
+      [
         {match: Sequence.new([ScalarMonth, slashdash, ScalarDay, slashdash, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sm_sd_sy(toks, **opts) }},
         {match: Sequence.new([ScalarMonth, slashdash, ScalarDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sm_sd(toks, **opts) }},
-        {match: Sequence.new([ScalarDay, slashdash, ScalarMonth, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_sm(toks, **opts) }},
+       ]
+    end
+    
+    def day_month(**opts)
+      [
         {match: Sequence.new([ScalarDay, slashdash, ScalarMonth, slashdash, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_sm_sy(toks, **opts) }},
-        {match: Sequence.new([ScalarDay, RepeaterMonthName, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_rmn_sy(toks, **opts) }},
+        {match: Sequence.new([ScalarDay, slashdash, ScalarMonth, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_sm(toks, **opts) }},
       ]
+    end
+    
+    def definitions(endian_precedence : Array(DateEndian), **opts)
 
-      case endian_precedence.first
-      when :little
-        definitions.reverse
-      when :middle
-        definitions
-      else
-        raise ArgumentError.new("Unknown endian option '#{endian_precedence}'")
+      defs = [] of NamedTuple(match: Sequence, proc: Proc(Array(Token), SecSpan?))
+
+      endian_precedence.each do |endian|
+        case endian
+        in DateEndian::MonthDay
+          defs += month_day(**opts)
+        in DateEndian::DayMonth
+          defs += day_month(**opts)
+        end
       end
+      return defs
+      
     end
   end
 end

@@ -326,9 +326,9 @@ describe Cronic::Parser do
     time.should eq Time.local(2006, 10, 27, 19, 30)
     time = parse_now("3 jan 10")
     time.should eq Time.local(2010, 1, 3, 12)
-    time = parse_now("3 jan 10", endian_precedence: [:little])
+    time = parse_now("3 jan 10", endian_precedence: [DateEndian::DayMonth])
     time.should eq Time.local(2010, 1, 3, 12)
-    time = parse_now("3 jan 10", endian_precedence: [:middle])
+    time = parse_now("3 jan 10", endian_precedence: [DateEndian::MonthDay])
     time.should eq Time.local(2010, 1, 3, 12)
   end
   it "handle sm sd sy" do
@@ -338,7 +338,7 @@ describe Cronic::Parser do
     time.should eq Time.local(1979, 5, 27, 4)
     time = parse_now("7/12/11")
     time.should eq Time.local(2011, 7, 12, 12)
-    time = parse_now("7/12/11", endian_precedence: [:little])
+    time = parse_now("7/12/11", endian_precedence: [DateEndian::DayMonth])
     time.should eq Time.local(2011, 12, 7, 12)
     time = parse_now("9/19/2011 6:05:57 PM")
     time.should eq Time.local(2011, 9, 19, 18, 5, 57)
@@ -398,11 +398,11 @@ describe Cronic::Parser do
   it("handle sm sd") do
     time = parse_now("05/06")
     time.should eq Time.local(2007, 5, 6, 12)
-    time = parse_now("05/06", endian_precedence: ([:little, :medium]))
+    time = parse_now("05/06", endian_precedence: ([DateEndian::DayMonth, DateEndian::MonthDay]))
     time.should eq Time.local(2007, 6, 5, 12)
     time = parse_now("05/06 6:05:57 PM")
     time.should eq Time.local(2007, 5, 6, 18, 5, 57)
-    time = parse_now("05/06 6:05:57 PM", endian_precedence: ([:little, :medium]))
+    time = parse_now("05/06 6:05:57 PM", endian_precedence: ([DateEndian::DayMonth, DateEndian::MonthDay]))
     time.should eq Time.local(2007, 6, 5, 18, 5, 57)
     time = parse_now("13/09")
     time.should eq Time.local(2006, 9, 13, 12)
@@ -901,8 +901,8 @@ describe Cronic::Parser do
     expect_for_middle_endian = Time.local(2007, 11, 2, 12)
     expect_for_little_endian = Time.local(2007, 2, 11, 12)
     Cronic.parse(date).should eq expect_for_middle_endian
-    Cronic.parse(date, endian_precedence: ([:middle, :little])).should eq expect_for_middle_endian
-    Cronic.parse(date, endian_precedence: ([:little, :middle])).should eq expect_for_little_endian
+    Cronic.parse(date, endian_precedence: ([DateEndian::MonthDay, DateEndian::DayMonth])).should eq expect_for_middle_endian
+    Cronic.parse(date, endian_precedence: ([DateEndian::DayMonth, DateEndian::MonthDay])).should eq expect_for_little_endian
   end
 
   it("parse words") do

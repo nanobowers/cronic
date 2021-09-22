@@ -39,9 +39,9 @@ describe Cronic do
   pending("endian definitions") do
     endians = [Cronic::Handler.new([:scalar_month, [:separator_slash, :separator_dash], :scalar_day, [:separator_slash, :separator_dash], :scalar_year, :separator_at?, "time?"], :handle_sm_sd_sy), Cronic::Handler.new([:scalar_month, [:separator_slash, :separator_dash], :scalar_day, :separator_at?, "time?"], :handle_sm_sd), Cronic::Handler.new([:scalar_day, [:separator_slash, :separator_dash], :scalar_month, :separator_at?, "time?"], :handle_sd_sm), Cronic::Handler.new([:scalar_day, [:separator_slash, :separator_dash], :scalar_month, [:separator_slash, :separator_dash], :scalar_year, :separator_at?, "time?"], :handle_sd_sm_sy), Cronic::Handler.new([:scalar_day, :repeater_month_name, :scalar_year, :separator_at?, "time?"], :handle_sd_rmn_sy)]
     Cronic::SpanDictionary.new.definitions[:endian].should eq endians
-    defs = Cronic::SpanDictionary.new(endian_precedence: :little).definitions
+    defs = Cronic::SpanDictionary.new(endian_precedence: [Cronic::DateEndian::DayMonth]).definitions
     defs[:endian].should eq endians.reverse
-    defs = Cronic::SpanDictionary.new(endian_precedence: ([:little, :middle])).definitions
+    defs = Cronic::SpanDictionary.new(endian_precedence: [Cronic::DateEndian::DayMonth, Cronic::DateEndian::MonthDay]).definitions
     defs[:endian].should eq endians.reverse
     expect do
       Cronic::SpanDictionary.new(endian_precedence: :invalid).definitions
@@ -94,6 +94,13 @@ describe Cronic do
   end
 
   it "can parse given all valid keyword args" do
-    Cronic.parse("now", context: :future, now: now_time, hours24: nil, week_start: Time::DayOfWeek::Sunday, ambiguous_time_range: 6, endian_precedence: ([:middle, :little]), ambiguous_year_future_bias: 50)
+    Cronic.parse("now",
+                 context: :future,
+                 now: now_time,
+                 hours24: nil,
+                 week_start: Time::DayOfWeek::Sunday,
+                 ambiguous_time_range: 6,
+                 endian_precedence: [Cronic::DateEndian::MonthDay, Cronic::DateEndian::DayMonth],
+                 ambiguous_year_future_bias: 50)
   end
 end
