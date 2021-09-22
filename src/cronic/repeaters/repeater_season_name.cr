@@ -1,8 +1,8 @@
 module Cronic
   class RepeaterSeasonName < RepeaterSeason # :nodoc:
 
-    def initialize(typ, wid, @season : Season)
-      super(typ, wid) # useless superclass stuff.
+    def initialize(@season : Season, width = nil)
+      super(@season.to_s, width)
     end
 
     def next(pointer)
@@ -20,9 +20,9 @@ module Cronic
       case pointer
       when :past
         this_ssn_start = goal_ssn_start
-        this_ssn_end = (curr_ssn == @type) ? today : goal_ssn_end
+        this_ssn_end = (curr_ssn == @season) ? today : goal_ssn_end
       when :future
-        this_ssn_start = (curr_ssn == @type) ? (today + 1.day) : goal_ssn_start
+        this_ssn_start = (curr_ssn == @season) ? (today + 1.day) : goal_ssn_start
         this_ssn_end = goal_ssn_end
       else # when :none
         this_ssn_start = goal_ssn_start

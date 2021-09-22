@@ -39,10 +39,10 @@ module Cronic
     # Returns a new Repeater object.
     def self.scan_for_season_names(token, **kwargs)
       case token.word
-      when /^springs?$/          then RepeaterSeasonName.new(:spring, nil, Season::Spring)
-      when /^summers?$/          then RepeaterSeasonName.new(:summer, nil, Season::Summer)
-      when /^(autumn)|(fall)s?$/ then RepeaterSeasonName.new(:autumn, nil, Season::Autumn)
-      when /^winters?$/          then RepeaterSeasonName.new(:winter, nil, Season::Winter)
+      when /^springs?$/          then RepeaterSeasonName.new(Season::Spring, nil)
+      when /^summers?$/          then RepeaterSeasonName.new(Season::Summer, nil)
+      when /^(autumn)|(fall)s?$/ then RepeaterSeasonName.new(Season::Autumn, nil)
+      when /^winters?$/          then RepeaterSeasonName.new(Season::Winter, nil)
       else
         nil
       end

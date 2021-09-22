@@ -727,7 +727,7 @@ module Cronic
           if token.get_tag(RepeaterTime) && token.get_tag(RepeaterTime).as(RepeaterTime).tagtype.ambiguous? && (!next_token || !next_token.get_tag(RepeaterDayPortion))
             distoken = Token.new("disambiguator")
 
-            distoken.tag(RepeaterDayPortion.new(ambiguous_time_range))
+            distoken.tag(RepeaterDayPortion.new(ambiguous_time_range.as(Int32)))
             ambiguous_tokens << distoken
           end
         end
