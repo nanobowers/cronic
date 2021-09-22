@@ -1,6 +1,5 @@
-require "./handlers"
-
 module Cronic
+
   alias AnyTagKlass = Tag.class | Separator.class | Time.class
 
   alias SeqType = Array(Tag.class) |
@@ -10,7 +9,6 @@ module Cronic
                   Array(Scalar.class | Or) |
                   Array(Repeater.class | Or) |
                   Array(OrdinalDay.class)
-  # Array(Time.class)
 
   alias OrSeqType = Array(Tag.class) |
                     Array(Grabber.class) |
@@ -30,8 +28,7 @@ module Cronic
                     Array(Or | Repeater.class) |
                     Array(Tag.class | Or)
 
-  class Or # (T)
-
+  class Or
     getter :items
     getter? :maybe
 
@@ -39,7 +36,7 @@ module Cronic
     end
   end
 
-  class Sequence # (T)
+  class Sequence
     getter :items
 
     def initialize(@items : SeqType)
@@ -60,17 +57,8 @@ module Cronic
 
   # SpanDefinitions subclasses return definitions constructed by Handler instances (see handler.rb)
   # SpanDefinitions subclasses follow a <Type> + Definitions naming pattern
-  # Types of Definitions are collected in Dictionaries (see dictionary.rb)
-  class Definitions
-    def initialize(**options)
-    end
 
-    def definitions
-      raise RuntimeError.new("definitions are set in subclasses of #{self.class}")
-    end
-  end
-
-  class SpanDefinitions < Definitions
+  class SpanDefinitions #< Definitions
     include Handlers
   end
 

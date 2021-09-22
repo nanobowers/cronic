@@ -53,6 +53,7 @@ require "./cronic/repeaters/repeater_minute"
 require "./cronic/repeaters/repeater_second"
 require "./cronic/repeaters/repeater_time"
 
+require "./cronic/definition"
 require "./cronic/parser"
 
 # Parse natural language dates and times into Time or Cronic::Span objects.

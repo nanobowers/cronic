@@ -1,4 +1,3 @@
-require "./dictionary"
 require "./handlers"
 
 module Cronic
@@ -200,9 +199,9 @@ module Cronic
     # options - An optional Hash of configuration options.
     #
     # Returns a Hash of Handler definitions.
-    def definitions(**kwargs)
-      SpanDictionary.new(**kwargs).definitions
-    end
+    #def definitions(**kwargs)
+    #  SpanDictionary.new(**kwargs).definitions
+    #end
 
     def tokenize(text, **options)
       text = pre_normalize(text)
