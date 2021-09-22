@@ -1,10 +1,10 @@
 module Cronic
-  class RepeaterQuarter < Repeater #:nodoc:
-    MONTHS_PER_QUARTER = 3
-    QUARTER_SECONDS = 7_776_000 # 3 * 30 * 24 * 60 * 60
+  class RepeaterQuarter < Repeater # :nodoc:
+    MONTHS_PER_QUARTER =         3
+    QUARTER_SECONDS    = 7_776_000 # 3 * 30 * 24 * 60 * 60
 
     @current_span : SecSpan?
-    
+
     def next(pointer)
       @current_span ||= quarter(@now)
       offset_quarter_amount = pointer == :future ? 1 : -1
@@ -28,7 +28,6 @@ module Cronic
     def to_s
       super + "-quarter"
     end
-
 
     protected def quarter_index(month)
       (month - 1) // MONTHS_PER_QUARTER

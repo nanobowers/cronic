@@ -5,7 +5,6 @@ def now_time
 end
 
 describe Cronic::RepeaterHour do
-
   it("next future") do
     hours = Cronic::RepeaterHour.new(:hour)
     hours.start = now_time

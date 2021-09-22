@@ -1,23 +1,23 @@
 require "./spec_helper"
 
-Cronic.debug = true
+# Cronic.debug = true
 
 describe Cronic::Token do
-#  it "tokenizes something" do
-#    par = Cronic::Parser.new
-#    p par.tokenize("15th of january")
+  #  it "tokenizes something" do
+  #    par = Cronic::Parser.new
+  #    p par.tokenize("15th of january")
   #  end
-  
+
   it "parses something" do
     zz = Cronic.parse("15th of january")
     p zz
-    #p! Cronic.parse("15th of jan")
+    # p! Cronic.parse("15th of jan")
   end
 
   it "parses something2" do
     zz = Cronic.parse("22-feb")
     p zz
-    #p! Cronic.parse("15th of jan")
+    # p! Cronic.parse("15th of jan")
   end
 
   it "parses something2" do
@@ -37,13 +37,12 @@ describe Cronic::Token do
     p! NumberParser.parse("one fourth", bias: :ordinal)
     p! NumberParser.parse("two fourths", bias: :ordinal)
     p! NumberParser.parse("may fourth", bias: :ordinal)
-    
+
     p! NumberParser.parse("fourth", bias: :fractional)
     p! NumberParser.parse("a fourth", bias: :fractional)
     p! NumberParser.parse("one fourth", bias: :fractional)
     p! NumberParser.parse("two fourths", bias: :fractional)
     p! NumberParser.parse("may fourth", bias: :fractional)
-    
   end
 
   it "numerizes" do
@@ -58,12 +57,11 @@ describe Cronic::Token do
     p! NumberParser.parse("one tenth", bias: :ordinal)
     p! NumberParser.parse("two tenths", bias: :ordinal)
     p! NumberParser.parse("may tenth", bias: :ordinal)
-    
+
     p! NumberParser.parse("tenth", bias: :fractional)
     p! NumberParser.parse("a tenth", bias: :fractional)
     p! NumberParser.parse("one tenth", bias: :fractional)
     p! NumberParser.parse("two tenths", bias: :fractional)
     p! NumberParser.parse("may tenth", bias: :fractional)
-    
   end
 end

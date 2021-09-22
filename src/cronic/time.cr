@@ -1,15 +1,8 @@
 module Cronic
-
-  enum Direction
-    Backward = -1
-    Forward = 1
-  end
-  
   class TimeUtil
-    
-    HOUR_SECONDS = 3600 # 60 * 60
-    MINUTE_SECONDS = 60
-    SECOND_SECONDS = 1 # haha, awesome
+    HOUR_SECONDS      =  3600 # 60 * 60
+    MINUTE_SECONDS    =    60
+    SECOND_SECONDS    =     1 # haha, awesome
     SUBSECOND_SECONDS = 0.001
 
     # Checks if given number could be hour
@@ -38,8 +31,8 @@ module Cronic
       offset = Time.now.to_time.utc_offset unless offset # get current system's UTC offset if offset is nil
       sign = '+'
       sign = '-' if offset < 0
-      hours = (offset.abs / 3600).to_i.to_s.rjust(2,'0')
-      minutes = (offset.abs % 3600).to_s.rjust(2,'0')
+      hours = (offset.abs / 3600).to_i.to_s.rjust(2, '0')
+      minutes = (offset.abs % 3600).to_s.rjust(2, '0')
       sign + hours + minutes
     end
 
@@ -53,6 +46,5 @@ module Cronic
       end
       newtime
     end
-    
   end
 end

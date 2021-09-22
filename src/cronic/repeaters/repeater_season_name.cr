@@ -1,12 +1,10 @@
 module Cronic
-  class RepeaterSeasonName < RepeaterSeason #:nodoc:
-    SEASON_SECONDS = 7_862_400 # 91 * 24 * 60 * 60
-    DAY_SECONDS = 86_400 # (24 * 60 * 60)
+  class RepeaterSeasonName < RepeaterSeason # :nodoc:
 
     def initialize(typ, wid, @season : Season)
       super(typ, wid) # useless superclass stuff.
     end
-    
+
     def next(pointer)
       direction = pointer == :future ? Direction::Forward : Direction::Backward
       find_next_season_span(direction, @season)
@@ -40,8 +38,7 @@ module Cronic
 
     def offset_by(time, amount : Int32, pointer : Symbol)
       direction = pointer == :future ? 1 : -1
-      time + (amount * direction).years #  * RepeaterYear::YEAR_SECONDS
+      time + (amount * direction).years
     end
-
   end
 end

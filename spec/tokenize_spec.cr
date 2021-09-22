@@ -4,8 +4,8 @@ include Cronic
 
 def test_tokenize(str)
   par = Cronic::Parser.new
-  toks =  par.tokenize(str)
-  puts toks.map(&.to_s)
+  toks = par.tokenize(str)
+  # debug# puts toks.map(&.to_s)
   toks
 end
 
@@ -22,7 +22,6 @@ end
 
 describe "lots of tokenizing" do
   it "toks" do
-
     test_tokenize("Ham Sandwich").should be_empty
 
     test_tokenize("q4 2005")
@@ -216,7 +215,7 @@ describe "lots of tokenizing" do
     test_tokenize("4:00 in the morning")
     test_tokenize("friday 11 in the evening")
     test_tokenize("friday evening at 7")
-    
+
     test_tokenize("friday 13:00")
 
     test_tokenize("futuristically speaking today at 2pm")
@@ -226,7 +225,6 @@ describe "lots of tokenizing" do
     test_tokenize("jan 3 2010 at midnight")
     test_tokenize("jan 3 2010 midnight")
     test_tokenize("jan 3 2010")
-
 
     test_tokenize("may '01")
     test_tokenize("may 10th")
@@ -275,7 +273,7 @@ describe "lots of tokenizing" do
     test_tokenize("today at 6:00pm")
     test_tokenize("today at 9:00")
     test_tokenize("today")
-    
+
     test_tokenize("tomorrow at 0900")
     test_tokenize("tomorrow at 4a.m.")
     test_tokenize("tomorrow evening at 7")
@@ -292,13 +290,12 @@ describe "lots of tokenizing" do
     toks[0].has_tag(Grabber).should be_true
     toks[1].has_tag(RepeaterDay).should be_true
     toks[2].has_tag(RepeaterDayPortion).should be_true
-    
+
     test_tokenize("yesterday at 4:00")
     test_tokenize("yesterday at 4:00pm")
     toks = test_tokenize("yesterday")
     toks[0].has_tag(Grabber).should be_true
     toks[1].has_tag(RepeaterDay).should be_true
-    
   end
 
   it "tokenizes grabber plus" do
@@ -342,7 +339,6 @@ describe "lots of tokenizing" do
     test_tokenize("next wed 4:00")
     test_tokenize("this day 1800")
     test_tokenize("this day at 0900")
-
   end
   it "tokenizes DayName" do
     %w[mon mun tue tus wed wenns thu thur sat satterday sum sun fri friday fry].each do |txt|
@@ -351,7 +347,7 @@ describe "lots of tokenizing" do
       toks[0].has_tag(RepeaterDayName).should be_true
     end
   end
-    
+
   it "tokenizes grabbers" do
     %w[this next last].each do |txt|
       toks = test_tokenize(txt)
@@ -367,5 +363,4 @@ describe "lots of tokenizing" do
       toks[0].has_tag(Cronic::Pointer).should be_true, txt
     end
   end
-
 end

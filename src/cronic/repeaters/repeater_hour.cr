@@ -1,9 +1,9 @@
 module Cronic
-  class RepeaterHour < Repeater #:nodoc:
-    HOUR_SECONDS = 3600 # 60 * 60
+  class RepeaterHour < Repeater # :nodoc:
+    HOUR_SECONDS = 3600         # 60 * 60
 
-    @current_hour_start : ::Time?
-    
+    @current_hour_start : Time?
+
     def initialize(type, width = nil, **kwargs)
       super
       @current_hour_start = nil
@@ -21,10 +21,10 @@ module Cronic
         end
       else
         direction = pointer == :future ? 1 : -1
-        @current_hour_start = @current_hour_start.as(::Time) + ::Time::Span.new(hours: direction)
+        @current_hour_start = @current_hour_start.as(Time) + ::Time::Span.new(hours: direction)
       end
-      chs = @current_hour_start.as(::Time)
-      SecSpan.new(chs, chs + ::Time::Span.new(hours: 1))
+      chs = @current_hour_start.as(Time)
+      SecSpan.new(chs, chs + Time::Span.new(hours: 1))
     end
 
     def this(pointer = :future)
@@ -39,7 +39,7 @@ module Cronic
         hour_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute)
       else # when :none
         hour_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour)
-        hour_end = hour_start + ::Time::Span.new(hours: 1) # HOUR_SECONDS
+        hour_end = hour_start + Time::Span.new(hours: 1) # HOUR_SECONDS
       end
 
       SecSpan.new(hour_start, hour_end)
@@ -47,7 +47,7 @@ module Cronic
 
     def offset(span, amount, pointer)
       direction = (pointer == :future) ? 1 : -1
-      span + ::Time::Span.new(hours: direction * amount) 
+      span + Time::Span.new(hours: direction * amount)
     end
 
     def width

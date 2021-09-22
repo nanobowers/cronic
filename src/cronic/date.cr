@@ -1,14 +1,15 @@
 module Cronic
   class Date
-    YEAR_QUARTERS     = 4
-    YEAR_MONTHS       = 12
-    SEASON_MONTHS     = 3
-    QUARTER_MONTHS    = 3
-    MONTH_DAYS        = [nil, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    MONTH_DAYS_LEAP   = [nil, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    FORTNIGHT_DAYS    = 14
-    WEEK_DAYS         =  7
-    DAY_HOURS         = 24
+    YEAR_QUARTERS   =  4
+    YEAR_MONTHS     = 12
+    SEASON_MONTHS   =  3
+    QUARTER_MONTHS  =  3
+    MONTH_DAYS      = [nil, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    MONTH_DAYS_LEAP = [nil, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    FORTNIGHT_DAYS  = 14
+    WEEK_DAYS       =  7
+    DAY_HOURS       = 24
+
     YEAR_SECONDS      = 31_536_000 # 365 * 24 * 60 * 60
     SEASON_SECONDS    =  7_862_400 #  91 * 24 * 60 * 60
     QUARTER_SECONDS   =  7_776_000 #  90 * 24 * 60 * 60
@@ -17,41 +18,41 @@ module Cronic
     WEEK_SECONDS      =    604_800 #   7 * 24 * 60 * 60
     WEEKEND_SECONDS   =    172_800 #   2 * 24 * 60 * 60
     DAY_SECONDS       =     86_400 #       24 * 60 * 60
-    SEASONS = [
+    SEASONS           = [
       :spring,
       :summer,
       :autumn,
-      :winter
+      :winter,
     ]
     SEASON_DATES = {
       :spring => [3, 20],
       :summer => [6, 21],
       :autumn => [9, 23],
-      :winter => [12, 22]
+      :winter => [12, 22],
     }
     QUARTERS = [nil, 1, 4, 7, 10]
-    MONTHS = {
-      :january => 1,
-      :february => 2,
-      :march => 3,
-      :april => 4,
-      :may => 5,
-      :june => 6,
-      :july => 7,
-      :august => 8,
+    MONTHS   = {
+      :january   => 1,
+      :february  => 2,
+      :march     => 3,
+      :april     => 4,
+      :may       => 5,
+      :june      => 6,
+      :july      => 7,
+      :august    => 8,
       :september => 9,
-      :october => 10,
-      :november => 11,
-      :december => 12
+      :october   => 10,
+      :november  => 11,
+      :december  => 12,
     }
     DAYS = {
-      :sunday => 0,
-      :monday => 1,
-      :tuesday => 2,
+      :sunday    => 0,
+      :monday    => 1,
+      :tuesday   => 2,
       :wednesday => 3,
-      :thursday => 4,
-      :friday => 5,
-      :saturday => 6
+      :thursday  => 4,
+      :friday    => 5,
+      :saturday  => 6,
     }
 
     # Checks if given number could be day
@@ -68,7 +69,7 @@ module Cronic
     def self.could_be_year?(year, width = nil)
       year >= 0 && year <= 9999 && (width.nil? || width == 2 || width == 4)
     end
-    
+
     # Build a year from a 2 digit suffix.
     #
     # year - The two digit Integer year to build from.
@@ -215,7 +216,6 @@ module Cronic
     def self.quarter_diff(date_quarter, quarter, modifier = 1, context = 0)
       self.calculate_difference(quarter - date_quarter, YEAR_QUARTERS, modifier, context)
     end
-
   end
 
   module DateStructure
@@ -225,7 +225,8 @@ module Cronic
     property :have_year
     property :have_month
     property :have_day
-    getter   :precision
+    getter :precision
+
     def update(date)
       @year = date.year
       @month = date.month
@@ -235,8 +236,8 @@ module Cronic
 
     def is_equal?(date)
       @year == date.year &&
-      @month == date.month &&
-      @day == date.day
+        @month == date.month &&
+        @day == date.day
     end
 
     def add_day(amount = 1)
@@ -266,9 +267,9 @@ module Cronic
 
   class DateInfo
     include DateStructure
+
     def initialize(@now : Time = Time.local)
       update(@now)
     end
   end
-
 end

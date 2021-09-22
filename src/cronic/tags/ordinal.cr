@@ -1,6 +1,5 @@
 module Cronic
   class Ordinal < Tag
-
     # Scan an Array of Token objects and apply any necessary Ordinal
     # tags to each token.
     #
@@ -33,22 +32,21 @@ module Cronic
     end
   end
 
-  class OrdinalDay < Ordinal #:nodoc:
+  class OrdinalDay < Ordinal # :nodoc:
     def to_s
       super + "-day-" + @type.to_s
     end
   end
 
-  class OrdinalMonth < Ordinal #:nodoc:
+  class OrdinalMonth < Ordinal # :nodoc:
     def to_s
       super + "-month-" + @type.to_s
     end
   end
 
-  class OrdinalYear < Ordinal #:nodoc:
+  class OrdinalYear < Ordinal # :nodoc:
     def to_s
       super + "-year-" + @type.to_s
     end
   end
-
 end

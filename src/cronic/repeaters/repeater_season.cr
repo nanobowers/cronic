@@ -1,23 +1,20 @@
 module Cronic
-  class RepeaterSeason < Repeater #:nodoc:
-    SEASON_SECONDS = 7_862_400 # 91 * 24 * 60 * 60
+  class RepeaterSeason < Repeater # :nodoc:
 
     SEASONS = {
-      Season::Spring => SeasonSpan.new(MiniDate.new(3,20), MiniDate.new(6,20)),
-      Season::Summer => SeasonSpan.new(MiniDate.new(6,21), MiniDate.new(9,22)),
-      Season::Autumn => SeasonSpan.new(MiniDate.new(9,23), MiniDate.new(12,21)),
-      Season::Winter => SeasonSpan.new(MiniDate.new(12,22), MiniDate.new(3,19))
+      Season::Spring => SeasonSpan.new(MiniDate.new(3, 20), MiniDate.new(6, 20)),
+      Season::Summer => SeasonSpan.new(MiniDate.new(6, 21), MiniDate.new(9, 22)),
+      Season::Autumn => SeasonSpan.new(MiniDate.new(9, 23), MiniDate.new(12, 21)),
+      Season::Winter => SeasonSpan.new(MiniDate.new(12, 22), MiniDate.new(3, 19)),
     }
 
     @next_season_start : Time
     @next_season_end : Time
-    
+
     def initialize(type, width = nil, **kwargs)
       super
       @next_season_start = Cronic.construct(@now.year, @now.month, @now.day)
       @next_season_end = Cronic.construct(@now.year, @now.month, @now.day)
-      #@next_season_start = nil
-      #@next_season_end = nil
     end
 
     def start=(time)
@@ -25,8 +22,7 @@ module Cronic
       @next_season_start = Cronic.construct(@now.year, @now.month, @now.day)
       @next_season_end = Cronic.construct(@now.year, @now.month, @now.day)
     end
-    
-    
+
     def next(pointer)
       super
 
@@ -65,11 +61,11 @@ module Cronic
 
     def offset_by(time, amount, pointer)
       direction = pointer == :future ? 1 : -1
-      time + (amount * direction * SEASON_SECONDS).seconds
+      time + (amount * direction * Date::SEASON_SECONDS).seconds
     end
 
     def width
-      SEASON_SECONDS
+      Date::SEASON_SECONDS
     end
 
     def to_s
@@ -77,10 +73,10 @@ module Cronic
     end
 
     private def find_next_season_span(direction : Direction, next_season)
-      #unless @next_season_start || @next_season_end
+      # unless @next_season_start || @next_season_end
       #  @next_season_start = Cronic.construct(@now.year, @now.month, @now.day)
       #  @next_season_end = Cronic.construct(@now.year, @now.month, @now.day)
-      #end
+      # end
 
       @next_season_start += (direction.value * num_seconds_til_start(next_season, direction)).seconds
       @next_season_end += (direction.value * num_seconds_til_end(next_season, direction)).seconds
@@ -100,7 +96,7 @@ module Cronic
       seconds = 0
 
       until MiniDate.from_time(start + (direction.value * seconds).seconds).equals?(goal)
-        seconds += RepeaterDay::DAY_SECONDS
+        seconds += Date::DAY_SECONDS
       end
 
       seconds
@@ -115,7 +111,7 @@ module Cronic
     end
 
     private def construct_season(start, finish)
-      SecSpan.new( Cronic.construct(start.year, start.month, start.day),
+      SecSpan.new(Cronic.construct(start.year, start.month, start.day),
         Cronic.construct(finish.year, finish.month, finish.day))
     end
   end

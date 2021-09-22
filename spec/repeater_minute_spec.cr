@@ -5,7 +5,6 @@ def ref_time_min
 end
 
 describe Cronic::RepeaterMinute do
-
   it("next future") do
     minutes = Cronic::RepeaterMinute.new(:minute)
     minutes.start = ref_time_min

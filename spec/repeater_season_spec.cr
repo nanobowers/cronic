@@ -5,7 +5,6 @@ def now_time
 end
 
 describe Cronic::RepeaterSeason do
-
   it("next future") do
     seasons = Cronic::RepeaterSeason.new(:season)
     seasons.start = now_time

@@ -1,7 +1,6 @@
 require "./spec_helper"
 
 describe Cronic::RepeaterYear do
-
   it("next future") do
     years = Cronic::RepeaterYear.new(:year)
     years.start = now_time

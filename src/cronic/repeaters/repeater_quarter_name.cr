@@ -1,10 +1,10 @@
 module Cronic
-  class RepeaterQuarterName < RepeaterQuarter #:nodoc:
+  class RepeaterQuarterName < RepeaterQuarter # :nodoc:
     QUARTERS = {
       :q1 => 0,
       :q2 => 1,
       :q3 => 2,
-      :q4 => 3
+      :q4 => 3,
     }
 
     def next(pointer)
@@ -25,10 +25,10 @@ module Cronic
       target_quarter_index = QUARTERS[type]
 
       year_basis_offset = case pointer
-      when :past then current_quarter_index > target_quarter_index ? 0 : -1
-      when :future then current_quarter_index < target_quarter_index ? 0 : 1
-      else 0
-      end
+                          when :past   then current_quarter_index > target_quarter_index ? 0 : -1
+                          when :future then current_quarter_index < target_quarter_index ? 0 : 1
+                          else              0
+                          end
 
       year_basis = @now.year + year_basis_offset
       month_basis = (MONTHS_PER_QUARTER * target_quarter_index) + 1

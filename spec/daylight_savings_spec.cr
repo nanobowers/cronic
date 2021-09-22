@@ -3,11 +3,12 @@ require "./spec_helper"
 def begin_daylight_savings
   Time.local(2008, 3, 9, 5, 0, 0)
 end
+
 def end_daylight_savings
   Time.local(2008, 11, 2, 5, 0, 0)
 end
-describe "daylight-savings" do
 
+describe "daylight-savings" do
   it("begin past") do
     t = Cronic::RepeaterTime.new("900")
     t.start = begin_daylight_savings

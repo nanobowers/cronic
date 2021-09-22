@@ -1,7 +1,6 @@
 module Cronic
   class Scalar < Tag
-
-    DAY_PORTIONS = %w( am pm morning afternoon evening night )
+    DAY_PORTIONS = %w(am pm morning afternoon evening night)
 
     # Scan an Array of Token objects and apply any necessary Scalar
     # tags to each token.
@@ -11,28 +10,28 @@ module Cronic
     #
     # Returns an Array of tokens.
     def self.scan(tokens,
-                  hours24 : Bool ?= nil,
+                  hours24 : Bool? = nil,
                   ambiguous_year_future_bias : Int32 = 50,
                   **options)
       tokens.each_index do |i|
         token = tokens[i]
         post_token = tokens[i + 1]?
         if token.word =~ /^\d+$/
-            width = token.word.size
-            scalar = token.word.to_i
-            token.tag(Scalar.new(scalar, width))
-            token.tag(ScalarWide.new(token.word, width)) if width == 4
-            token.tag(ScalarSubsecond.new(scalar, width)) if Cronic::TimeUtil.could_be_subsecond?(scalar, width)
-            token.tag(ScalarSecond.new(scalar, width)) if Cronic::TimeUtil.could_be_second?(scalar, width)
-            token.tag(ScalarMinute.new(scalar, width)) if Cronic::TimeUtil.could_be_minute?(scalar, width)
-            token.tag(ScalarHour.new(scalar, width)) if Cronic::TimeUtil.could_be_hour?(scalar, width, hours24 == false)
-            unless post_token && DAY_PORTIONS.includes?(post_token.word)
-              token.tag(ScalarDay.new(scalar, width)) if Cronic::Date.could_be_day?(scalar, width)
-              token.tag(ScalarMonth.new(scalar, width)) if Cronic::Date.could_be_month?(scalar, width)
-              if Cronic::Date.could_be_year?(scalar, width)
-                year = Cronic::Date.make_year(scalar, ambiguous_year_future_bias)
-                token.tag(ScalarYear.new(year.to_i, width))
-              end
+          width = token.word.size
+          scalar = token.word.to_i
+          token.tag(Scalar.new(scalar, width))
+          token.tag(ScalarWide.new(token.word, width)) if width == 4
+          token.tag(ScalarSubsecond.new(scalar, width)) if Cronic::TimeUtil.could_be_subsecond?(scalar, width)
+          token.tag(ScalarSecond.new(scalar, width)) if Cronic::TimeUtil.could_be_second?(scalar, width)
+          token.tag(ScalarMinute.new(scalar, width)) if Cronic::TimeUtil.could_be_minute?(scalar, width)
+          token.tag(ScalarHour.new(scalar, width)) if Cronic::TimeUtil.could_be_hour?(scalar, width, hours24 == false)
+          unless post_token && DAY_PORTIONS.includes?(post_token.word)
+            token.tag(ScalarDay.new(scalar, width)) if Cronic::Date.could_be_day?(scalar, width)
+            token.tag(ScalarMonth.new(scalar, width)) if Cronic::Date.could_be_month?(scalar, width)
+            if Cronic::Date.could_be_year?(scalar, width)
+              year = Cronic::Date.make_year(scalar, ambiguous_year_future_bias)
+              token.tag(ScalarYear.new(year.to_i, width))
+            end
           end
         end
       end
@@ -43,49 +42,49 @@ module Cronic
     end
   end
 
-  class ScalarWide < Scalar #:nodoc:
+  class ScalarWide < Scalar # :nodoc:
     def to_s
       super + "-wide-" + @type.to_s
     end
   end
 
-  class ScalarSubsecond < Scalar #:nodoc:
+  class ScalarSubsecond < Scalar # :nodoc:
     def to_s
       super + "-subsecond-" + @type.to_s
     end
   end
 
-  class ScalarSecond < Scalar #:nodoc:
+  class ScalarSecond < Scalar # :nodoc:
     def to_s
       super + "-second-" + @type.to_s
     end
   end
 
-  class ScalarMinute < Scalar #:nodoc:
+  class ScalarMinute < Scalar # :nodoc:
     def to_s
       super + "-minute-" + @type.to_s
     end
   end
 
-  class ScalarHour < Scalar #:nodoc:
+  class ScalarHour < Scalar # :nodoc:
     def to_s
       super + "-hour-" + @type.to_s
     end
   end
 
-  class ScalarDay < Scalar #:nodoc:
+  class ScalarDay < Scalar # :nodoc:
     def to_s
       super + "-day-" + @type.to_s
     end
   end
 
-  class ScalarMonth < Scalar #:nodoc:
+  class ScalarMonth < Scalar # :nodoc:
     def to_s
       super + "-month-" + @type.to_s
     end
   end
 
-  class ScalarYear < Scalar #:nodoc:
+  class ScalarYear < Scalar # :nodoc:
     def to_s
       super + "-year-" + @type.to_s
     end

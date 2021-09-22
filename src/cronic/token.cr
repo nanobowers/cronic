@@ -1,14 +1,13 @@
 module Cronic
   class Token
-
     property :word
     property :tags
 
     getter :text
     getter :position
 
-    #@text : String?
-    
+    # @text : String?
+
     def initialize(@word : String, @text : String = "", position = 0)
       @word = word
       @tags = [] of Tag
@@ -39,7 +38,6 @@ module Cronic
       @tags.reject! { |m| m.class == tag_class }
     end
 
-
     # tag_class - The tag Class to search for.
     # Returns The first Tag that matches the given class.
     def get_tag(tg_class : Class)
@@ -63,5 +61,4 @@ module Cronic
       to_s
     end
   end
-
 end

@@ -5,7 +5,6 @@ def now_time
 end
 
 describe Cronic::RepeaterFortnight do
-
   it("next future") do
     fortnights = Cronic::RepeaterFortnight.new(:fortnight)
     fortnights.start = now_time

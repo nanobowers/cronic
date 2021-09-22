@@ -1,21 +1,17 @@
 module Cronic
-
   alias TagType = Int32 | Symbol | String | Tick
-  
+
   # Tokens are tagged with subclassed instances of this class when
   # they match specific criteria.
   class Tag
-
     property :type
     property :width
 
     @width : Int32?
     @now : Time
-    
-    #@options : NamedTuple(Symbol)
+
     # stype - The Symbol type of this tag.
     def initialize(@type : TagType, @width : Int32? = nil, **options)
-      #@options = options
       @now = Time.local
     end
 
@@ -33,7 +29,6 @@ module Cronic
     def self.scan(tokens, **options)
       raise NotImplementedError.new("Subclasses must override scan!")
     end
-
 
     # Internal: Match item and create respective Tag class.
     #           When item is a Symbol it will match only when it's identical to Token.
@@ -53,7 +48,7 @@ module Cronic
       case item
       when String
         item_type = Tokenizer.char_type(item.to_s[-1])
-        text_type = token.text[token.position+item.size]?
+        text_type = token.text[token.position + item.size]?
         text_type = Tokenizer.char_type(text_type) if text_type
         compatible = true
         compatible = item_type != text_type if text_type && (item_type == :letter || item_type == :digit)
@@ -76,9 +71,9 @@ module Cronic
     # options - Options as hash to pass to Tag class.
     #
     # Returns an instance of specified Tag klass or nil if item(s) didn't match.
-    #private
+    # private
     def self.scan_for(token : Token, klass : Class, items, **options)
-      ##p! token, klass, items
+      # #p! token, klass, items
       if items.is_a?(Hash)
         items.each do |item, symbol|
           scanned = match_item(item, klass, symbol, token, **options)
@@ -89,8 +84,5 @@ module Cronic
       end
       nil
     end
-
   end
-  
 end
-

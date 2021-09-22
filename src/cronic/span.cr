@@ -1,7 +1,7 @@
 module Cronic
   # A SecSpan represents a range of time in seconds.
 
-  #TODO: Error: can't make class 'Span' inherit generic
+  # TODO: Error: can't make class 'Span' inherit generic
   # struct 'Range(Int32, Int32)'
 
   class SecSpan # < Range(Int32, Int32)
@@ -10,16 +10,16 @@ module Cronic
 
     def initialize(@begin : Time, @end : Time)
     end
-    
+
     # Returns the width of this span in seconds
     def width
       (self.end - self.begin).to_i
     end
 
     def includes?(val)
-      (@begin .. @end).includes?(val)
+      (@begin..@end).includes?(val)
     end
-      
+
     # Add a number of seconds to this span, returning the
     # resulting Span
     def +(seconds : Int32)
@@ -46,6 +46,5 @@ module Cronic
       half_width = Time::Span.new(seconds: self.width // 2)
       self.begin + half_width
     end
-    
   end
 end

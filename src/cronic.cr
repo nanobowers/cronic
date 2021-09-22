@@ -5,12 +5,14 @@ module Cronic
   # a certain span was exceeded.  e.g. "10th tuesday in january"
   class InvalidParseError < Exception
   end
+
   # Raised when we try to parse an unknown string
   class UnknownParseError < Exception
   end
 end
 
 require "./cronic/version"
+require "./cronic/enums"
 require "./cronic/date"
 require "./cronic/time"
 
@@ -67,24 +69,23 @@ require "./cronic/parser"
 #   Cronic.parse("monday", context: :past)
 #     #=> Mon Aug 21 12:00:00 PDT 2006
 module Cronic
-
   @@debug : Bool = false
 
   # Returns true when debug mode is enabled.
   def self.debug
     @@debug
   end
-  def self.debug=(val : Bool)
-    @@debug=val
-  end
-  
-#KILL  property :time_class
-#K  time_class = ::Time
 
+  def self.debug=(val : Bool)
+    @@debug = val
+  end
+
+  # KILL  property :time_class
+  # K  time_class = ::Time
 
   # Parses a string containing a natural language date or time.
   #
-  # If the parser can find a date or time, a Time 
+  # If the parser can find a date or time, a Time
   # will be returned (depending on the value of `guess:`). If no
   # date/time can be found, `nil` will be returned.
   #
@@ -112,7 +113,7 @@ module Cronic
   # second - Integer second.
   #
   # Returns a new Time object constructed from these params.
-  def self.construct(year : Int32, month : Int32 = 1, day : Int32  = 1, hour : Int32  = 0, minute : Int32  = 0, second : Int32  = 0, offset = nil) : ::Time
+  def self.construct(year : Int32, month : Int32 = 1, day : Int32 = 1, hour : Int32 = 0, minute : Int32 = 0, second : Int32 = 0, offset = nil) : ::Time
     if second >= 60
       minute += second // 60
       second = second % 60
@@ -150,15 +151,14 @@ module Cronic
       end
     end
 
-    #if Cronic.time_class.name == "Date"
+    # if Cronic.time_class.name == "Date"
     #  Cronic.time_class.new(year, month, day)
-    #elsif not Cronic.time_class.respond_to?(:new) or (RUBY_VERSION.to_f < 1.9 and Cronic.time_class.name == "Time")
+    # elsif not Cronic.time_class.respond_to?(:new) or (RUBY_VERSION.to_f < 1.9 and Cronic.time_class.name == "Time")
     #  Cronic.time_class.local(year, month, day, hour, minute, second)
-    #else
+    # else
     #  offset = Time::normalize_offset(offset) if Cronic.time_class.name == "DateTime"
     #  Cronic.time_class.new(year, month, day, hour, minute, second, offset)
-    #end
+    # end
     ::Time.local(year, month, day, hour, minute, second)
   end
-
 end

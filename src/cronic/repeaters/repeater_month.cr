@@ -1,12 +1,12 @@
 module Cronic
-  class RepeaterMonth < Repeater #:nodoc:
-    MONTH_SECONDS = 2_592_000 # 30 * 24 * 60 * 60
-    YEAR_MONTHS = 12
-    #MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    #MONTH_DAYS_LEAP = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  class RepeaterMonth < Repeater # :nodoc:
+    MONTH_SECONDS = 2_592_000    # 30 * 24 * 60 * 60
+    YEAR_MONTHS   =        12
+    # MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    # MONTH_DAYS_LEAP = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
     @current_month_start : Time?
-    
+
     def initialize(type, width = nil, **kwargs)
       super
       @current_month_start = nil
@@ -74,6 +74,5 @@ module Cronic
     def to_s
       super + "-month"
     end
-
   end
 end

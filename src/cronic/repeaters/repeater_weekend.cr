@@ -1,11 +1,10 @@
 module Cronic
-  class RepeaterWeekend < Repeater #:nodoc:
+  class RepeaterWeekend < Repeater # :nodoc:
 
-    WEEKEND_SECONDS = 172_800 # (2 * 24 * 60 * 60)
     WEEKEND_SPAN = 2.days
-    
+
     @current_week_start : Time?
-    
+
     def initialize(type, width = nil, **kwargs)
       super
       @current_week_start = nil
@@ -32,7 +31,7 @@ module Cronic
         @current_week_start = @current_week_start.as(Time) + Time::Span.new(days: 7 * direction)
       end
       cws = @current_week_start.as(Time)
-      SecSpan.new(cws, cws + 2.days)
+      SecSpan.new(cws, cws + WEEKEND_SPAN)
     end
 
     def this(pointer = :future)
@@ -61,7 +60,7 @@ module Cronic
     end
 
     def width
-      WEEKEND_SECONDS
+      Date::WEEKEND_SECONDS
     end
 
     def to_s

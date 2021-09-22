@@ -1,6 +1,5 @@
 module Cronic
   class Pointer < Tag
-
     # Scan an Array of Token objects and apply any necessary Pointer
     # tags to each token.
     #
@@ -16,7 +15,7 @@ module Cronic
 
     def self.patterns
       @@patterns ||= {
-        "past" => :past,
+        "past"         => :past,
         /^future|in$/i => :future,
       }
     end

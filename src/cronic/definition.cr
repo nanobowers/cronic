@@ -1,7 +1,6 @@
 require "./handlers"
 
 module Cronic
-
   alias AnyTagKlass = Tag.class | Separator.class | Time.class
 
   alias SeqType = Array(Tag.class) |
@@ -10,10 +9,8 @@ module Cronic
                   Array(Separator.class) |
                   Array(Scalar.class | Or) |
                   Array(Repeater.class | Or) |
-                  Array(OrdinalDay.class) 
-  #Array(Time.class)
-                  
-  
+                  Array(OrdinalDay.class)
+  # Array(Time.class)
 
   alias OrSeqType = Array(Tag.class) |
                     Array(Grabber.class) |
@@ -31,40 +28,40 @@ module Cronic
                     Array(Or | Tag.class) |
                     Array(Or | Scalar.class) |
                     Array(Or | Repeater.class) |
-                    Array(Tag.class | Or) 
+                    Array(Tag.class | Or)
 
-  
-  
-  class Or #(T)
-    
+  class Or # (T)
+
     getter :items
     getter? :maybe
-    
-    def initialize(@items : OrSeqType , @maybe = false)
+
+    def initialize(@items : OrSeqType, @maybe = false)
     end
-    
   end
 
-  class Sequence #(T)
+  class Sequence # (T)
     getter :items
-    def initialize(@items : SeqType )
+
+    def initialize(@items : SeqType)
     end
+
     def empty?
       @items.empty?
     end
+
     def first
       @items[0]
     end
+
     def [](arg)
       @items[arg]
     end
   end
-  
+
   # SpanDefinitions subclasses return definitions constructed by Handler instances (see handler.rb)
   # SpanDefinitions subclasses follow a <Type> + Definitions naming pattern
   # Types of Definitions are collected in Dictionaries (see dictionary.rb)
   class Definitions
-
     def initialize(**options)
     end
 
@@ -80,7 +77,7 @@ module Cronic
   class TimeDefinitions < SpanDefinitions
     def definitions
       [
-        Handler.new(["repeater_time", "repeater_day_portion?"], nil)
+        Handler.new(["repeater_time", "repeater_day_portion?"], nil),
       ]
     end
   end
@@ -129,7 +126,7 @@ module Cronic
       [
         Handler.new(["separator_on?", "grabber?", "repeater", "separator_at?", "repeater?", "repeater?"], "handle_r"),
         Handler.new(["grabber?", "repeater", "repeater", "separator?", "repeater?", "repeater?"], "handle_r"),
-        Handler.new(["repeater", "grabber", "repeater"], "handle_r_g_r")
+        Handler.new(["repeater", "grabber", "repeater"], "handle_r_g_r"),
       ]
     end
   end
@@ -141,7 +138,7 @@ module Cronic
         Handler.new(["scalar", "repeater", "pointer"], "handle_s_r_p"),
         Handler.new(["scalar", "repeater", "separator_and?", "scalar", "repeater", "pointer", "separator_at?", "anchor"], "handle_s_r_a_s_r_p_a"),
         Handler.new(["pointer", "scalar", "repeater"], "handle_p_s_r"),
-        Handler.new(["scalar", "repeater", "pointer", "separator_at?", "anchor"], "handle_s_r_p_a")
+        Handler.new(["scalar", "repeater", "pointer", "separator_at?", "anchor"], "handle_s_r_p_a"),
       ]
     end
   end
@@ -150,7 +147,7 @@ module Cronic
     def definitions
       [
         Handler.new(["ordinal", "repeater", "separator_in", "repeater"], "handle_o_r_s_r"),
-        Handler.new(["ordinal", "repeater", "grabber", "repeater"], "handle_o_r_g_r")
+        Handler.new(["ordinal", "repeater", "grabber", "repeater"], "handle_o_r_g_r"),
       ]
     end
   end
@@ -167,7 +164,7 @@ module Cronic
         Handler.new(["scalar_month", ["separator_slash", "separator_dash"], "scalar_day", "separator_at?", "time?"], "handle_sm_sd"),
         Handler.new(["scalar_day", ["separator_slash", "separator_dash"], "scalar_month", "separator_at?", "time?"], "handle_sd_sm"),
         Handler.new(["scalar_day", ["separator_slash", "separator_dash"], "scalar_month", ["separator_slash", "separator_dash"], "scalar_year", "separator_at?", "time?"], "handle_sd_sm_sy"),
-        Handler.new(["scalar_day", "repeater_month_name", "scalar_year", "separator_at?", "time?"], "handle_sd_rmn_sy")
+        Handler.new(["scalar_day", "repeater_month_name", "scalar_year", "separator_at?", "time?"], "handle_sd_rmn_sy"),
       ]
 
       case @endian_precedence.first
@@ -180,5 +177,4 @@ module Cronic
       end
     end
   end
-
 end

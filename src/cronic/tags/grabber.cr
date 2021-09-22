@@ -1,6 +1,5 @@
 module Cronic
   class Grabber < Tag
-
     # Scan an Array of Tokens and apply any necessary Grabber tags to
     # each token.
     #
@@ -18,7 +17,7 @@ module Cronic
       @@patterns ||= {
         "last" => :last,
         "this" => :this,
-        "next" => :next
+        "next" => :next,
       }
     end
 

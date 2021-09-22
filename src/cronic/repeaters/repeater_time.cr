@@ -1,13 +1,11 @@
 module Cronic
-
-  class Tick #:nodoc:
+  class Tick # :nodoc:
     property :time
     getter? :ambiguous
 
     def initialize(@time : Int32 | Float64, @ambiguous = false)
     end
 
-    
     def *(other)
       Tick.new(@time * other, @ambiguous)
     end
@@ -25,16 +23,16 @@ module Cronic
     end
   end
 
-  class RepeaterTime < Repeater #:nodoc:
+  class RepeaterTime < Repeater # :nodoc:
 
     @current_time : Time?
     @tagtype : Tick
     getter :tagtype
-          
+
     def start=(time)
       @now = time
     end
-    
+
     def initialize(time, width = nil, @hours24 : Bool? = nil, **kwargs)
       @type = :time
       @current_time = nil
@@ -42,7 +40,6 @@ module Cronic
       time_parts = time.split(":")
       raise ArgumentError.new("Time cannot have more than 4 groups of ':'") if time_parts.size > 4
 
-      
       if time_parts.size == 1 && time_parts.first.size > 2
         if time_parts.first.size > 4
           second_index = time_parts.first.size - 2
@@ -58,8 +55,8 @@ module Cronic
       hours = time_parts.first.to_i
 
       if @hours24.nil? || @hours24 == false
-          ambiguous = true if (time_parts.first.size == 1 && hours > 0) || (hours >= 10 && hours <= 12) || (@hours24 == false && hours > 0)
-          hours = 0 if hours == 12 && ambiguous
+        ambiguous = true if (time_parts.first.size == 1 && hours > 0) || (hours >= 10 && hours <= 12) || (@hours24 == false && hours > 0)
+        hours = 0 if hours == 12 && ambiguous
       end
 
       hours *= 60 * 60
@@ -72,47 +69,48 @@ module Cronic
       subseconds = time_parts[3].to_f / (10 ** time_parts[3].size) if time_parts.size > 3
 
       @tagtype = Tick.new(hours + minutes + seconds + subseconds, ambiguous)
-       end
+    end
 
     def update_current_time(pointer)
-        half_day = 12.hours
-        full_day = 24.hours
-        midnight = Time.local(@now.year, @now.month, @now.day)
-        yesterday_midnight = midnight - full_day
-        tomorrow_midnight = midnight + full_day
-        offset_fix = Time::Span.new(seconds: (midnight.offset - tomorrow_midnight.offset))
-        tomorrow_midnight += offset_fix
+      half_day = 12.hours
+      full_day = 24.hours
+      midnight = Time.local(@now.year, @now.month, @now.day)
+      yesterday_midnight = midnight - full_day
+      tomorrow_midnight = midnight + full_day
+      offset_fix = Time::Span.new(seconds: (midnight.offset - tomorrow_midnight.offset))
+      tomorrow_midnight += offset_fix
 
-        if pointer == :future
-          if tagtype.ambiguous?
-            [midnight + tagtype.timespan + offset_fix, midnight + half_day + tagtype.timespan + offset_fix, tomorrow_midnight + tagtype.timespan].each do |t|
-              (@current_time = t; return) if t >= @now
-            end
-          else
-            [midnight + tagtype.timespan + offset_fix, tomorrow_midnight + tagtype.timespan].each do |t|
-              (@current_time = t; return) if t >= @now
-            end
+      if pointer == :future
+        if tagtype.ambiguous?
+          [midnight + tagtype.timespan + offset_fix, midnight + half_day + tagtype.timespan + offset_fix, tomorrow_midnight + tagtype.timespan].each do |t|
+            (@current_time = t; return) if t >= @now
           end
-        else # pointer == :past
-          if tagtype.ambiguous?
-             [midnight + half_day + tagtype.timespan + offset_fix, midnight + tagtype.timespan + offset_fix, yesterday_midnight + tagtype.timespan + half_day].each do |t|
-               (@current_time = t; return) if t <= @now
-             end
-          else
-            [midnight + tagtype.timespan + offset_fix, yesterday_midnight + tagtype.timespan].each do |t|
-              (@current_time = t; return) if t <= @now
-            end
+        else
+          [midnight + tagtype.timespan + offset_fix, tomorrow_midnight + tagtype.timespan].each do |t|
+            (@current_time = t; return) if t >= @now
+          end
+        end
+      else # pointer == :past
+        if tagtype.ambiguous?
+          [midnight + half_day + tagtype.timespan + offset_fix, midnight + tagtype.timespan + offset_fix, yesterday_midnight + tagtype.timespan + half_day].each do |t|
+            (@current_time = t; return) if t <= @now
+          end
+        else
+          [midnight + tagtype.timespan + offset_fix, yesterday_midnight + tagtype.timespan].each do |t|
+            (@current_time = t; return) if t <= @now
           end
         end
       end
-#    end
-#      end
+    end
+
+    #    end
+    #      end
     # Return the next past or future Span for the time that this Repeater represents
     #   pointer - Symbol representing which temporal direction to fetch the next day
     #             must be either :past or :future
     def next(pointer)
-      #super
-      
+      # super
+
       first = false
 
       unless @current_time
@@ -132,7 +130,7 @@ module Cronic
     end
 
     def this(context = :future)
-      #super
+      # super
       context = :future if context == :none
       self.next(context)
     end

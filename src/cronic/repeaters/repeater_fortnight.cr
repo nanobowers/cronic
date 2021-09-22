@@ -1,9 +1,8 @@
 module Cronic
-  class RepeaterFortnight < Repeater #:nodoc:
-    FORTNIGHT_SECONDS = 1_209_600 # (14 * 24 * 60 * 60)
+  class RepeaterFortnight < Repeater # :nodoc:
 
-    @current_fortnight_start : ::Time?
-    
+    @current_fortnight_start : Time?
+
     def initialize(type, width = nil, **kwargs)
       super
       @current_fortnight_start = nil
@@ -16,7 +15,7 @@ module Cronic
         case pointer
         when :past
           sunday_repeater = RepeaterDayName.new(:sunday)
-          sunday_repeater.start = (@now + ::Time::Span.new(seconds: RepeaterDay::DAY_SECONDS))
+          sunday_repeater.start = (@now + 1.day)
           2.times { sunday_repeater.next(:past) }
           last_sunday_span = sunday_repeater.next(:past)
           @current_fortnight_start = last_sunday_span.begin
@@ -28,10 +27,10 @@ module Cronic
         end
       else
         direction = pointer == :future ? 1 : -1
-        @current_fortnight_start = @current_fortnight_start.as(::Time) +  ::Time::Span.new(seconds: direction * FORTNIGHT_SECONDS)
+        @current_fortnight_start = @current_fortnight_start.as(Time) + Time::Span.new(seconds: direction * Date::FORTNIGHT_SECONDS)
       end
 
-      SecSpan.new(@current_fortnight_start.as(::Time), @current_fortnight_start.as(::Time) + ::Time::Span.new(seconds: FORTNIGHT_SECONDS))
+      SecSpan.new(@current_fortnight_start.as(Time), @current_fortnight_start.as(::Time) + Time::Span.new(seconds: Date::FORTNIGHT_SECONDS))
     end
 
     def this(pointer = :future)
@@ -41,7 +40,7 @@ module Cronic
 
       case pointer
       when :future
-        this_fortnight_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour) + ::Time::Span.new(seconds: RepeaterHour::HOUR_SECONDS)
+        this_fortnight_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour) + Time::Span.new(seconds: TimeUtil::HOUR_SECONDS)
         sunday_repeater = RepeaterDayName.new(:sunday)
         sunday_repeater.start = @now
         sunday_repeater.this(:future)
@@ -60,11 +59,11 @@ module Cronic
 
     def offset(span, amount, pointer)
       direction = pointer == :future ? 1 : -1
-      span + direction * amount * FORTNIGHT_SECONDS
+      span + direction * amount * Date::FORTNIGHT_SECONDS
     end
 
     def width
-      FORTNIGHT_SECONDS
+      Date::FORTNIGHT_SECONDS
     end
 
     def to_s

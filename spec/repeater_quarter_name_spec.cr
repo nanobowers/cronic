@@ -5,7 +5,6 @@ def now_time
 end
 
 describe Cronic::RepeaterQuarterName do
-
   it "matches quarter names" do
     [:q1, :q2, :q3, :q4].each do |sym|
       token = Cronic::Token.new(sym.to_s)
@@ -14,7 +13,7 @@ describe Cronic::RepeaterQuarterName do
       repeater.try(&.type).should eq sym
     end
   end
-  
+
   it "gets this quarter" do
     quarter = Cronic::RepeaterQuarterName.new(:q1)
     quarter.start = now_time
@@ -60,7 +59,7 @@ describe Cronic::RepeaterQuarterName do
     time.try(&.begin).should eq Time.local(2005, 10, 1)
     time.try(&.end).should eq Time.local(2006, 1, 1)
   end
-  
+
   it "gets this future quarter" do
     quarter = Cronic::RepeaterQuarterName.new(:q1)
     quarter.start = now_time

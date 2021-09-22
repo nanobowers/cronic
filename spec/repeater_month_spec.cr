@@ -5,7 +5,6 @@ def now_time
 end
 
 describe Cronic::RepeaterMonth do
-
   it("offset by") do
     time = Cronic::RepeaterMonth.new(:month).offset_by(now_time, 1, :future)
     time.should eq Time.local(2006, 9, 16, 14)
@@ -19,13 +18,13 @@ describe Cronic::RepeaterMonth do
     time.month.should eq 2
     time.day.should eq 28
   end
-  
+
   it("offset") do
     span = Cronic::SecSpan.new(now_time, (now_time + Time::Span.new(seconds: 60)))
     offset_span = Cronic::RepeaterMonth.new(:month).offset(span, 1, :future)
     offset_span.begin.should eq Time.local(2006, 9, 16, 14)
     offset_span.end.should eq Time.local(2006, 9, 16, 14, 1)
-    
+
     span = Cronic::SecSpan.new(now_time, (now_time + Time::Span.new(seconds: 60)))
     offset_span = Cronic::RepeaterMonth.new(:month).offset(span, 1, :past)
     offset_span.begin.should eq Time.local(2006, 7, 16, 14)

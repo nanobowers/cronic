@@ -1,11 +1,10 @@
 require "./spec_helper"
 
 def ref_wkdy_time
-  Time.local(2007, 6, 11, 14, 0, 0) 
+  Time.local(2007, 6, 11, 14, 0, 0)
 end
 
 describe Cronic::RepeaterWeekday do
-
   it("next future") do
     weekdays = Cronic::RepeaterWeekday.new(:weekday)
     weekdays.start = ref_wkdy_time

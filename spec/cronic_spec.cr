@@ -1,11 +1,10 @@
 require "./spec_helper"
 
 describe Cronic do
-
   it("pre normalize") do
     Cronic::Parser.new.pre_normalize("12.55 pm").should eq Cronic::Parser.new.pre_normalize("12:55 pm")
   end
-  
+
   it("pre normalize numerized string") do
     string = "two and a half years"
     Cronic::Parser.new.pre_normalize(string).should eq NumberParser.parse(string)
@@ -27,7 +26,7 @@ describe Cronic do
     tokens[1].tags[0].type.should eq :morning
     tokens.size.should eq 2
   end
-  
+
   it "guesses within a SecSpan" do
     span = Cronic::SecSpan.new(Time.local(2006, 8, 16, 0), Time.local(2006, 8, 17, 0))
     Cronic::Parser.new.guess(span).should eq Time.local(2006, 8, 16, 12)
@@ -61,7 +60,7 @@ describe Cronic do
   #      Cronic.debug = false)
   #    end
   #  end
-  
+
   describe "construct" do
     it "constructs like Time.local" do
       Cronic.construct(2006, 1, 2, 0, 0, 0).should eq Time.local(2006, 1, 2, 0, 0, 0)
@@ -93,9 +92,8 @@ describe Cronic do
       Cronic.construct(2000, 72).should eq Time.local(2005, 12, 1)
     end
   end
-  
+
   it "can parse given all valid keyword args" do
     Cronic.parse("now", context: :future, now: now_time, hours24: nil, week_start: Time::DayOfWeek::Sunday, ambiguous_time_range: 6, endian_precedence: ([:middle, :little]), ambiguous_year_future_bias: 50)
   end
-
 end

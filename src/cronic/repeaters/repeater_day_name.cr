@@ -1,11 +1,9 @@
 module Cronic
-  class RepeaterDayName < Repeater #:nodoc:
-    DAY_SECONDS = 86400 # (24 * 60 * 60)
-
-    @current_date : ::Time?
+  class RepeaterDayName < Repeater # :nodoc:
+    @current_date : Time?
 
     getter :day
-    
+
     def initialize(@day : Time::DayOfWeek, width = nil, **kwargs)
       super(@day.value, width, **kwargs)
       @current_date = nil
@@ -39,27 +37,11 @@ module Cronic
     end
 
     def width
-      DAY_SECONDS
+      Date::DAY_SECONDS
     end
 
     def to_s
       super + "-dayname-" + @day.to_s
     end
-
-    #KILL
-    #    private def symbol_to_day_of_the_week(sym)
-    #      lookup = {:sunday => ::Time::DayOfWeek::Sunday,
-    #                :monday => ::Time::DayOfWeek::Monday,
-    #                :tuesday => ::Time::DayOfWeek::Tuesday,
-    #                :wednesday => ::Time::DayOfWeek::Wednesday,
-    #                :thursday => ::Time::DayOfWeek::Thursday,
-    #                :friday => ::Time::DayOfWeek::Friday,
-    #                :saturday => ::Time::DayOfWeek::Saturday}
-    #      lookup[sym]
-    #    end
-    #    private def symbol_to_number(sym) : Int32
-    #      lookup = {:sunday => 0, :monday => 1, :tuesday => 2, :wednesday => 3, :thursday => 4, :friday => 5, :saturday => 6}
-    #      lookup[sym] || raise RuntimeError.new("Invalid symbol specified")
-    #    end
   end
 end

@@ -1,13 +1,12 @@
 require "./spec_helper"
 
 describe Cronic::RepeaterTime do
-
   it("generic") do
     expect_raises(ArgumentError) {
       Cronic::RepeaterTime.new("00:01:02:03:004")
     }
   end
-  
+
   it("next future") do
     t = Cronic::RepeaterTime.new("4:00")
     t.start = now_time
@@ -69,6 +68,5 @@ describe Cronic::RepeaterTime do
 
     t1 = Cronic::RepeaterTime.new("12:19", hours24: true) # 12h, 19m
     t1.tagtype.time.should eq (12*3600 + 19*60)
-    
   end
 end

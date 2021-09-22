@@ -5,7 +5,6 @@ require "../src/cronic"
 #  redo the handler interface, but what is here is no good at all.
 
 describe Cronic::Handler do
-  
   pending "handler class 1" do
     definitions = Cronic::SpanDictionary.new.definitions
     handler = Cronic::Handler.new(["repeater"], "handler")
@@ -16,7 +15,7 @@ describe Cronic::Handler do
     tokens[1].tag(Cronic::RepeaterDayPortion.new(:afternoon))
     handler.match(tokens, definitions).should_not be_truthy
   end
-  
+
   pending "handler class 2" do
     definitions = Cronic::SpanDictionary.new.definitions
     handler = Cronic::Handler.new(["repeater", "repeater?"], "handler")
@@ -30,7 +29,7 @@ describe Cronic::Handler do
     tokens[2].tag(Cronic::RepeaterDayPortion.new(:afternoon))
     handler.match(tokens, definitions).should_not be_truthy
   end
-  
+
   pending "handler class 3" do
     definitions = Cronic::SpanDictionary.new.definitions
     handler = Cronic::Handler.new(["repeater", "time?"], "handler")
@@ -41,7 +40,7 @@ describe Cronic::Handler do
     tokens[1].tag(Cronic::RepeaterDayPortion.new(:afternoon))
     handler.match(tokens, definitions).should_not be_truthy
   end
-  
+
   pending "handler class 4" do
     definitions = Cronic::SpanDictionary.new.definitions
     handler = Cronic::Handler.new(["repeater_month_name", "scalar_day", "time?"], "handler")
@@ -52,7 +51,7 @@ describe Cronic::Handler do
     tokens[1].tag(Cronic::ScalarDay.new(27))
     handler.match(tokens, definitions).should be_truthy
   end
-  
+
   pending "handler class 5" do
     definitions = Cronic::SpanDictionary.new.definitions
     handler = Cronic::Handler.new(["repeater", "time?"], "handler")
@@ -66,7 +65,7 @@ describe Cronic::Handler do
     tokens[2].tag(Cronic::RepeaterDayPortion.new(:pm))
     handler.match(tokens, definitions).should be_truthy
   end
-  
+
   pending "handler class 6" do
     definitions = Cronic::SpanDictionary.new.definitions
     handler = Cronic::Handler.new(["scalar", "repeater", "pointer"], "handler")
@@ -76,7 +75,7 @@ describe Cronic::Handler do
     tokens[2].tag(Cronic::Pointer.new(:past))
     handler.match(tokens, definitions).should be_truthy
   end
-  
+
   pending "handler class 7" do
     definitions = Cronic::SpanDictionary.new.definitions
     handler = Cronic::Handler.new([["separator_on", "separator_at"], "scalar"], "handler")

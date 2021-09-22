@@ -1,9 +1,7 @@
 module Cronic
-  class RepeaterMinute < Repeater #:nodoc:
-    MINUTE_SECONDS = 60
+  class RepeaterMinute < Repeater # :nodoc:
+    @current_minute_start : Time?
 
-    @current_minute_start : ::Time?
-    
     def initialize(type, width = nil, **kwargs)
       super
       @current_minute_start = nil
@@ -11,21 +9,18 @@ module Cronic
 
     def next(pointer = :future)
       super
-
+      direction = pointer == :future ? 1 : -1
       if @current_minute_start.nil?
-        direction = pointer == :future ? 1 : -1
-        @current_minute_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute) + ::Time::Span.new(minutes: direction)
+        @current_minute_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute) + direction.minutes
       else
-        direction = pointer == :future ? 1 : -1
-        @current_minute_start = @current_minute_start.as(::Time) + direction.minutes
+        @current_minute_start = @current_minute_start.as(Time) + direction.minutes
       end
-      cms = @current_minute_start.as(::Time)
-      SecSpan.new(cms, cms + ::Time::Span.new(minutes: 1))
+      cms = @current_minute_start.as(Time)
+      SecSpan.new(cms, cms + 1.minute)
     end
 
     def this(pointer = :future)
       super
-
       case pointer
       when :future
         minute_begin = @now
@@ -35,7 +30,7 @@ module Cronic
         minute_end = @now
       else # when :none
         minute_begin = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute)
-        minute_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute)  + 1.minute
+        minute_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute) + 1.minute
       end
 
       SecSpan.new(minute_begin, minute_end)
@@ -43,11 +38,11 @@ module Cronic
 
     def offset(span, amount, pointer)
       direction = pointer == :future ? 1 : -1
-      span + direction * amount * MINUTE_SECONDS
+      span + direction * amount * TimeUtil::MINUTE_SECONDS
     end
 
     def width
-      MINUTE_SECONDS
+      TimeUtil::MINUTE_SECONDS
     end
 
     def to_s

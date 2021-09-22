@@ -1,10 +1,7 @@
 module Cronic
-  class RepeaterWeek < Repeater #:nodoc:
-
-    WEEK_SECONDS = 604800 # (7 * 24 * 60 * 60)
-
+  class RepeaterWeek < Repeater # :nodoc:
     @current_week_start : Time?
-    
+
     def initialize(xtype, width = nil, week_start : Time::DayOfWeek = Time::DayOfWeek::Sunday, **kwargs)
       super(xtype, width, **kwargs)
       @repeater_day_name = week_start
@@ -59,17 +56,17 @@ module Cronic
         first_week_day_repeater.start = @now
         last_span = first_week_day_repeater.next(:past)
         this_week_start = last_span.begin
-        SecSpan.new(this_week_start, this_week_start + 7.days) 
+        SecSpan.new(this_week_start, this_week_start + 7.days)
       end
     end
 
     def offset(span, amount, pointer)
       direction = pointer == :future ? 1 : -1
-      span + Time::Span.new(days: 7 * direction * amount) # * WEEK_SECONDS
+      span + Time::Span.new(days: 7 * direction * amount)
     end
 
     def width
-      WEEK_SECONDS
+      Date::WEEK_SECONDS
     end
 
     def to_s

@@ -24,6 +24,5 @@ module Cronic
       tokens << Token.new(text[previos_index...index], text, previos_index)
       tokens
     end
-
   end
 end

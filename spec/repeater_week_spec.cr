@@ -1,7 +1,6 @@
 require "./spec_helper"
 
 describe Cronic::RepeaterWeek do
-
   it("next future") do
     weeks = Cronic::RepeaterWeek.new(:week)
     weeks.start = now_time

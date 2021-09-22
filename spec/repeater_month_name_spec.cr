@@ -5,7 +5,6 @@ def now_time
 end
 
 describe Cronic::RepeaterMonthName do
-
   it("next") do
     mays = Cronic::RepeaterMonthName.new(:may)
     mays.start = now_time

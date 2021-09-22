@@ -1,17 +1,18 @@
 module Cronic
-  class RepeaterDayPortion < Repeater #:nodoc:
+  class RepeaterDayPortion < Repeater # :nodoc:
+
     PORTIONS = {
-      :am => 0..(12 * 60 * 60 - 1),
-      :pm => (12 * 60 * 60)..(24 * 60 * 60 - 1),
-      :morning => (6 * 60 * 60)..(12 * 60 * 60),    # 6am-12am,
+      :am        => 0..(12 * 60 * 60 - 1),
+      :pm        => (12 * 60 * 60)..(24 * 60 * 60 - 1),
+      :morning   => (6 * 60 * 60)..(12 * 60 * 60),  # 6am-12am,
       :afternoon => (13 * 60 * 60)..(17 * 60 * 60), # 1pm-5pm,
-      :evening => (17 * 60 * 60)..(20 * 60 * 60),   # 5pm-8pm,
-      :night => (20 * 60 * 60)..(24 * 60 * 60),     # 8pm-12pm
+      :evening   => (17 * 60 * 60)..(20 * 60 * 60), # 5pm-8pm,
+      :night     => (20 * 60 * 60)..(24 * 60 * 60), # 8pm-12pm
     }
 
-    @range : Range(Int32,Int32)
+    @range : Range(Int32, Int32)
     @current_span : SecSpan?
-    
+
     def initialize(type, width = nil, **kwargs)
       super
       @current_span = nil
@@ -29,8 +30,8 @@ module Cronic
 
     def next(pointer)
       super
-      range_begin = ::Time::Span.new(seconds: @range.begin)
-      range_end = ::Time::Span.new(seconds: @range.end)
+      range_begin = Time::Span.new(seconds: @range.begin)
+      range_end = Time::Span.new(seconds: @range.end)
       unless @current_span
         now_seconds = @now - Cronic.construct(@now.year, @now.month, @now.day)
         if now_seconds < range_begin
@@ -60,12 +61,12 @@ module Cronic
         @current_span = SecSpan.new(range_start, range_end)
       else
         days_to_shift_window =
-        case pointer
-        when :past
-          -1
-        else # when :future
-          1
-        end
+          case pointer
+          when :past
+            -1
+          else # when :future
+            1
+          end
 
         cspan = @current_span.as(SecSpan)
         new_begin = Cronic.construct(cspan.begin.year, cspan.begin.month, cspan.begin.day + days_to_shift_window, cspan.begin.hour, cspan.begin.minute, cspan.begin.second)
@@ -86,7 +87,7 @@ module Cronic
       @now = span.begin
       portion_span = self.next(pointer)
       direction = pointer == :future ? 1 : -1
-      portion_span + (direction * (amount - 1) * RepeaterDay::DAY_SECONDS)
+      portion_span + (direction * (amount - 1) * Date::DAY_SECONDS)
     end
 
     def width
@@ -105,8 +106,8 @@ module Cronic
       super + "-dayportion-" + @type.to_s
     end
 
-      private def construct_date_from_reference_and_offset(reference, offset = nil)
-        reftime = reference.as(::Time)
+    private def construct_date_from_reference_and_offset(reference, offset = nil)
+      reftime = reference.as(Time)
       elapsed_seconds_for_range = offset || (@range.end - @range.begin)
       second_hand = ((elapsed_seconds_for_range - (12 * 60))) % 60
       minute_hand = (elapsed_seconds_for_range - second_hand) // (60) % 60

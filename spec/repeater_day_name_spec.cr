@@ -5,7 +5,6 @@ def now_time
 end
 
 describe Cronic::RepeaterDayName do
-
   it("match") do
     token = Cronic::Token.new("saturday")
     repeater = Cronic::Repeater.scan_for_day_names(token)

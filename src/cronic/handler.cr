@@ -1,18 +1,17 @@
 module Cronic
   class Handler
-
     getter :pattern
 
     getter :handler_method
 
     alias Pattern = Array(String) | Array(String | Array(String))
-    
+
     # pattern        - An Array of patterns to match tokens against.
     # handler_method - A Symbol representing the method to be invoked
     #   when a pattern matches.
     def initialize(@pattern : Pattern, @handler_method : String?)
-      #@pattern = pattern
-      #@handler_method = handler_method
+      # @pattern = pattern
+      # @handler_method = handler_method
     end
 
     # tokens - An Array of tokens to process.
@@ -20,7 +19,6 @@ module Cronic
     #
     # Returns true if a match is found.
     def match(tokens, definitions)
-      
       token_index = 0
       @pattern.each do |elements|
         was_optional = false
@@ -33,7 +31,6 @@ module Cronic
 
           puts "Testing #{elements[i]}"
           case elements[i]
-
           when String # Symbol
             if tags_match?(name, tokens, token_index)
               puts ">>#{elements[i]} #{name} matched"
@@ -54,7 +51,7 @@ module Cronic
 
             return true if optional && token_index == tokens.size
 
-        # when String
+            # when String
             if definitions.has_key?(name)
               sub_handlers = definitions[name]
             else
@@ -68,7 +65,6 @@ module Cronic
             raise RuntimeError.new("Invalid match type: #{elements[i].class}")
           end
         end
-
       end
 
       return false if token_index != tokens.size
@@ -84,11 +80,11 @@ module Cronic
       p! @handler_method
       case @handler_method
       when :abc
-        SecSpan.new(::Time.local, ::Time.local)
+        SecSpan.new(Time.local, ::Time.local)
       else
-        SecSpan.new(::Time.local, ::Time.local)
+        SecSpan.new(Time.local, ::Time.local)
       end
-      #parser.send(@handler_method, tokens, options)
+      # parser.send(@handler_method, tokens, options)
     end
 
     # other - The other Handler object to compare.
@@ -101,20 +97,19 @@ module Cronic
     private def tags_match?(name, tokens, token_index)
       constname = name.to_s.gsub(/(?:^|_)(.)/) { $1.upcase }
       if tokens[token_index]?
-           searchtags = tokens[token_index].tags
-           #puts ">> #{searchtags.map(&.class)}"
-           seltokens = searchtags.select do |o|
-             #dbug
-             #p [name, constname, o.class]
-             piece = o.class.to_s.sub(/.*::/,"")
-             #p [o.class, piece, constname]
-             
-             piece.match(Regex.new(constname)) # == constname # kind_of?(klass)
-           end
-           return !seltokens.empty?
+        searchtags = tokens[token_index].tags
+        # puts ">> #{searchtags.map(&.class)}"
+        seltokens = searchtags.select do |o|
+          # dbug
+          # p [name, constname, o.class]
+          piece = o.class.to_s.sub(/.*::/, "")
+          # p [o.class, piece, constname]
+
+          piece.match(Regex.new(constname)) # == constname # kind_of?(klass)
+        end
+        return !seltokens.empty?
       end
       false
     end
-
   end
 end

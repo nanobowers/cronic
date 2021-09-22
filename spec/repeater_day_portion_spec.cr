@@ -5,7 +5,6 @@ def now_time
 end
 
 describe Cronic::RepeaterDayPortion do
-
   it("am future") do
     day_portion = Cronic::RepeaterDayPortion.new(:am)
     day_portion.start = now_time

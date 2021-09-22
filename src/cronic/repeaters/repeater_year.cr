@@ -1,9 +1,7 @@
 module Cronic
-  class RepeaterYear < Repeater #:nodoc:
-    YEAR_SECONDS =  31536000  # 365 * 24 * 60 * 60
+  class RepeaterYear < Repeater # :nodoc:
+    @current_year_start : Time?
 
-    @current_year_start : ::Time?
-    
     def initialize(type, width = nil, **kwargs)
       super
       @current_year_start = nil
@@ -21,9 +19,9 @@ module Cronic
         end
       else
         diff = pointer == :future ? 1 : -1
-        @current_year_start = Cronic.construct(@current_year_start.as(::Time).year + diff)
+        @current_year_start = Cronic.construct(@current_year_start.as(Time).year + diff)
       end
-      cys = @current_year_start.as(::Time)
+      cys = @current_year_start.as(Time)
       SecSpan.new(cys, Cronic.construct(cys.year + 1))
     end
 
@@ -48,12 +46,12 @@ module Cronic
     def offset(span, amount, pointer)
       direction = pointer == :future ? 1 : -1
       new_begin = build_offset_time(span.begin, amount, direction)
-      new_end   = build_offset_time(span.end, amount, direction)
+      new_end = build_offset_time(span.end, amount, direction)
       SecSpan.new(new_begin, new_end)
     end
 
     def width
-      YEAR_SECONDS
+      Date::YEAR_SECONDS
     end
 
     def to_s
@@ -66,6 +64,5 @@ module Cronic
       day = time.day > days ? days : time.day
       Cronic.construct(year, time.month, day, time.hour, time.minute, time.second)
     end
-
   end
 end

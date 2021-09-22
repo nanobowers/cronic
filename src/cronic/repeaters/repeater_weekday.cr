@@ -1,19 +1,18 @@
 module Cronic
-  class RepeaterWeekday < Repeater #:nodoc:
-    DAY_SECONDS = 86400 # (24 * 60 * 60)
+  class RepeaterWeekday < Repeater # :nodoc:
 
     @current_weekday_start : Time
-    
+
     def initialize(xtype, width = nil, **kwargs)
       super
       @current_weekday_start = Cronic.construct(@now.year, @now.month, @now.day)
     end
-    
+
     def start=(time)
       super
       @current_weekday_start = Cronic.construct(@now.year, @now.month, @now.day)
     end
-    
+
     def next(pointer)
       super
 
@@ -51,33 +50,23 @@ module Cronic
     end
 
     def width
-      DAY_SECONDS
+      Date::DAY_SECONDS
     end
 
     def to_s
       super + "-weekday"
     end
-
-#    private def is_weekend?(time)
-#      day == symbol_to_number(:saturday) || day == symbol_to_number(:sunday)
-#    end
-#    private def is_weekday?(time)
-#      !is_weekend?(day)
-#    end
-#
-#    private def symbol_to_number(sym)
-#      DAYS[sym] || raise RuntimeError.new("Invalid symbol specified")
-#    end
   end
 end
 
+# Patching Time from stdlib to add some methods
 struct Time
   def weekday? : Bool
     !self.weekend?
   end
+
   def weekend? : Bool
     doweek = self.day_of_week
     doweek.saturday? || doweek.sunday?
   end
 end
-    
