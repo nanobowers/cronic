@@ -1,7 +1,5 @@
 module Cronic
 
-  alias AnyTagKlass = Tag.class | Separator.class | Time.class
-
   alias SeqType = Array(Tag.class) |
                   Array(Tag.class | Or) |
                   Array(SeparatorAt.class) |
@@ -59,109 +57,155 @@ module Cronic
   # SpanDefinitions subclasses follow a <Type> + Definitions naming pattern
 
   class SpanDefinitions #< Definitions
-    include Handlers
-  end
 
-  class TimeDefinitions < SpanDefinitions
-    def definitions
-      [
-        Handler.new(["repeater_time", "repeater_day_portion?"], nil),
-      ]
+    include Handlers
+    property :now
+
+    def initialize(@now : Time)
     end
+
+    # Shortcut for single-term Or with maybe
+    def maybe(item)
+      Or.new([item], maybe: true)
+    end
+
+    # Shortcut for double-term Or
+    def or(item, item2)
+      Or.new([item, item2], maybe: false)
+    end
+
+    # Shortcut for double-term Or with maybe
+    def ormaybe(item, item2)
+      Or.new([item, item2], maybe: true)
+    end
+
+    # common date separators
+    def slashdash
+      or(SeparatorSlash, SeparatorDash)
+    end
+    
+    def maybetime
+      [maybe(RepeaterTime), maybe(RepeaterDayPortion)]
+    end
+
+    # shared anchors
+    def anchor1
+      [maybe(SeparatorOn), maybe(Grabber), Repeater, maybe(SeparatorAt), maybe(Repeater), maybe(Repeater)]
+    end
+    
+    def anchor2
+      [maybe(Grabber), Repeater, Repeater, maybe(Separator), maybe(Repeater), maybe(Repeater)]
+    end
+    
+    def anchor3
+      [Repeater, Grabber, Repeater]
+    end
+
   end
 
   class DateDefinitions < SpanDefinitions
-    def definitions
+    def definitions(**opts)
       [
-        Handler.new(["repeater_day_name", "repeater_month_name", "scalar_day", "repeater_time", ["separator_slash?", "separator_dash?"], "time_zone", "scalar_year"], "handle_generic"),
-        Handler.new(["repeater_day_name", "repeater_month_name", "scalar_day"], "handle_rdn_rmn_sd"),
-        Handler.new(["repeater_day_name", "repeater_month_name", "scalar_day", "scalar_year"], "handle_rdn_rmn_sd_sy"),
-        Handler.new(["repeater_day_name", "repeater_month_name", "ordinal_day"], "handle_rdn_rmn_od"),
-        Handler.new(["repeater_day_name", "repeater_month_name", "ordinal_day", "scalar_year"], "handle_rdn_rmn_od_sy"),
-        Handler.new(["repeater_day_name", "repeater_month_name", "scalar_day", "separator_at?", "time?"], "handle_rdn_rmn_sd"),
-        Handler.new(["repeater_day_name", "repeater_month_name", "ordinal_day", "separator_at?", "time?"], "handle_rdn_rmn_od"),
-        Handler.new(["repeater_day_name", "ordinal_day", "separator_at?", "time?"], "handle_rdn_od"),
-        Handler.new(["scalar_year", ["separator_slash", "separator_dash"], "scalar_month", ["separator_slash", "separator_dash"], "scalar_day", "repeater_time", "time_zone"], "handle_generic"),
-        Handler.new(["ordinal_day"], "handle_generic"),
-        Handler.new(["repeater_month_name", "scalar_day", "scalar_year"], "handle_rmn_sd_sy"),
-        Handler.new(["repeater_month_name", "ordinal_day", "scalar_year"], "handle_rmn_od_sy"),
-        Handler.new(["repeater_month_name", "scalar_day", "scalar_year", "separator_at?", "time?"], "handle_rmn_sd_sy"),
-        Handler.new(["repeater_month_name", "ordinal_day", "scalar_year", "separator_at?", "time?"], "handle_rmn_od_sy"),
-        Handler.new(["repeater_month_name", ["separator_slash?", "separator_dash?"], "scalar_day", "separator_at?", "time?"], "handle_rmn_sd"),
-        Handler.new(["repeater_time", "repeater_day_portion?", "separator_on?", "repeater_month_name", "scalar_day"], "handle_rmn_sd_on"),
-        Handler.new(["repeater_month_name", "ordinal_day", "separator_at?", "time?"], "handle_rmn_od"),
-        Handler.new(["ordinal_day", "repeater_month_name", "scalar_year", "separator_at?", "time?"], "handle_od_rmn_sy"),
-        Handler.new(["ordinal_day", "repeater_month_name", "separator_at?", "time?"], "handle_od_rmn"),
-        Handler.new(["ordinal_day", "grabber?", "repeater_month", "separator_at?", "time?"], "handle_od_rm"),
-        Handler.new(["scalar_year", "repeater_month_name", "ordinal_day"], "handle_sy_rmn_od"),
-        Handler.new(["repeater_time", "repeater_day_portion?", "separator_on?", "repeater_month_name", "ordinal_day"], "handle_rmn_od_on"),
-        Handler.new(["repeater_month_name", "scalar_year"], "handle_rmn_sy"),
-        Handler.new(["repeater_quarter_name", "scalar_year"], "handle_rqn_sy"),
-        Handler.new(["scalar_year", "repeater_quarter_name"], "handle_sy_rqn"),
-        Handler.new(["scalar_day", "repeater_month_name", "scalar_year", "separator_at?", "time?"], "handle_sd_rmn_sy"),
-        Handler.new(["scalar_day", ["separator_slash?", "separator_dash?"], "repeater_month_name", "separator_at?", "time?"], "handle_sd_rmn"),
-        Handler.new(["scalar_year", ["separator_slash", "separator_dash"], "scalar_month", ["separator_slash", "separator_dash"], "scalar_day", "separator_at?", "time?"], "handle_sy_sm_sd"),
-        Handler.new(["scalar_year", ["separator_slash", "separator_dash"], "scalar_month"], "handle_sy_sm"),
-        Handler.new(["scalar_month", ["separator_slash", "separator_dash"], "scalar_year"], "handle_sm_sy"),
-        Handler.new(["scalar_day", ["separator_slash", "separator_dash"], "repeater_month_name", ["separator_slash", "separator_dash"], "scalar_year", "repeater_time?"], "handle_sm_rmn_sy"),
-        Handler.new(["scalar_year", ["separator_slash", "separator_dash"], "scalar_month", ["separator_slash", "separator_dash"], "scalar?", "time_zone"], "handle_generic"),
+        {match: Sequence.new([ScalarYear, SeparatorDash, ScalarMonth, SeparatorDash, ScalarDay, RepeaterTime, TimeZone]), proc: ->(toks : Array(Token)) { handle_rfc3339(toks, **opts) }},
+        {match: Sequence.new([ScalarYear, SeparatorDash, ScalarMonth, SeparatorDash, ScalarDay, RepeaterTime]), proc: ->(toks : Array(Token)) { handle_rfc3339_no_tz(toks, **opts) }},
+
+        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay, RepeaterTime, ormaybe(SeparatorSlash, SeparatorDash), TimeZone, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_sd_t_tz_sy(toks, **opts) }},
+        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_sd_sy(toks, **opts) }},
+        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_sd(toks, **opts) }},
+
+        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, OrdinalDay, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_od_sy(toks, **opts) }},
+        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, OrdinalDay]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_od(toks, **opts) }},
+
+        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_sd(toks, **opts) }},
+        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, OrdinalDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_od(toks, **opts) }},
+        {match: Sequence.new([RepeaterDayName, OrdinalDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rdn_od(toks, **opts) }},
+        {match: Sequence.new([ScalarYear, slashdash, ScalarMonth, slashdash, ScalarDay, RepeaterTime, TimeZone]), proc: ->(toks : Array(Token)) { handle_generic(toks, **opts) }},
+        {match: Sequence.new([OrdinalDay]), proc: ->(toks : Array(Token)) { handle_ordday(toks, **opts) }},
+        {match: Sequence.new([RepeaterMonthName, ScalarDay, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rmn_sd_sy(toks, **opts) }},
+        {match: Sequence.new([RepeaterMonthName, OrdinalDay, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rmn_od_sy(toks, **opts) }},
+        {match: Sequence.new([RepeaterMonthName, ScalarDay, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rmn_sd_sy(toks, **opts) }},
+        {match: Sequence.new([RepeaterMonthName, OrdinalDay, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rmn_od_sy(toks, **opts) }},
+        {match: Sequence.new([RepeaterMonthName, ormaybe(SeparatorSlash, SeparatorDash), ScalarDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rmn_sd(toks, **opts) }},
+
+        {match: Sequence.new([RepeaterTime, maybe(RepeaterDayPortion), maybe(SeparatorOn), RepeaterMonthName, ScalarDay]), proc: ->(toks : Array(Token)) { handle_rmn_sd_on(toks, **opts) }},
+        {match: Sequence.new([RepeaterMonthName, OrdinalDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rmn_od(toks, **opts) }},
+        {match: Sequence.new([OrdinalDay, RepeaterMonthName, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_od_rmn_sy(toks, **opts) }},
+        {match: Sequence.new([OrdinalDay, RepeaterMonthName, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_od_rmn(toks, **opts) }},
+        {match: Sequence.new([OrdinalDay, maybe(Grabber), RepeaterMonth, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_od_rm(toks, **opts) }},
+
+        {match: Sequence.new([ScalarYear, RepeaterMonthName, OrdinalDay]), proc: ->(toks : Array(Token)) { handle_sy_rmn_od(toks, **opts) }},
+        {match: Sequence.new([RepeaterTime, maybe(RepeaterDayPortion), maybe(SeparatorOn), RepeaterMonthName, OrdinalDay]), proc: ->(toks : Array(Token)) { handle_rmn_od_on(toks, **opts) }},
+        {match: Sequence.new([RepeaterMonthName, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rmn_sy(toks, **opts) }},
+        {match: Sequence.new([RepeaterQuarterName, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rqn_sy(toks, **opts) }},
+        {match: Sequence.new([ScalarYear, RepeaterQuarterName]), proc: ->(toks : Array(Token)) { handle_sy_rqn(toks, **opts) }},
+        {match: Sequence.new([ScalarDay, RepeaterMonthName, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_rmn_sy(toks, **opts) }},
+        {match: Sequence.new([ScalarDay, ormaybe(SeparatorSlash, SeparatorDash), RepeaterMonthName, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_rmn(toks, **opts) }},
+        {match: Sequence.new([ScalarYear, slashdash, ScalarMonth, slashdash, ScalarDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sy_sm_sd(toks, **opts) }},
+        {match: Sequence.new([ScalarYear, slashdash, ScalarMonth]), proc: ->(toks : Array(Token)) { handle_sy_sm(toks, **opts) }},
+        {match: Sequence.new([ScalarMonth, slashdash, ScalarYear]), proc: ->(toks : Array(Token)) { handle_sm_sy(toks, **opts) }},
+        {match: Sequence.new([ScalarDay, slashdash, RepeaterMonthName, slashdash, ScalarYear, maybe(RepeaterTime)]), proc: ->(toks : Array(Token)) { handle_sm_rmn_sy(toks, **opts) }},
+        {match: Sequence.new([ScalarYear, slashdash, ScalarMonth, slashdash, maybe(Scalar), TimeZone]), proc: ->(toks : Array(Token)) { handle_generic(toks, **opts) }},
       ]
     end
   end
 
   class AnchorDefinitions < SpanDefinitions
-    def definitions
+     def definitions(**opts)
       [
-        Handler.new(["separator_on?", "grabber?", "repeater", "separator_at?", "repeater?", "repeater?"], "handle_r"),
-        Handler.new(["grabber?", "repeater", "repeater", "separator?", "repeater?", "repeater?"], "handle_r"),
-        Handler.new(["repeater", "grabber", "repeater"], "handle_r_g_r"),
+        {match: Sequence.new(anchor1), proc: ->(toks : Array(Token)) { handle_r(toks, **opts) }},
+        {match: Sequence.new(anchor2), proc: ->(toks : Array(Token)) { handle_r(toks, **opts) }},
+        {match: Sequence.new(anchor3), proc: ->(toks : Array(Token)) { handle_r_g_r(toks, **opts) }},
       ]
     end
   end
 
   class ArrowDefinitions < SpanDefinitions
-    def definitions
+    def definitions(**opts)
+      sr_and_srp_at = [Scalar, Repeater, maybe(SeparatorAnd), Scalar, Repeater, Pointer, maybe(SeparatorAt)]
       [
-        Handler.new(["repeater_month_name", "scalar", "repeater", "pointer"], "handle_rmn_s_r_p"),
-        Handler.new(["scalar", "repeater", "pointer"], "handle_s_r_p"),
-        Handler.new(["scalar", "repeater", "separator_and?", "scalar", "repeater", "pointer", "separator_at?", "anchor"], "handle_s_r_a_s_r_p_a"),
-        Handler.new(["pointer", "scalar", "repeater"], "handle_p_s_r"),
-        Handler.new(["scalar", "repeater", "pointer", "separator_at?", "anchor"], "handle_s_r_p_a"),
+        {match: Sequence.new([RepeaterMonthName, Scalar, Repeater, Pointer]), proc: ->(toks : Array(Token)) { handle_rmn_s_r_p(toks, **opts) }},
+        {match: Sequence.new([Scalar, Repeater, Pointer]), proc: ->(toks : Array(Token)) { handle_s_r_p(toks, **opts) }},
+        {match: Sequence.new(sr_and_srp_at + anchor1), proc: ->(toks : Array(Token)) { handle_s_r_a_s_r_p_a(toks, **opts) }},
+        {match: Sequence.new(sr_and_srp_at + anchor2), proc: ->(toks : Array(Token)) { handle_s_r_a_s_r_p_a(toks, **opts) }},
+        {match: Sequence.new(sr_and_srp_at + anchor3), proc: ->(toks : Array(Token)) { handle_s_r_a_s_r_p_a(toks, **opts) }},
+
+        {match: Sequence.new([Pointer, Scalar, Repeater]), proc: ->(toks : Array(Token)) { handle_p_s_r(toks, **opts) }},
+
+        {match: Sequence.new([Scalar, Repeater, Pointer, maybe(SeparatorAt), *anchor1]), proc: ->(toks : Array(Token)) { handle_s_r_p_a(toks, **opts) }},
+        {match: Sequence.new([Scalar, Repeater, Pointer, maybe(SeparatorAt), *anchor2]), proc: ->(toks : Array(Token)) { handle_s_r_p_a(toks, **opts) }},
+        {match: Sequence.new([Scalar, Repeater, Pointer, maybe(SeparatorAt), *anchor3]), proc: ->(toks : Array(Token)) { handle_s_r_p_a(toks, **opts) }},
+
       ]
     end
   end
 
   class NarrowDefinitions < SpanDefinitions
-    def definitions
+    def definitions(**opts)
       [
-        Handler.new(["ordinal", "repeater", "separator_in", "repeater"], "handle_o_r_s_r"),
-        Handler.new(["ordinal", "repeater", "grabber", "repeater"], "handle_o_r_g_r"),
+        {match: Sequence.new([Ordinal, Repeater, SeparatorIn, Repeater]), proc: ->(toks : Array(Token)) { handle_o_r_s_r(toks, **opts) }},
+        {match: Sequence.new([Ordinal, Repeater, Grabber, Repeater]), proc: ->(toks : Array(Token)) { handle_o_r_g_r(toks, **opts) }},
       ]
     end
   end
 
   class EndianDefinitions < SpanDefinitions
-    def initialize(@endian_precedence : Array(Symbol) = [] of Symbol)
-    end
-
-    def definitions
-      @endian_precedence = ["middle", "little"] if @endian_precedence.empty?
+    def definitions(endian_precedence : Array(Symbol) = [:middle, :little], **opts)
 
       definitions = [
-        Handler.new(["scalar_month", ["separator_slash", "separator_dash"], "scalar_day", ["separator_slash", "separator_dash"], "scalar_year", "separator_at?", "time?"], "handle_sm_sd_sy"),
-        Handler.new(["scalar_month", ["separator_slash", "separator_dash"], "scalar_day", "separator_at?", "time?"], "handle_sm_sd"),
-        Handler.new(["scalar_day", ["separator_slash", "separator_dash"], "scalar_month", "separator_at?", "time?"], "handle_sd_sm"),
-        Handler.new(["scalar_day", ["separator_slash", "separator_dash"], "scalar_month", ["separator_slash", "separator_dash"], "scalar_year", "separator_at?", "time?"], "handle_sd_sm_sy"),
-        Handler.new(["scalar_day", "repeater_month_name", "scalar_year", "separator_at?", "time?"], "handle_sd_rmn_sy"),
+        {match: Sequence.new([ScalarMonth, slashdash, ScalarDay, slashdash, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sm_sd_sy(toks, **opts) }},
+        {match: Sequence.new([ScalarMonth, slashdash, ScalarDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sm_sd(toks, **opts) }},
+        {match: Sequence.new([ScalarDay, slashdash, ScalarMonth, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_sm(toks, **opts) }},
+        {match: Sequence.new([ScalarDay, slashdash, ScalarMonth, slashdash, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_sm_sy(toks, **opts) }},
+        {match: Sequence.new([ScalarDay, RepeaterMonthName, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_rmn_sy(toks, **opts) }},
       ]
 
-      case @endian_precedence.first
-      when "little"
+      case endian_precedence.first
+      when :little
         definitions.reverse
-      when "middle"
+      when :middle
         definitions
       else
-        raise ArgumentError.new("Unknown endian option '#{@endian_precedence}'")
+        raise ArgumentError.new("Unknown endian option '#{endian_precedence}'")
       end
     end
   end

@@ -1,9 +1,6 @@
-require "./handlers"
-
 module Cronic
   class Parser
     include Handlers
-
     property :now
 
     # options - An optional Hash of configuration options:
@@ -45,7 +42,6 @@ module Cronic
       @now : Time = Time.local,
       @hours24 : Bool? = nil,
       @week_start : Time::DayOfWeek = Time::DayOfWeek::Sunday,
-      # @guess : Cronic::Guess::Middle,
       @ambiguous_time_range : Int32 | Symbol = 6,
       @endian_precedence : Array(Symbol) = [:middle, :little],
       @ambiguous_year_future_bias : Int = 50
@@ -59,6 +55,7 @@ module Cronic
       guess(span, guess)
     end
 
+    # Parse text into a Span
     def parse_span(text) : SecSpan
       tokens = tokenize(text, context: @context,
         now: @now,
@@ -193,17 +190,9 @@ module Cronic
       end
     end
 
-    # List of Handler definitions. See Cronic.parse for a list of options this
-    # method accepts.
-    #
-    # options - An optional Hash of configuration options.
-    #
-    # Returns a Hash of Handler definitions.
-    #def definitions(**kwargs)
-    #  SpanDictionary.new(**kwargs).definitions
-    #end
 
-    def tokenize(text, **options)
+    # Process text into tagged tokens
+    def tokenize(text, **options) : Array(Token)
       text = pre_normalize(text)
       tokens = Tokenizer.tokenize(text)
       [Repeater, Grabber, Pointer, Scalar, Ordinal, Separator, Sign, TimeZone].each do |tok|
@@ -212,25 +201,60 @@ module Cronic
       tokens.select { |token| token.tagged? }
     end
 
-    def maybe(item)
-      Or.new([item], maybe: true)
+
+    private def tokens_to_span(tokens, **opts) : SecSpan
+      
+      date_defs = DateDefinitions.new(@now).definitions(**opts)
+      anchor_defs = AnchorDefinitions.new(@now).definitions(**opts)
+      arrow_defs = ArrowDefinitions.new(@now).definitions(**opts)
+      narrow_defs = NarrowDefinitions.new(@now).definitions(**opts)
+      endian_defs = EndianDefinitions.new(@now).definitions(**opts)
+
+      good_tokens = tokens.select { |o| !o.has_tag Separator }
+
+      # TODO: Generic needs to be replaced with a real handler for
+      # Crystal since we do not have Ruby's Date.parse
+
+      span : SecSpan? = nil
+
+      defs = endian_defs + date_defs + anchor_defs
+
+      defs.each_with_index do |defn, idx|
+        if span.nil? && (hadmatch = match(defn[:match], tokens))
+          #debug# puts "#{idx} #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n"
+          span = defn[:proc].call(good_tokens)
+        end
+      end
+
+      arrow_defs.each do |defn|
+        if span.nil? && (hadmatch = match(defn[:match], tokens))
+          arrow_good_tokens = tokens.reject { |o| o.get_tag(SeparatorAt) || o.get_tag(SeparatorSlash) || o.get_tag(SeparatorDash) || o.get_tag(SeparatorComma) || o.get_tag(SeparatorAnd) }
+          span = defn[:proc].call(arrow_good_tokens)
+        end
+      end
+      narrow_defs.each do |defn|
+        if span.nil? && (hadmatch = match(defn[:match], tokens))
+          #debug# puts "NARROW #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n"
+          span = defn[:proc].call(tokens)
+        end
+      end
+
+      if span.is_a?(SecSpan)
+        return span
+      else
+        raise UnknownParseError.new("Failed to match tokens against any known patterns #{tokens.map(&.to_s)}")
+      end
+
     end
 
-    def or(item, item2)
-      Or.new([item, item2], maybe: false)
-    end
 
-    def ormaybe(item, item2)
-      Or.new([item, item2], maybe: true)
-    end
-
-    # sequence matcher
-    def seqmatch(pattern, tokens) : Bool
-      seq = Sequence.new(pattern)
-      match(seq, tokens)
-    end
-
-    def match_one(pat, tok : Token)
+    #
+    # Matching routines, kind of like a poor-man's regex
+    # Supports a single Sequence with a single nesting of
+    # Or's and Maybe's
+    #
+    
+    private def match_one(pat, tok : Token)
       if pat.is_a?(Or)
         # puts ">> checking #{tok.inspect} against #{pat}"
         return pat.items.any? { |x| match_one(x, tok) }
@@ -240,7 +264,7 @@ module Cronic
       end
     end
 
-    def match_maybe(pattern, tokens) : Bool
+    private def match_maybe(pattern, tokens) : Bool
       if match_one(pattern.first, tokens.first) && match(pattern[1..], tokens[1..])
         return true
       else
@@ -248,7 +272,7 @@ module Cronic
       end
     end
 
-    def match(pattern, tokens) : Bool
+    private def match(pattern, tokens) : Bool
       # puts ">> matching #{pattern.inspect}<<"
       if pattern.empty?
         return true if tokens.empty?
@@ -276,168 +300,6 @@ module Cronic
         return match_one(pattern[0], tokens[0]) && match(pattern[1..], tokens[1..])
       end
     end
-
-    private def tokens_to_span(tokens, **opts) : SecSpan
-      # definitions = definitions(**opts)
-
-      good_tokens = tokens.select { |o| !o.has_tag Separator }
-      slashdash = or(SeparatorSlash, SeparatorDash)
-      maybetime = [maybe(RepeaterTime), maybe(RepeaterDayPortion)]
-
-      # TODO: Generic needs to be replaced with a real handler for
-      # Crystal since we do not have Ruby's Date.parse
-
-      # # DATES
-      date_defs = [
-        {match: Sequence.new([ScalarYear, SeparatorDash, ScalarMonth, SeparatorDash, ScalarDay, RepeaterTime, TimeZone]), proc: ->(toks : Array(Token)) { handle_rfc3339(toks, **opts) }},
-        {match: Sequence.new([ScalarYear, SeparatorDash, ScalarMonth, SeparatorDash, ScalarDay, RepeaterTime]), proc: ->(toks : Array(Token)) { handle_rfc3339_no_tz(toks, **opts) }},
-
-        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay, RepeaterTime, ormaybe(SeparatorSlash, SeparatorDash), TimeZone, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_sd_t_tz_sy(toks, **opts) }},
-        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_sd_sy(toks, **opts) }},
-        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_sd(toks, **opts) }},
-
-        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, OrdinalDay, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_od_sy(toks, **opts) }},
-        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, OrdinalDay]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_od(toks, **opts) }},
-
-        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, ScalarDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_sd(toks, **opts) }},
-        {match: Sequence.new([RepeaterDayName, RepeaterMonthName, OrdinalDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rdn_rmn_od(toks, **opts) }},
-        {match: Sequence.new([RepeaterDayName, OrdinalDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rdn_od(toks, **opts) }},
-        {match: Sequence.new([ScalarYear, slashdash, ScalarMonth, slashdash, ScalarDay, RepeaterTime, TimeZone]), proc: ->(toks : Array(Token)) { handle_generic(toks, **opts) }},
-        {match: Sequence.new([OrdinalDay]), proc: ->(toks : Array(Token)) { handle_ordday(toks, **opts) }},
-        {match: Sequence.new([RepeaterMonthName, ScalarDay, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rmn_sd_sy(toks, **opts) }},
-        {match: Sequence.new([RepeaterMonthName, OrdinalDay, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rmn_od_sy(toks, **opts) }},
-        {match: Sequence.new([RepeaterMonthName, ScalarDay, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rmn_sd_sy(toks, **opts) }},
-        {match: Sequence.new([RepeaterMonthName, OrdinalDay, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rmn_od_sy(toks, **opts) }},
-        {match: Sequence.new([RepeaterMonthName, ormaybe(SeparatorSlash, SeparatorDash), ScalarDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rmn_sd(toks, **opts) }},
-
-        {match: Sequence.new([RepeaterTime, maybe(RepeaterDayPortion), maybe(SeparatorOn), RepeaterMonthName, ScalarDay]), proc: ->(toks : Array(Token)) { handle_rmn_sd_on(toks, **opts) }},
-        {match: Sequence.new([RepeaterMonthName, OrdinalDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_rmn_od(toks, **opts) }},
-        {match: Sequence.new([OrdinalDay, RepeaterMonthName, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_od_rmn_sy(toks, **opts) }},
-        {match: Sequence.new([OrdinalDay, RepeaterMonthName, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_od_rmn(toks, **opts) }},
-        {match: Sequence.new([OrdinalDay, maybe(Grabber), RepeaterMonth, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_od_rm(toks, **opts) }},
-
-        {match: Sequence.new([ScalarYear, RepeaterMonthName, OrdinalDay]), proc: ->(toks : Array(Token)) { handle_sy_rmn_od(toks, **opts) }},
-        {match: Sequence.new([RepeaterTime, maybe(RepeaterDayPortion), maybe(SeparatorOn), RepeaterMonthName, OrdinalDay]), proc: ->(toks : Array(Token)) { handle_rmn_od_on(toks, **opts) }},
-        {match: Sequence.new([RepeaterMonthName, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rmn_sy(toks, **opts) }},
-        {match: Sequence.new([RepeaterQuarterName, ScalarYear]), proc: ->(toks : Array(Token)) { handle_rqn_sy(toks, **opts) }},
-        {match: Sequence.new([ScalarYear, RepeaterQuarterName]), proc: ->(toks : Array(Token)) { handle_sy_rqn(toks, **opts) }},
-        {match: Sequence.new([ScalarDay, RepeaterMonthName, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_rmn_sy(toks, **opts) }},
-        {match: Sequence.new([ScalarDay, ormaybe(SeparatorSlash, SeparatorDash), RepeaterMonthName, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_rmn(toks, **opts) }},
-        {match: Sequence.new([ScalarYear, slashdash, ScalarMonth, slashdash, ScalarDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sy_sm_sd(toks, **opts) }},
-        {match: Sequence.new([ScalarYear, slashdash, ScalarMonth]), proc: ->(toks : Array(Token)) { handle_sy_sm(toks, **opts) }},
-        {match: Sequence.new([ScalarMonth, slashdash, ScalarYear]), proc: ->(toks : Array(Token)) { handle_sm_sy(toks, **opts) }},
-        {match: Sequence.new([ScalarDay, slashdash, RepeaterMonthName, slashdash, ScalarYear, maybe(RepeaterTime)]), proc: ->(toks : Array(Token)) { handle_sm_rmn_sy(toks, **opts) }},
-        {match: Sequence.new([ScalarYear, slashdash, ScalarMonth, slashdash, maybe(Scalar), TimeZone]), proc: ->(toks : Array(Token)) { handle_generic(toks, **opts) }},
-      ]
-
-      # # ANCHORS
-      anchor1 = [maybe(SeparatorOn), maybe(Grabber), Repeater, maybe(SeparatorAt), maybe(Repeater), maybe(Repeater)]
-      anchor2 = [maybe(Grabber), Repeater, Repeater, maybe(Separator), maybe(Repeater), maybe(Repeater)]
-      anchor3 = [Repeater, Grabber, Repeater]
-      anchor_defs = [
-
-        {match: Sequence.new(anchor1), proc: ->(toks : Array(Token)) { handle_r(toks, **opts) }},
-        {match: Sequence.new(anchor2), proc: ->(toks : Array(Token)) { handle_r(toks, **opts) }},
-        {match: Sequence.new(anchor3), proc: ->(toks : Array(Token)) { handle_r_g_r(toks, **opts) }},
-      ]
-
-      sr_and_srp_at = [Scalar, Repeater, maybe(SeparatorAnd), Scalar, Repeater, Pointer, maybe(SeparatorAt)]
-
-      arrow_defs = [
-        {match: Sequence.new([RepeaterMonthName, Scalar, Repeater, Pointer]), proc: ->(toks : Array(Token)) { handle_rmn_s_r_p(toks, **opts) }},
-        {match: Sequence.new([Scalar, Repeater, Pointer]), proc: ->(toks : Array(Token)) { handle_s_r_p(toks, **opts) }},
-        # {match: Sequence.new([Scalar, Repeater, maybe(SeparatorAnd), Scalar, Repeater, Pointer, maybe(SeparatorAt), Anchor]), proc: ->(toks : Array(Token)){ handle_s_r_a_s_r_p_a(toks, **opts) }},
-        {match: Sequence.new(sr_and_srp_at + anchor1), proc: ->(toks : Array(Token)) { handle_s_r_a_s_r_p_a(toks, **opts) }},
-        {match: Sequence.new(sr_and_srp_at + anchor2), proc: ->(toks : Array(Token)) { handle_s_r_a_s_r_p_a(toks, **opts) }},
-        {match: Sequence.new(sr_and_srp_at + anchor3), proc: ->(toks : Array(Token)) { handle_s_r_a_s_r_p_a(toks, **opts) }},
-
-        {match: Sequence.new([Pointer, Scalar, Repeater]), proc: ->(toks : Array(Token)) { handle_p_s_r(toks, **opts) }},
-
-        # {match: Sequence.new([Scalar, Repeater, Pointer, maybe(SeparatorAt), Anchor]), proc: ->(toks : Array(Token)){ handle_s_r_p_a(toks, **opts) }},
-        {match: Sequence.new([Scalar, Repeater, Pointer, maybe(SeparatorAt), *anchor1]), proc: ->(toks : Array(Token)) { handle_s_r_p_a(toks, **opts) }},
-        {match: Sequence.new([Scalar, Repeater, Pointer, maybe(SeparatorAt), *anchor2]), proc: ->(toks : Array(Token)) { handle_s_r_p_a(toks, **opts) }},
-        {match: Sequence.new([Scalar, Repeater, Pointer, maybe(SeparatorAt), *anchor3]), proc: ->(toks : Array(Token)) { handle_s_r_p_a(toks, **opts) }},
-
-      ]
-
-      narrow_defs = [
-        {match: Sequence.new([Ordinal, Repeater, SeparatorIn, Repeater]), proc: ->(toks : Array(Token)) { handle_o_r_s_r(toks, **opts) }},
-        {match: Sequence.new([Ordinal, Repeater, Grabber, Repeater]), proc: ->(toks : Array(Token)) { handle_o_r_g_r(toks, **opts) }},
-      ]
-
-      endian_defs = [
-        {match: Sequence.new([ScalarMonth, slashdash, ScalarDay, slashdash, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sm_sd_sy(toks, **opts) }},
-        {match: Sequence.new([ScalarMonth, slashdash, ScalarDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sm_sd(toks, **opts) }},
-        {match: Sequence.new([ScalarDay, slashdash, ScalarMonth, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_sm(toks, **opts) }},
-        {match: Sequence.new([ScalarDay, slashdash, ScalarMonth, slashdash, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_sm_sy(toks, **opts) }},
-        {match: Sequence.new([ScalarDay, RepeaterMonthName, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_rmn_sy(toks, **opts) }},
-      ]
-
-      ######
-
-      span : SecSpan? = nil
-
-      ordered_endian_defs = @endian_precedence.first == :little ? endian_defs.reverse : endian_defs
-      defs = ordered_endian_defs + date_defs + anchor_defs
-
-      defs.each_with_index do |defn, idx|
-        if span.nil? && (hadmatch = match(defn[:match], tokens))
-          # puts "#{idx} #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n"
-          span = defn[:proc].call(good_tokens)
-        end
-      end
-
-      arrow_defs.each do |defn|
-        if span.nil? && (hadmatch = match(defn[:match], tokens))
-          arrow_good_tokens = tokens.reject { |o| o.get_tag(SeparatorAt) || o.get_tag(SeparatorSlash) || o.get_tag(SeparatorDash) || o.get_tag(SeparatorComma) || o.get_tag(SeparatorAnd) }
-          span = defn[:proc].call(arrow_good_tokens)
-        end
-      end
-      narrow_defs.each do |defn|
-        if span.nil? && (hadmatch = match(defn[:match], tokens))
-          # puts "NARROW #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n"
-          span = defn[:proc].call(tokens)
-        end
-      end
-
-      if span.is_a?(SecSpan)
-        return span
-      else
-        raise UnknownParseError.new("Failed to match tokens against any known patterns #{tokens.map(&.to_s)}")
-      end
-      #
-      #      (definitions["endian"] + definitions["date"]).each do |handler|
-      #
-      #        #pp! tokens
-      #
-      #        if handler.match(tokens, definitions)
-      #          good_tokens = tokens.select { |o| !o.get_tag Separator }
-      #          return handler.invoke(:date, good_tokens, self, opts)
-      #        end
-      #      end
-      #
-      #      definitions["anchor"].each do |handler|
-      #        if handler.match(tokens, definitions)
-      #          good_tokens = tokens.select { |o| !o.get_tag Separator }
-      #          return handler.invoke(:anchor, good_tokens, self, opts)
-      #        end
-      #      end
-      #
-      #      definitions["arrow"].each do |handler|
-      #        if handler.match(tokens, definitions)
-      #          good_tokens = tokens.reject { |o| o.get_tag(SeparatorAt) || o.get_tag(SeparatorSlash) || o.get_tag(SeparatorDash) || o.get_tag(SeparatorComma) || o.get_tag(SeparatorAnd) }
-      #           return handler.invoke(:arrow, good_tokens, self, opts)
-      #        end
-      #      end
-      #
-      #      definitions["narrow"].each do |handler|
-      #        if handler.match(tokens, definitions)
-      #          return handler.invoke(:narrow, tokens, self, opts)
-      #        end
-      #      end
-      #
-      #      puts "-none" if Cronic.debug
-      #      return nil
-    end
+    
   end
 end
