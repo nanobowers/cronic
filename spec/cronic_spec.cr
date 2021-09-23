@@ -95,7 +95,7 @@ describe Cronic do
 
   it "can parse given all valid keyword args" do
     Cronic.parse("now",
-                 context: :future,
+                 context: Cronic::PointerDir::Future,
                  now: now_time,
                  hours24: nil,
                  week_start: Time::DayOfWeek::Sunday,

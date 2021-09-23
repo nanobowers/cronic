@@ -79,21 +79,21 @@ describe Cronic::Parser do
       time.should eq Time.local(2007, 5, 27, 12)
     end
     it "handles past context" do
-      time = parse_now("aug 3", context: :past)
+      time = parse_now("aug 3", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 8, 3, 12)
-      time = parse_now("may 28", context: :past)
+      time = parse_now("may 28", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 5, 28, 12)
     end
     it "handles future context" do
-      time = parse_now("aug 20", context: :future)
+      time = parse_now("aug 20", context: Cronic::PointerDir::Future)
       time.should eq Time.local(2006, 8, 20, 12)
     end
     it "also accepts a time" do
-      time = parse_now("may 28 5pm", context: :past)
+      time = parse_now("may 28 5pm", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 5, 28, 17)
-      time = parse_now("may 28 at 5pm", context: :past)
+      time = parse_now("may 28 at 5pm", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 5, 28, 17)
-      time = parse_now("may 28 at 5:32.19pm", context: :past)
+      time = parse_now("may 28 at 5:32.19pm", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 5, 28, 17, 32, 19)
     end
     it "handles nanoseconds" do
@@ -118,15 +118,15 @@ describe Cronic::Parser do
       time.should eq Time.local(2007, 5, 27, 12)
     end
     it "parses a date in the past" do
-      time = parse_now("may 27th", context: :past)
+      time = parse_now("may 27th", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 5, 27, 12)
     end
     it "parses a date in the past with a time" do
-      time = parse_now("may 27th 5:00 pm", context: :past)
+      time = parse_now("may 27th 5:00 pm", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 5, 27, 17)
     end
     it "parses a date in the past with a time (2)" do
-      time = parse_now("may 27th at 5pm", context: :past)
+      time = parse_now("may 27th at 5pm", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 5, 27, 17)
     end
     it "parses a date in the past with a time (3)" do
@@ -181,11 +181,11 @@ describe Cronic::Parser do
   end
   describe "RepeaterMonthName-ScalarDay-ON" do
     it "parses" do
-      time = parse_now("5:00 pm may 27th", context: :past)
+      time = parse_now("5:00 pm may 27th", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 5, 27, 17)
-      time = parse_now("05:00 pm may 27th", context: :past)
+      time = parse_now("05:00 pm may 27th", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 5, 27, 17)
-      time = parse_now("5pm on may 27th", context: :past)
+      time = parse_now("5pm on may 27th", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 5, 27, 17)
       time = parse_now("5 on may 27th", ambiguous_time_range: nil)
       time.should eq Time.local(2007, 5, 27, 5)
@@ -350,7 +350,7 @@ describe Cronic::Parser do
     }
   end
   it "handles something like rfc3339 but not really" do
-    time = parse_now("2013-03-12 17:00", context: :past)
+    time = parse_now("2013-03-12 17:00", context: Cronic::PointerDir::Past)
     time.should eq Time.local(2013, 3, 12, 17, 0, 0)
   end
 
@@ -420,27 +420,27 @@ describe Cronic::Parser do
     time.should eq Time.local(2006, 9, 13, 12)
     time = parse_now("05/06")
     time.should eq Time.local(2007, 5, 6, 12)
-    time = parse_now("1/13", context: :future)
+    time = parse_now("1/13", context: Cronic::PointerDir::Future)
     time.should eq Time.local(2007, 1, 13, 12)
-    time = parse_now("3/13", context: :none)
+    time = parse_now("3/13", context: Cronic::PointerDir::None)
     time.should eq Time.local(2006, 3, 13, 12)
-    time = parse_now("12/1", context: :past)
+    time = parse_now("12/1", context: Cronic::PointerDir::Past)
     time.should eq Time.local(2005, 12, 1, 12)
-    time = parse_now("12/1", context: :future)
+    time = parse_now("12/1", context: Cronic::PointerDir::Future)
     time.should eq Time.local(2006, 12, 1, 12)
-    time = parse_now("12/1", context: :none)
+    time = parse_now("12/1", context: Cronic::PointerDir::None)
     time.should eq Time.local(2006, 12, 1, 12)
-    time = parse_now("8/1", context: :past)
+    time = parse_now("8/1", context: Cronic::PointerDir::Past)
     time.should eq Time.local(2006, 8, 1, 12)
-    time = parse_now("8/1", context: :future)
+    time = parse_now("8/1", context: Cronic::PointerDir::Future)
     time.should eq Time.local(2007, 8, 1, 12)
-    time = parse_now("8/1", context: :none)
+    time = parse_now("8/1", context: Cronic::PointerDir::None)
     time.should eq Time.local(2006, 8, 1, 12)
-    time = parse_now("1/1", context: :past)
+    time = parse_now("1/1", context: Cronic::PointerDir::Past)
     time.should eq Time.local(2006, 1, 1, 12)
-    time = parse_now("1/1", context: :future)
+    time = parse_now("1/1", context: Cronic::PointerDir::Future)
     time.should eq Time.local(2007, 1, 1, 12)
-    time = parse_now("1/1", context: :none)
+    time = parse_now("1/1", context: Cronic::PointerDir::None)
     time.should eq Time.local(2006, 1, 1, 12)
   end
 
@@ -594,11 +594,11 @@ describe Cronic::Parser do
     it "parses this/next __" do
       time = parse_now_span("this year")
       time.begin.should eq Time.local(2006, 8, 17)
-      time = parse_now_span("this year", context: :past)
+      time = parse_now_span("this year", context: Cronic::PointerDir::Past)
       time.begin.should eq Time.local(2006, 1, 1)
       time = parse_now("this month")
       time.should eq Time.local(2006, 8, 24, 12)
-      time = parse_now("this month", context: :past)
+      time = parse_now("this month", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 8, 8, 12)
       time = Cronic.parse("next month", now: Time.local(2006, 11, 15))
       time.should eq Time.local(2006, 12, 16, 12)
@@ -606,31 +606,31 @@ describe Cronic::Parser do
       time.should eq Time.local(2005, 11, 16)
       time = parse_now("this fortnight")
       time.should eq Time.local(2006, 8, 21, 19, 30)
-      time = parse_now("this fortnight", context: :past)
+      time = parse_now("this fortnight", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 8, 14, 19)
       time = parse_now("this week")
       time.should eq Time.local(2006, 8, 18, 7, 30)
-      time = parse_now("this week", context: :past)
+      time = parse_now("this week", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 8, 14, 19)
-      time = parse_now("this week", context: :past, guess: Cronic::Guess::Begin)
+      time = parse_now("this week", context: Cronic::PointerDir::Past, guess: Cronic::Guess::Begin)
       time.should eq Time.local(2006, 8, 13)
     end
 
     it "parses this week with nondefault week_start" do
-      time = parse_now("this week", context: :past, guess: Cronic::Guess::Begin, week_start: Time::DayOfWeek::Monday)
+      time = parse_now("this week", context: Cronic::PointerDir::Past, guess: Cronic::Guess::Begin, week_start: Time::DayOfWeek::Monday)
       time.should eq Time.local(2006, 8, 14)
     end
 
     it "parses this/last __" do
       time = parse_now("this weekend")
       time.should eq Time.local(2006, 8, 20)
-      time = parse_now("this weekend", context: :past)
+      time = parse_now("this weekend", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 8, 13)
       time = parse_now("last weekend")
       time.should eq Time.local(2006, 8, 13)
       time = parse_now("this day")
       time.should eq Time.local(2006, 8, 16, 19)
-      time = parse_now("this day", context: :past)
+      time = parse_now("this day", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 8, 16, 7)
     end
     it "parses yesterday/today/tomorrow" do
@@ -704,7 +704,7 @@ describe Cronic::Parser do
     it "parses second as a time-unit and not 2nd" do
       time = parse_now("this second")
       time.should eq Time.local(2006, 8, 16, 14)
-      time = parse_now("this second", context: :past)
+      time = parse_now("this second", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 8, 16, 14)
       time = parse_now("next second")
       time.should eq Time.local(2006, 8, 16, 14, 0, 1)
@@ -758,7 +758,7 @@ describe Cronic::Parser do
     time.should eq Time.local(2006, 8, 21, 0, 1)
     time = parse_now("next monday at 12:01 pm")
     time.should eq Time.local(2006, 8, 21, 12, 1)
-    time = parse_now("sunday at 8:15pm", context: :past)
+    time = parse_now("sunday at 8:15pm", context: Cronic::PointerDir::Past)
     time.should eq Time.local(2006, 8, 13, 20, 15)
   end
 
@@ -1020,13 +1020,13 @@ describe Cronic::Parser do
   end
   it("quarters named") do
     ["Q1", "first quarter", "1st quarter"].each do |string|
-      time = parse_now_span(string, context: :none)
+      time = parse_now_span(string, context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2006, 1, 1)
       time.end.should eq Time.local(2006, 4, 1)
-      time = parse_now_span(string, context: :future)
+      time = parse_now_span(string, context: Cronic::PointerDir::Future)
       time.begin.should eq Time.local(2007, 1, 1)
       time.end.should eq Time.local(2007, 4, 1)
-      time = parse_now_span(string, context: :past)
+      time = parse_now_span(string, context: Cronic::PointerDir::Past)
       time.begin.should eq Time.local(2006, 1, 1)
       time.end.should eq Time.local(2006, 4, 1)
       time = parse_now_span("#{string} 2005")
@@ -1047,24 +1047,24 @@ describe Cronic::Parser do
       time = parse_now_span("next year #{string}")
       time.begin.should eq Time.local(2007, 1, 1)
       time.end.should eq Time.local(2007, 4, 1)
-      time = parse_now_span("this #{string}", context: :none)
+      time = parse_now_span("this #{string}", context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2006, 1, 1)
       time.end.should eq Time.local(2006, 4, 1)
-      time = parse_now_span("last #{string}", context: :none)
+      time = parse_now_span("last #{string}", context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2006, 1, 1)
       time.end.should eq Time.local(2006, 4, 1)
-      time = parse_now_span("next #{string}", context: :none)
+      time = parse_now_span("next #{string}", context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2007, 1, 1)
       time.end.should eq Time.local(2007, 4, 1)
     end
     ["Q2", "second quarter", "2nd quarter"].each do |string|
-      time = parse_now_span(string, context: :none)
+      time = parse_now_span(string, context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2006, 4, 1)
       time.end.should eq Time.local(2006, 7, 1)
-      time = parse_now_span(string, context: :future)
+      time = parse_now_span(string, context: Cronic::PointerDir::Future)
       time.begin.should eq Time.local(2007, 4, 1)
       time.end.should eq Time.local(2007, 7, 1)
-      time = parse_now_span(string, context: :past)
+      time = parse_now_span(string, context: Cronic::PointerDir::Past)
       time.begin.should eq Time.local(2006, 4, 1)
       time.end.should eq Time.local(2006, 7, 1)
       time = parse_now_span("#{string} 2005")
@@ -1085,24 +1085,24 @@ describe Cronic::Parser do
       time = parse_now_span("next year #{string}")
       time.begin.should eq Time.local(2007, 4, 1)
       time.end.should eq Time.local(2007, 7, 1)
-      time = parse_now_span("this #{string}", context: :none)
+      time = parse_now_span("this #{string}", context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2006, 4, 1)
       time.end.should eq Time.local(2006, 7, 1)
-      time = parse_now_span("last #{string}", context: :none)
+      time = parse_now_span("last #{string}", context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2006, 4, 1)
       time.end.should eq Time.local(2006, 7, 1)
-      time = parse_now_span("next #{string}", context: :none)
+      time = parse_now_span("next #{string}", context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2007, 4, 1)
       time.end.should eq Time.local(2007, 7, 1)
     end
     ["Q3", "third quarter", "3rd quarter"].each do |string|
-      time = parse_now_span(string, context: :none)
+      time = parse_now_span(string, context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2006, 7, 1)
       time.end.should eq Time.local(2006, 10, 1)
-      time = parse_now_span(string, context: :future)
+      time = parse_now_span(string, context: Cronic::PointerDir::Future)
       time.begin.should eq Time.local(2007, 7, 1)
       time.end.should eq Time.local(2007, 10, 1)
-      time = parse_now_span(string, context: :past)
+      time = parse_now_span(string, context: Cronic::PointerDir::Past)
       time.begin.should eq Time.local(2005, 7, 1)
       time.end.should eq Time.local(2005, 10, 1)
       time = parse_now_span("#{string} 2005")
@@ -1123,24 +1123,24 @@ describe Cronic::Parser do
       time = parse_now_span("next year #{string}")
       time.begin.should eq Time.local(2007, 7, 1)
       time.end.should eq Time.local(2007, 10, 1)
-      time = parse_now_span("this #{string}", context: :none)
+      time = parse_now_span("this #{string}", context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2006, 7, 1)
       time.end.should eq Time.local(2006, 10, 1)
-      time = parse_now_span("last #{string}", context: :none)
+      time = parse_now_span("last #{string}", context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2005, 7, 1)
       time.end.should eq Time.local(2005, 10, 1)
-      time = parse_now_span("next #{string}", context: :none)
+      time = parse_now_span("next #{string}", context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2007, 7, 1)
       time.end.should eq Time.local(2007, 10, 1)
     end
     ["Q4", "fourth quarter", "4th quarter"].each do |string|
-      time = parse_now_span(string, context: :none)
+      time = parse_now_span(string, context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2006, 10, 1)
       time.end.should eq Time.local(2007, 1, 1)
-      time = parse_now_span(string, context: :future)
+      time = parse_now_span(string, context: Cronic::PointerDir::Future)
       time.begin.should eq Time.local(2006, 10, 1)
       time.end.should eq Time.local(2007, 1, 1)
-      time = parse_now_span(string, context: :past)
+      time = parse_now_span(string, context: Cronic::PointerDir::Past)
       time.begin.should eq Time.local(2005, 10, 1)
       time.end.should eq Time.local(2006, 1, 1)
       time = parse_now_span("#{string} 2005")
@@ -1161,13 +1161,13 @@ describe Cronic::Parser do
       time = parse_now_span("next year #{string}")
       time.begin.should eq Time.local(2007, 10, 1)
       time.end.should eq Time.local(2008, 1, 1)
-      time = parse_now_span("this #{string}", context: :none)
+      time = parse_now_span("this #{string}", context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2006, 10, 1)
       time.end.should eq Time.local(2007, 1, 1)
-      time = parse_now_span("last #{string}", context: :none)
+      time = parse_now_span("last #{string}", context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2005, 10, 1)
       time.end.should eq Time.local(2006, 1, 1)
-      time = parse_now_span("next #{string}", context: :none)
+      time = parse_now_span("next #{string}", context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2006, 10, 1)
       time.end.should eq Time.local(2007, 1, 1)
     end
@@ -1221,7 +1221,7 @@ describe Cronic::Parser do
     time.should eq Time.local(2006, 8, 16, 16)
     time = parse_now("Thu 1st at 4pm")
     time.should eq Time.local(2006, 9, 1, 16)
-    time = parse_now("Thu 1st at 4pm", context: :past)
+    time = parse_now("Thu 1st at 4pm", context: Cronic::PointerDir::Past)
     time.should eq Time.local(2006, 8, 1, 16)
   end
   it("handle rdn od") do

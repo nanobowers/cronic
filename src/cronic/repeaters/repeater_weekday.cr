@@ -16,7 +16,7 @@ module Cronic
     def next(pointer)
       super
 
-      direction = (pointer == :future) ? 1 : -1
+      direction = (pointer == PointerDir::Future) ? 1 : -1
 
       loop do
         @current_weekday_start += Time::Span.new(days: direction)
@@ -26,18 +26,18 @@ module Cronic
       SecSpan.new(@current_weekday_start, @current_weekday_start + 1.day)
     end
 
-    def this(pointer = :future)
+    def this(pointer = PointerDir::Future)
       super
       case pointer
-      when :past
-        self.next(:past)
-      else # when :future, :none
-        self.next(:future)
+      in PointerDir::Past
+        self.next(PointerDir::Past)
+      in PointerDir::Future, PointerDir::None
+        self.next(PointerDir::Future)
       end
     end
 
     def offset(span, amount, pointer)
-      direction = pointer == :future ? 1 : -1
+      direction = pointer == PointerDir::Future ? 1 : -1
 
       num_weekdays_passed = 0
       offset = 0.seconds

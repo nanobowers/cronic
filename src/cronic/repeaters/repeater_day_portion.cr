@@ -29,7 +29,7 @@ module Cronic
       @range || raise RuntimeError.new("Range should have been set by now")
     end
 
-    def next(pointer)
+    def next(pointer)  : SecSpan
       super
       range_begin = @range.begin.seconds
       range_end = @range.end.seconds
@@ -37,23 +37,23 @@ module Cronic
         now_seconds = @now - Cronic.construct(@now.year, @now.month, @now.day)
         if now_seconds < range_begin
           case pointer
-          when :past
+          in PointerDir::Past
             range_start = Cronic.construct(@now.year, @now.month, @now.day - 1) + range_begin
-          else # when :future
+          in PointerDir::Future, PointerDir::None
             range_start = Cronic.construct(@now.year, @now.month, @now.day) + range_begin
           end
         elsif now_seconds > range_end
           case pointer
-          when :past
+          in PointerDir::Past
             range_start = Cronic.construct(@now.year, @now.month, @now.day) + range_begin
-          else # when :future
+          in PointerDir::Future, PointerDir::None
             range_start = Cronic.construct(@now.year, @now.month, @now.day + 1) + range_begin
           end
         else
           case pointer
-          when :past
+          in PointerDir::Past
             range_start = Cronic.construct(@now.year, @now.month, @now.day - 1) + range_begin
-          else # when :future
+          in PointerDir::Future, PointerDir::None
             range_start = Cronic.construct(@now.year, @now.month, @now.day + 1) + range_begin
           end
         end
@@ -61,7 +61,7 @@ module Cronic
         range_end = construct_date_from_reference_and_offset(range_start, offset)
         @current_span = SecSpan.new(range_start, range_end)
       else
-        days_to_shift_window = (pointer == :past) ? -1 : 1
+        days_to_shift_window = (pointer == PointerDir::Past) ? -1 : 1
         cspan = @current_span.as(SecSpan)
         new_begin = Cronic.construct(cspan.begin.year, cspan.begin.month, cspan.begin.day + days_to_shift_window, cspan.begin.hour, cspan.begin.minute, cspan.begin.second)
         new_end = Cronic.construct(cspan.end.year, cspan.end.month, cspan.end.day + days_to_shift_window, cspan.end.hour, cspan.end.minute, cspan.end.second)
@@ -69,7 +69,7 @@ module Cronic
       end
     end
 
-    def this(context = :future)
+    def this(context = PointerDir::Future) : SecSpan
       super
 
       range_start = Cronic.construct(@now.year, @now.month, @now.day) + @range.begin.seconds
@@ -77,10 +77,10 @@ module Cronic
       @current_span = SecSpan.new(range_start, range_end)
     end
 
-    def offset(span, amount, pointer)
+    def offset(span, amount, pointer) : SecSpan
       @now = span.begin
       portion_span = self.next(pointer)
-      direction = pointer == :future ? 1 : -1
+      direction = pointer == PointerDir::Future ? 1 : -1
       portion_span + (direction * (amount - 1) * Date::DAY_SECONDS)
     end
 

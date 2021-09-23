@@ -7,6 +7,12 @@ module Cronic
     # options - The Hash of options specified in Cronic::parse.
     #
     # Returns an Array of tokens.
+    getter :dir
+    
+    def initialize(@dir : PointerDir, width=nil, **options)
+      super(@dir.to_s, width)
+    end
+
     def self.scan(tokens, **options)
       tokens.each do |token|
         token.tag scan_for(token, self, patterns, **options)
@@ -15,8 +21,8 @@ module Cronic
 
     def self.patterns
       @@patterns ||= {
-        "past"         => :past,
-        /^future|in$/i => :future,
+        "past"         => PointerDir::Past,
+        /^future|in$/i => PointerDir::Future,
       }
     end
 

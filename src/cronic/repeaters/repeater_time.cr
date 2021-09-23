@@ -81,7 +81,7 @@ module Cronic
       offset_fix = Time::Span.new(seconds: (midnight.offset - tomorrow_midnight.offset))
       tomorrow_midnight += offset_fix
 
-      if pointer == :future
+      if pointer == PointerDir::Future
         if tagtype.ambiguous?
           [midnight + tagtype.timespan + offset_fix, midnight + half_day + tagtype.timespan + offset_fix, tomorrow_midnight + tagtype.timespan].each do |t|
             (@current_time = t; return) if t >= @now
@@ -91,7 +91,7 @@ module Cronic
             (@current_time = t; return) if t >= @now
           end
         end
-      else # pointer == :past
+      else # pointer == PointerDir::Past
         if tagtype.ambiguous?
           [midnight + half_day + tagtype.timespan + offset_fix, midnight + tagtype.timespan + offset_fix, yesterday_midnight + tagtype.timespan + half_day].each do |t|
             (@current_time = t; return) if t <= @now
@@ -106,7 +106,7 @@ module Cronic
 
     # Return the next past or future Span for the time that this Repeater represents
     #   pointer - Symbol representing which temporal direction to fetch the next day
-    #             must be either :past or :future
+    #             must be either PointerDir::Past or PointerDir::Future
     def next(pointer)
       first = false
 
@@ -121,14 +121,14 @@ module Cronic
       #unless first
       else
         increment = tagtype.ambiguous? ? 12.hours : 24.hours
-        @current_time = @current_time.as(Time) + ((pointer == :future) ? increment : -increment)
+        @current_time = @current_time.as(Time) + ((pointer == PointerDir::Future) ? increment : -increment)
       end
       ctime = @current_time.as(Time)
       SecSpan.new(ctime, ctime + 1.second)
     end
 
-    def this(context = :future)
-      context = :future if context == :none
+    def this(context = PointerDir::Future)
+      context = PointerDir::Future if context == PointerDir::None
       self.next(context)
     end
 

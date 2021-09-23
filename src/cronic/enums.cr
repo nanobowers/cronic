@@ -10,6 +10,12 @@ module Cronic
     Forward  =  1
   end
 
+  enum PointerDir
+    Past = -1
+    None = 0
+    Future = 1
+  end
+  
   enum DateEndian
     MonthDay # aka :middle from chronic
     DayMonth # aka :little from chronic

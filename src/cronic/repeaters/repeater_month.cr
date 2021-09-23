@@ -22,30 +22,30 @@ module Cronic
       SecSpan.new(cms, Cronic.construct(cms.year, cms.month) + 1.month)
     end
 
-    def this(pointer = :future)
+    def this(pointer = PointerDir::Future)
       super
 
       case pointer
-      when :future
+      in PointerDir::Future
         month_start = Cronic.construct(@now.year, @now.month, @now.day + 1)
-        month_end = self.offset_by(Cronic.construct(@now.year, @now.month), 1, :future)
-      when :past
+        month_end = self.offset_by(Cronic.construct(@now.year, @now.month), 1, PointerDir::Future)
+      in PointerDir::Past
         month_start = Cronic.construct(@now.year, @now.month)
         month_end = Cronic.construct(@now.year, @now.month, @now.day)
-      else # when :none
+      in PointerDir::None
         month_start = Cronic.construct(@now.year, @now.month)
-        month_end = self.offset_by(Cronic.construct(@now.year, @now.month), 1, :future)
+        month_end = self.offset_by(Cronic.construct(@now.year, @now.month), 1, PointerDir::Future)
       end
 
       SecSpan.new(month_start, month_end)
     end
 
-    def offset(span, amount, pointer)
+    def offset(span, amount, pointer) : SecSpan
       SecSpan.new(offset_by(span.begin, amount, pointer), offset_by(span.end, amount, pointer))
     end
 
     def offset_by(time, amount, pointer)
-      direction = pointer == :future ? 1 : -1
+      direction = pointer == PointerDir::Future ? 1 : -1
 
       amount_years = direction * amount // YEAR_MONTHS
       amount_months = direction * amount % YEAR_MONTHS

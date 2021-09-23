@@ -38,7 +38,7 @@ module Cronic
     #                 two digit year is `now + x years` it's assumed to be the
     #                 future, `now - x years` is assumed to be the past.
     def initialize(
-      @context : Symbol = :future,
+      @context : PointerDir = PointerDir::Future,
       @now : Time = Time.local,
       @hours24 : Bool? = nil,
       @week_start : Time::DayOfWeek = Time::DayOfWeek::Sunday,
@@ -103,7 +103,7 @@ module Cronic
     #     #=> "136 days future this second"
     #
     # Returns a new String ready for Cronic to parse.
-    def pre_normalize(text)
+    def pre_normalize(text) : String
       text = text.to_s.downcase
 
       text = text.gsub(/\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/, "\\3 / \\2 / \\1")
@@ -257,7 +257,7 @@ module Cronic
     # Or's and Maybe's
     #
     
-    private def match_one(pat, tok : Token)
+    private def match_one(pat, tok : Token) : Bool
       if pat.is_a?(Or)
         # puts ">> checking #{tok.inspect} against #{pat}"
         return pat.items.any? { |x| match_one(x, tok) }

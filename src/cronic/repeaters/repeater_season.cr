@@ -26,28 +26,28 @@ module Cronic
     def next(pointer)
       super
 
-      direction = (pointer == :future) ? Direction::Forward : Direction::Backward
+      direction = (pointer == PointerDir::Future) ? Direction::Forward : Direction::Backward
       cur_ssn = find_current_season(MiniDate.from_time(@now))
       next_season = cur_ssn.adjust(direction)
 
       find_next_season_span(direction, next_season)
     end
 
-    def this(pointer = :future)
+    def this(pointer = PointerDir::Future)
       super
 
-      direction = (pointer == :future) ? Direction::Forward : Direction::Backward
+      direction = (pointer == PointerDir::Future) ? Direction::Forward : Direction::Backward
 
       today = Cronic.construct(@now.year, @now.month, @now.day)
       this_ssn = find_current_season(MiniDate.from_time(@now))
       case pointer
-      when :past
+      in PointerDir::Past
         this_ssn_start = today + (direction.value * num_seconds_til_start(this_ssn, direction)).seconds
         this_ssn_end = today
-      when :future
+      in PointerDir::Future
         this_ssn_start = today + 1.day
         this_ssn_end = today + (direction.value * num_seconds_til_end(this_ssn, direction)).seconds
-      else # when :none
+      in PointerDir::None
         this_ssn_start = today + (direction.value * num_seconds_til_start(this_ssn, direction)).seconds
         this_ssn_end = today + (direction.value * num_seconds_til_end(this_ssn, direction)).seconds
       end
@@ -55,12 +55,12 @@ module Cronic
       construct_season(this_ssn_start, this_ssn_end)
     end
 
-    def offset(span, amount, pointer)
+    def offset(span, amount, pointer) : SecSpan
       SecSpan.new(offset_by(span.begin, amount, pointer), offset_by(span.end, amount, pointer))
     end
 
     def offset_by(time, amount, pointer)
-      direction = pointer == :future ? 1 : -1
+      direction = pointer == PointerDir::Future ? 1 : -1
       time + (amount * direction * Date::SEASON_SECONDS).seconds
     end
 

@@ -30,19 +30,19 @@ module Cronic
 
       unless @current_month_begin
         case pointer
-        when :future
+        in PointerDir::Future
           if @now.month < index
             @current_month_begin = Cronic.construct(@now.year, index)
           elsif @now.month > index
             @current_month_begin = Cronic.construct(@now.year + 1, index)
           end
-        when :none
+        in PointerDir::None
           if @now.month <= index
             @current_month_begin = Cronic.construct(@now.year, index)
           elsif @now.month > index
             @current_month_begin = Cronic.construct(@now.year + 1, index)
           end
-        when :past
+        in PointerDir::Past
           if @now.month >= index
             @current_month_begin = Cronic.construct(@now.year, index)
           elsif @now.month < index
@@ -54,9 +54,9 @@ module Cronic
       else
         cmb = @current_month_begin.as(Time)
         case pointer
-        when :future, :none
+        in PointerDir::Future, PointerDir::None
           @current_month_begin = Cronic.construct(cmb.year + 1, cmb.month)
-        when :past
+        in PointerDir::Past
           @current_month_begin = Cronic.construct(cmb.year - 1, cmb.month)
         end
       end
@@ -79,16 +79,13 @@ module Cronic
       @current_month_begin.as(Time)
     end
 
-    def this(pointer = :future) : SecSpan
+    def this(pointer = PointerDir::Future) : SecSpan
       super
-
       case pointer
-      when :past
+      in PointerDir::Past
         self.next(pointer)
-      when :future, :none
-        self.next(:none)
-      else
-        self.next(:none) # for case type completeness
+      in PointerDir::Future, PointerDir::None
+        self.next(PointerDir::None)
       end
     end
 

@@ -72,7 +72,7 @@ describe Cronic::Handlers do
     tokens = [Cronic::Token.new("3"), Cronic::Token.new("years"), Cronic::Token.new("past")]
     tokens[0].tag(Cronic::Scalar.new(3))
     tokens[1].tag(Cronic::RepeaterYear.new(:year))
-    tokens[2].tag(Cronic::Pointer.new(:past))
+    tokens[2].tag(Cronic::Pointer.new(Cronic::PointerDir::Past))
     handler.match(tokens, definitions).should be_truthy
   end
 

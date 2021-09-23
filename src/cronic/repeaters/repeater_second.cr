@@ -13,20 +13,20 @@ module Cronic
       @second_start = @now
     end
 
-    def next(pointer = :future)
+    def next(pointer = PointerDir::Future)
       super
-      direction = pointer == :future ? 1 : -1
+      direction = pointer == PointerDir::Future ? 1 : -1
       @second_start += direction.seconds
       SecSpan.new(@second_start, @second_start + 1.second)
     end
 
-    def this(pointer = :future)
+    def this(pointer = PointerDir::Future)
       super
       SecSpan.new(@now, @now + 1.second)
     end
 
     def offset(span, amount, pointer)
-      direction = pointer == :future ? 1 : -1
+      direction = pointer == PointerDir::Future ? 1 : -1
       span + direction * amount
     end
 

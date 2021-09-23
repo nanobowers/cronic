@@ -14,22 +14,22 @@ module Cronic
 
     def next(pointer)
       super
-      diff = pointer == :future ? 1 : -1
+      diff = pointer == PointerDir::Future ? 1 : -1
       @current_year_start += diff.years
       SecSpan.new(@current_year_start, @current_year_start + 1.year)
     end
 
-    def this(pointer = :future)
+    def this(pointer = PointerDir::Future)
       super
 
       case pointer
-      when :future
+      in PointerDir::Future
         this_year_start = Cronic.construct(@now.year, @now.month, @now.day + 1)
         this_year_end = Cronic.construct(@now.year + 1, 1, 1)
-      when :past
+      in PointerDir::Past
         this_year_start = Cronic.construct(@now.year, 1, 1)
         this_year_end = Cronic.construct(@now.year, @now.month, @now.day)
-      else # when :none
+      in PointerDir::None
         this_year_start = Cronic.construct(@now.year, 1, 1)
         this_year_end = Cronic.construct(@now.year + 1, 1, 1)
       end
@@ -37,8 +37,8 @@ module Cronic
       SecSpan.new(this_year_start, this_year_end)
     end
 
-    def offset(span, amount, pointer)
-      direction = pointer == :future ? 1 : -1
+    def offset(span, amount, pointer) : SecSpan
+      direction = pointer == PointerDir::Future ? 1 : -1
       new_begin = build_offset_time(span.begin, amount, direction)
       new_end = build_offset_time(span.end, amount, direction)
       SecSpan.new(new_begin, new_end)

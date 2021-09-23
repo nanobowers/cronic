@@ -17,7 +17,7 @@ module Cronic
       if @current_span.nil?
         @current_span = this(pointer)
       else
-        year_offset = (pointer == :future) ? 1 : -1
+        year_offset = (pointer == PointerDir::Future) ? 1 : -1
         new_year = @current_span.as(SecSpan).begin.year + year_offset
         time_basis = Cronic.construct(new_year, @current_span.as(SecSpan).begin.month)
         @current_span = quarter(time_basis)
@@ -26,14 +26,14 @@ module Cronic
       @current_span
     end
 
-    def this(pointer = :future)
+    def this(pointer = PointerDir::Future)
       current_quarter_index = quarter_index(@now.month)
       target_quarter_index = @quarter.value
 
       year_basis_offset = case pointer
-                          when :past   then current_quarter_index > target_quarter_index ? 0 : -1
-                          when :future then current_quarter_index < target_quarter_index ? 0 : 1
-                          else              0
+                          in PointerDir::Past   then current_quarter_index > target_quarter_index ? 0 : -1
+                          in PointerDir::Future then current_quarter_index < target_quarter_index ? 0 : 1
+                          in PointerDir::None   then 0
                           end
 
       year_basis = @now.year + year_basis_offset

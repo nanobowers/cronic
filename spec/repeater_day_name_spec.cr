@@ -18,20 +18,20 @@ describe Cronic::RepeaterDayName do
   it("next future") do
     mondays = Cronic::RepeaterDayName.new(:monday)
     mondays.start = now_time
-    span = mondays.next(:future)
+    span = mondays.next(Cronic::PointerDir::Future)
     span.begin.should eq Time.local(2006, 8, 21)
     span.end.should eq Time.local(2006, 8, 22)
-    span = mondays.next(:future)
+    span = mondays.next(Cronic::PointerDir::Future)
     span.begin.should eq Time.local(2006, 8, 28)
     span.end.should eq Time.local(2006, 8, 29)
   end
   it("next past") do
     mondays = Cronic::RepeaterDayName.new(:monday)
     mondays.start = now_time
-    span = mondays.next(:past)
+    span = mondays.next(Cronic::PointerDir::Past)
     span.begin.should eq Time.local(2006, 8, 14)
     span.end.should eq Time.local(2006, 8, 15)
-    span = mondays.next(:past)
+    span = mondays.next(Cronic::PointerDir::Past)
     span.begin.should eq Time.local(2006, 8, 7)
     span.end.should eq Time.local(2006, 8, 8)
   end

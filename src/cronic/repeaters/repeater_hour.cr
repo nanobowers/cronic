@@ -14,21 +14,21 @@ module Cronic
 
     def next(pointer)
       super
-      direction = pointer == :future ? 1 : -1
+      direction = pointer == PointerDir::Future ? 1 : -1
       @current_hour_start = @current_hour_start.as(Time) + direction.hours
       SecSpan.new(@current_hour_start, @current_hour_start + 1.hour)
     end
 
-    def this(pointer = :future)
+    def this(pointer = PointerDir::Future)
       super
       case pointer
-      when :future
+      in PointerDir::Future
         hour_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute + 1)
         hour_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour + 1)
-      when :past
+      in PointerDir::Past
         hour_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour)
         hour_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute)
-      else # when :none
+      in PointerDir::None
         hour_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour)
         hour_end = hour_start + 1.hour
       end
@@ -36,7 +36,7 @@ module Cronic
     end
 
     def offset(span, amount, pointer)
-      direction = (pointer == :future) ? 1 : -1
+      direction = (pointer == PointerDir::Future) ? 1 : -1
       span + (direction * amount).hours
     end
 

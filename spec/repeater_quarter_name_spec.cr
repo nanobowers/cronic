@@ -17,22 +17,22 @@ describe Cronic::RepeaterQuarterName do
   it "gets this quarter" do
     quarter = Cronic::RepeaterQuarterName.new(Cronic::QuarterNames::Q1)
     quarter.start = now_time
-    time = quarter.this(:none)
+    time = quarter.this(Cronic::PointerDir::None)
     time.try(&.begin).should eq Time.local(2006, 1, 1)
     time.try(&.end).should eq Time.local(2006, 4, 1)
     quarter = Cronic::RepeaterQuarterName.new(Cronic::QuarterNames::Q2)
     quarter.start = now_time
-    time = quarter.this(:none)
+    time = quarter.this(Cronic::PointerDir::None)
     time.try(&.begin).should eq Time.local(2006, 4, 1)
     time.try(&.end).should eq Time.local(2006, 7, 1)
     quarter = Cronic::RepeaterQuarterName.new(Cronic::QuarterNames::Q3)
     quarter.start = now_time
-    time = quarter.this(:none)
+    time = quarter.this(Cronic::PointerDir::None)
     time.try(&.begin).should eq Time.local(2006, 7, 1)
     time.try(&.end).should eq Time.local(2006, 10, 1)
     quarter = Cronic::RepeaterQuarterName.new(Cronic::QuarterNames::Q4)
     quarter.start = now_time
-    time = quarter.this(:none)
+    time = quarter.this(Cronic::PointerDir::None)
     time.try(&.begin).should eq Time.local(2006, 10, 1)
     time.try(&.end).should eq Time.local(2007, 1, 1)
   end
@@ -40,22 +40,22 @@ describe Cronic::RepeaterQuarterName do
   it "gets this past quarter" do
     quarter = Cronic::RepeaterQuarterName.new(:q1)
     quarter.start = now_time
-    time = quarter.this(:past)
+    time = quarter.this(Cronic::PointerDir::Past)
     time.try(&.begin).should eq Time.local(2006, 1, 1)
     time.try(&.end).should eq Time.local(2006, 4, 1)
     quarter = Cronic::RepeaterQuarterName.new(:q2)
     quarter.start = now_time
-    time = quarter.this(:past)
+    time = quarter.this(Cronic::PointerDir::Past)
     time.try(&.begin).should eq Time.local(2006, 4, 1)
     time.try(&.end).should eq Time.local(2006, 7, 1)
     quarter = Cronic::RepeaterQuarterName.new(:q3)
     quarter.start = now_time
-    time = quarter.this(:past)
+    time = quarter.this(Cronic::PointerDir::Past)
     time.try(&.begin).should eq Time.local(2005, 7, 1)
     time.try(&.end).should eq Time.local(2005, 10, 1)
     quarter = Cronic::RepeaterQuarterName.new(:q4)
     quarter.start = now_time
-    time = quarter.this(:past)
+    time = quarter.this(Cronic::PointerDir::Past)
     time.try(&.begin).should eq Time.local(2005, 10, 1)
     time.try(&.end).should eq Time.local(2006, 1, 1)
   end
@@ -63,90 +63,90 @@ describe Cronic::RepeaterQuarterName do
   it "gets this future quarter" do
     quarter = Cronic::RepeaterQuarterName.new(:q1)
     quarter.start = now_time
-    time = quarter.this(:future)
+    time = quarter.this(Cronic::PointerDir::Future)
     time.try(&.begin).should eq Time.local(2007, 1, 1)
     time.try(&.end).should eq Time.local(2007, 4, 1)
     quarter = Cronic::RepeaterQuarterName.new(:q2)
     quarter.start = now_time
-    time = quarter.this(:future)
+    time = quarter.this(Cronic::PointerDir::Future)
     time.try(&.begin).should eq Time.local(2007, 4, 1)
     time.try(&.end).should eq Time.local(2007, 7, 1)
     quarter = Cronic::RepeaterQuarterName.new(:q3)
     quarter.start = now_time
-    time = quarter.this(:future)
+    time = quarter.this(Cronic::PointerDir::Future)
     time.try(&.begin).should eq Time.local(2007, 7, 1)
     time.try(&.end).should eq Time.local(2007, 10, 1)
     quarter = Cronic::RepeaterQuarterName.new(:q4)
     quarter.start = now_time
-    time = quarter.this(:future)
+    time = quarter.this(Cronic::PointerDir::Future)
     time.try(&.begin).should eq Time.local(2006, 10, 1)
     time.try(&.end).should eq Time.local(2007, 1, 1)
   end
   it("next future") do
     quarter = Cronic::RepeaterQuarterName.new(:q1)
     quarter.start = now_time
-    time = quarter.next(:future)
+    time = quarter.next(Cronic::PointerDir::Future)
     time.try(&.begin).should eq Time.local(2007, 1, 1)
     time.try(&.end).should eq Time.local(2007, 4, 1)
-    time = quarter.next(:future)
+    time = quarter.next(Cronic::PointerDir::Future)
     time.try(&.begin).should eq Time.local(2008, 1, 1)
     time.try(&.end).should eq Time.local(2008, 4, 1)
     quarter = Cronic::RepeaterQuarterName.new(:q2)
     quarter.start = now_time
-    time = quarter.next(:future)
+    time = quarter.next(Cronic::PointerDir::Future)
     time.try(&.begin).should eq Time.local(2007, 4, 1)
     time.try(&.end).should eq Time.local(2007, 7, 1)
-    time = quarter.next(:future)
+    time = quarter.next(Cronic::PointerDir::Future)
     time.try(&.begin).should eq Time.local(2008, 4, 1)
     time.try(&.end).should eq Time.local(2008, 7, 1)
     quarter = Cronic::RepeaterQuarterName.new(:q3)
     quarter.start = now_time
-    time = quarter.next(:future)
+    time = quarter.next(Cronic::PointerDir::Future)
     time.try(&.begin).should eq Time.local(2007, 7, 1)
     time.try(&.end).should eq Time.local(2007, 10, 1)
-    time = quarter.next(:future)
+    time = quarter.next(Cronic::PointerDir::Future)
     time.try(&.begin).should eq Time.local(2008, 7, 1)
     time.try(&.end).should eq Time.local(2008, 10, 1)
     quarter = Cronic::RepeaterQuarterName.new(:q4)
     quarter.start = now_time
-    time = quarter.next(:future)
+    time = quarter.next(Cronic::PointerDir::Future)
     time.try(&.begin).should eq Time.local(2006, 10, 1)
     time.try(&.end).should eq Time.local(2007, 1, 1)
-    time = quarter.next(:future)
+    time = quarter.next(Cronic::PointerDir::Future)
     time.try(&.begin).should eq Time.local(2007, 10, 1)
     time.try(&.end).should eq Time.local(2008, 1, 1)
   end
   it("next past") do
     quarter = Cronic::RepeaterQuarterName.new(:q1)
     quarter.start = now_time
-    time = quarter.next(:past)
+    time = quarter.next(Cronic::PointerDir::Past)
     time.try(&.begin).should eq Time.local(2006, 1, 1)
     time.try(&.end).should eq Time.local(2006, 4, 1)
-    time = quarter.next(:past)
+    time = quarter.next(Cronic::PointerDir::Past)
     time.try(&.begin).should eq Time.local(2005, 1, 1)
     time.try(&.end).should eq Time.local(2005, 4, 1)
     quarter = Cronic::RepeaterQuarterName.new(:q2)
     quarter.start = now_time
-    time = quarter.next(:past)
+    time = quarter.next(Cronic::PointerDir::Past)
     time.try(&.begin).should eq Time.local(2006, 4, 1)
     time.try(&.end).should eq Time.local(2006, 7, 1)
-    time = quarter.next(:past)
+    time = quarter.next(Cronic::PointerDir::Past)
     time.try(&.begin).should eq Time.local(2005, 4, 1)
     time.try(&.end).should eq Time.local(2005, 7, 1)
     quarter = Cronic::RepeaterQuarterName.new(:q3)
     quarter.start = now_time
-    time = quarter.next(:past)
+    time = quarter.next(Cronic::PointerDir::Past)
     time.try(&.begin).should eq Time.local(2005, 7, 1)
     time.try(&.end).should eq Time.local(2005, 10, 1)
-    time = quarter.next(:past)
+    time = quarter.next(Cronic::PointerDir::Past)
     time.try(&.begin).should eq Time.local(2004, 7, 1)
     time.try(&.end).should eq Time.local(2004, 10, 1)
     quarter = Cronic::RepeaterQuarterName.new(:q4)
     quarter.start = now_time
-    time = quarter.next(:past)
+    time = quarter.next(Cronic::PointerDir::Past)
     time.try(&.begin).should eq Time.local(2005, 10, 1)
     time.try(&.end).should eq Time.local(2006, 1, 1)
-    time = quarter.next(:past)
+    time = quarter.next(Cronic::PointerDir::Past)
     time.try(&.begin).should eq Time.local(2004, 10, 1)
     time.try(&.end).should eq Time.local(2005, 1, 1)
   end

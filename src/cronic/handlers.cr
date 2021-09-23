@@ -1,12 +1,12 @@
 module Cronic
   module Handlers
     # Handle month/day
-    def handle_m_d(month, day, time_tokens, context = :none, **options)
+    def handle_m_d(month, day, time_tokens, context = PointerDir::None, **options)
       month.start = self.now
       span = month.this(context)
       year, month = span.begin.year, span.begin.month
       day_start = Time.local(year, month, day)
-      day_start = Time.local(year + 1, month, day) if context == :future && day_start < now
+      day_start = Time.local(year + 1, month, day) if context == PointerDir::Future && day_start < now
 
       day_or_time(day_start, time_tokens, **options)
     end
@@ -119,7 +119,7 @@ module Cronic
       year = tokens[1].get_tag(ScalarYear).as(ScalarYear).type.as(Int32)
       quarter_tag = tokens[0].get_tag(RepeaterQuarterName).as(RepeaterQuarterName)
       quarter_tag.start = Cronic.construct(year)
-      quarter_tag.this(:none)
+      quarter_tag.this(PointerDir::None)
     end
 
     # Handle repeater-month-name/scalar-year
@@ -307,7 +307,7 @@ module Cronic
     end
 
     # Handle scalar-month/scalar-day
-    def handle_sm_sd(tokens, context = :future, **options)
+    def handle_sm_sd(tokens, context = PointerDir::Future, **options)
       month = tokens[0].get_tag(ScalarMonth).as(ScalarMonth).type.as(Int32)
       day = tokens[1].get_tag(ScalarDay).as(ScalarDay).type.as(Int32)
       year = self.now.year
@@ -318,9 +318,9 @@ module Cronic
       begin
         day_start = Time.local(year, month, day)
 
-        if context == :future && day_start < now
+        if context == PointerDir::Future && day_start < now
           day_start = Time.local(year + 1, month, day)
-        elsif context == :past && day_start > now
+        elsif context == PointerDir::Past && day_start > now
           day_start = Time.local(year - 1, month, day)
         end
 
@@ -409,13 +409,13 @@ module Cronic
     end
 
     # Handle RepeaterDayName OrdinalDay
-    def handle_rdn_od(tokens, context = :future, **options)
+    def handle_rdn_od(tokens, context = PointerDir::Future, **options)
       day = tokens[1].get_tag(OrdinalDay).as(OrdinalDay).type.as(Int32)
 
       time_tokens = tokens.last(tokens.size - 2)
       year = self.now.year
       month = self.now.month
-      if context == :future
+      if context == PointerDir::Future
         # raise NotImplementedError.new("badness")
         # ???#
         if self.now.day > day
@@ -515,10 +515,10 @@ module Cronic
     # arrows
 
     # Handle scalar/repeater/pointer helper
-    def handle_srp(tokens, span : SecSpan, **options)
+    def handle_srp(tokens, span : SecSpan, **options) : SecSpan?
       distance = tokens[0].get_tag(Scalar).as(Scalar).type.as(Int32)
       repeater = tokens[1].get_tag(Repeater).as(Repeater)
-      pointer = tokens[2].get_tag(Pointer).as(Pointer).type
+      pointer = tokens[2].get_tag(Pointer).as(Pointer).dir
 
       repeater.offset(span, distance, pointer) if repeater.responds_to?(:offset)
     end
@@ -547,13 +547,13 @@ module Cronic
     end
 
     def handle_s_r_a_s_r_p_a(tokens, **options)
-      #anchor_span = get_anchor(tokens[4..tokens.size - 1], **options)
-      anchor_tokens = tokens[4..tokens.size - 1]
-      anchor_span = if anchor_tokens.size > 1
-                      get_anchor(anchor_tokens, options)
-                    else
-                      SecSpan.new(self.now, self.now + 1.second)
-                    end
+      anchor_span = get_anchor(tokens[4..tokens.size - 1], **options)
+      #anchor_tokens = tokens[4..tokens.size - 1]
+      #anchor_span = if anchor_tokens.size > 1
+      #                get_anchor(anchor_tokens, options)
+      #              else
+      #                SecSpan.new(self.now, self.now + 1.second)
+      #              end
 
       span = handle_srp(tokens[0..1] + tokens[4..6], anchor_span.as(SecSpan), **options)
       handle_srp(tokens[2..3] + tokens[4..6], span.as(SecSpan), **options)
@@ -571,7 +571,7 @@ module Cronic
       span = nil
 
       ordinal.as(Int32).times do
-        span = repeater.next(:future).as(SecSpan)
+        span = repeater.next(PointerDir::Future).as(SecSpan)
         # p! [span, outer_span]
         if span.begin >= outer_span.as(SecSpan).end
           raise Cronic::InvalidParseError.new("Cannot find Date/Time in span #{outer_span.inspect}")
@@ -597,20 +597,20 @@ module Cronic
 
     # support methods
 
-    def day_or_time(day_start : Time, time_tokens, context : Symbol? = nil, **options)
+    def day_or_time(day_start : Time, time_tokens, context : PointerDir = PointerDir::Future, **options)
       outer_span = SecSpan.new(day_start, day_start + Time::Span.new(hours: 24))
 
       unless time_tokens.empty?
         self.now = outer_span.begin
-        get_anchor(Handlers.dealias_and_disambiguate_times(time_tokens, **options), context: context || :future)
+        get_anchor(Handlers.dealias_and_disambiguate_times(time_tokens, **options), context: context)
       else
         outer_span
       end
     end
 
-    def get_anchor(tokens, context = :none, **options)
+    def get_anchor(tokens, context = PointerDir::None, **options)
       grabber = Grabber.new(GrabberEnum::This)
-      pointer = :future
+      pointer = PointerDir::Future
       repeaters = get_repeaters(tokens)
 
       repeaters.size.times { tokens.pop }
@@ -624,15 +624,15 @@ module Cronic
 
       case grabber.grab
       in GrabberEnum::Last
-        outer_span = head.next(:past)
+        outer_span = head.next(PointerDir::Past)
       in GrabberEnum::This
-        if (context != :past) && (repeaters.size > 0)
-          outer_span = head.this(:none)
+        if (context != PointerDir::Past) && (repeaters.size > 0)
+          outer_span = head.this(PointerDir::None)
         else
           outer_span = head.this(context)
         end
       in GrabberEnum::Next
-        outer_span = head.next(:future)
+        outer_span = head.next(PointerDir::Future)
       end
 
       raise Exception.new("Invalid nil for outer_span") if outer_span.nil?
@@ -654,20 +654,20 @@ module Cronic
     # Recursively finds repeaters within other repeaters.
     # Returns a SecSpan representing the innermost time span
     # or nil if no repeater union could be found
-    def find_within(tags, span : SecSpan, pointer : Symbol) : SecSpan?
+    def find_within(tags, span : SecSpan, pointer : PointerDir) : SecSpan?
       puts "--#{span}" if Cronic.debug
       return span if tags.empty?
 
       head = tags.shift
-      head.start = (pointer == :future) ? span.begin : span.end
-      h = head.this(:none).as(SecSpan)
+      head.start = (pointer == PointerDir::Future) ? span.begin : span.end
+      h = head.this(PointerDir::None).as(SecSpan)
 
       if span.includes?(h.begin) || span.includes?(h.end)
         find_within(tags, h, pointer)
       end
     end
 
-    def find_within(tags, span : Nil, pointer : Symbol)
+    def find_within(tags, span : Nil, pointer : PointerDir)
       return nil
     end
 
