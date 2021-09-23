@@ -547,7 +547,13 @@ module Cronic
     end
 
     def handle_s_r_a_s_r_p_a(tokens, **options)
-      anchor_span = get_anchor(tokens[4..tokens.size - 1], **options)
+      #anchor_span = get_anchor(tokens[4..tokens.size - 1], **options)
+      anchor_tokens = tokens[4..tokens.size - 1]
+      anchor_span = if anchor_tokens.size > 1
+                      get_anchor(anchor_tokens, options)
+                    else
+                      SecSpan.new(self.now, self.now + 1.second)
+                    end
 
       span = handle_srp(tokens[0..1] + tokens[4..6], anchor_span.as(SecSpan), **options)
       handle_srp(tokens[2..3] + tokens[4..6], span.as(SecSpan), **options)

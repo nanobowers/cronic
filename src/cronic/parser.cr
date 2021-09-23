@@ -107,7 +107,8 @@ module Cronic
       text = text.to_s.downcase
 
       text = text.gsub(/\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/, "\\3 / \\2 / \\1")
-
+      text = text.gsub(/\b(\d{1,2})\.(\d{1,2})\.(\d{2})\b/, "\\2 / \\1 / \\3") #Chronic.rb#356 / 2-digit euro-date-format
+      
       # a.m, p.m. => am, pm
       text = text.gsub(/\b([ap])\.m\.?/, "\\1m")
 
@@ -163,6 +164,7 @@ module Cronic
       text = text.gsub(/\b(?:ago|before(?: now)?)\b/, "past")
       text = text.gsub(/\bthis (?:last|past)\b/, "last")
       text = text.gsub(/\b(?:in|during) the (morning)\b/, "\\1")
+      text = text.gsub(/\b(?:in) an? (second|minute|hour|day|week|month|year)\b/, "in 1 \\1")
       text = text.gsub(/\b(?:in the|during the|at) (afternoon|evening|night)\b/, "\\1")
       text = text.gsub(/\btonight\b/, "this night")
       text = text.gsub(/\b\d+:?\d*[ap]\b/, "\\0m")
@@ -221,7 +223,7 @@ module Cronic
 
       defs.each_with_index do |defn, idx|
         if span.nil? && (hadmatch = match(defn[:match], tokens))
-          #debug# puts "#{idx} #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n"
+          #puts "#{idx} #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n" if Cronic.debug
           span = defn[:proc].call(good_tokens)
         end
       end
@@ -232,9 +234,10 @@ module Cronic
           span = defn[:proc].call(arrow_good_tokens)
         end
       end
+      
       narrow_defs.each do |defn|
         if span.nil? && (hadmatch = match(defn[:match], tokens))
-          #debug# puts "NARROW #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n"
+          #puts "NARROW #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n" if Cronic.debug
           span = defn[:proc].call(tokens)
         end
       end
