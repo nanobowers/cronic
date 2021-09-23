@@ -64,4 +64,9 @@ describe Cronic::Token do
     p! NumberParser.parse("two tenths", bias: :fractional)
     p! NumberParser.parse("may tenth", bias: :fractional)
   end
+
+  it "makes a bad time" do
+    #p Time.local(2020, 13, 2) # BAD
+    #p Cronic.construct(2020, 13, 2) # OK
+  end
 end

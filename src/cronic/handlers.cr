@@ -1,7 +1,7 @@
 module Cronic
   module Handlers
     # Handle month/day
-    def handle_m_d(month, day, time_tokens, context = PointerDir::None, **options)
+    def subhandle_m_d(month, day, time_tokens, context = PointerDir::None, **options)
       month.start = self.now
       span = month.this(context)
       year, month = span.begin.year, span.begin.month
@@ -17,8 +17,7 @@ module Cronic
       day = tokens[1].get_tag(ScalarDay).as(ScalarDay).type.as(Int32)
 
       return nil if Date.month_overflow?(self.now.year, month.index, day)
-
-      handle_m_d(month, day, tokens[2..], **options)
+      subhandle_m_d(month, day, tokens[2..], **options)
     end
 
     # Handle repeater-month-name/scalar-day with separator-on
@@ -34,8 +33,7 @@ module Cronic
       end
 
       return nil if Date.month_overflow?(self.now.year, month.index, day)
-
-      handle_m_d(month, day, tokens[token_range], **options)
+      subhandle_m_d(month, day, tokens[token_range], **options)
     end
 
     # Handle repeater-month-name/ordinal-day
@@ -44,15 +42,14 @@ module Cronic
       day = tokens[1].get_tag(OrdinalDay).as(OrdinalDay).type.as(Int32)
 
       return nil if Date.month_overflow?(self.now.year, month.index, day)
-
-      handle_m_d(month, day, tokens[2..tokens.size], **options)
+      subhandle_m_d(month, day, tokens[2..tokens.size], **options)
     end
 
     # Handle ordinal this month
     def handle_od_rm(tokens, **options)
       day = tokens[0].get_tag(OrdinalDay).as(OrdinalDay).type.as(Int32)
       month = tokens[2].get_tag(RepeaterMonth).as(RepeaterMonth)
-      handle_m_d(month, day, tokens[3..tokens.size], **options)
+      subhandle_m_d(month, day, tokens[3..tokens.size], **options)
     end
 
     # Handle ordinal-day/repeater-month-name
@@ -60,9 +57,7 @@ module Cronic
       month = tokens[1].get_tag(RepeaterMonthName).as(RepeaterMonthName)
       day = tokens[0].get_tag(OrdinalDay).as(OrdinalDay).type.as(Int32)
       return nil if Date.month_overflow?(self.now.year, month.index, day)
-
-      handle_m_d(month, day, tokens[2..tokens.size], **options)
-      # nil
+      subhandle_m_d(month, day, tokens[2..tokens.size], **options)
     end
 
     def handle_sy_rmn_od(tokens, **options)
@@ -88,8 +83,7 @@ module Cronic
       month = tokens[1].get_tag(RepeaterMonthName).as(RepeaterMonthName)
 
       return nil if Date.month_overflow?(self.now.year, month.index, day)
-
-      handle_m_d(month, day, tokens[2..tokens.size], **options)
+      subhandle_m_d(month, day, tokens[2..tokens.size], **options)
     end
 
     # Handle repeater-month-name/ordinal-day with separator-on
@@ -105,8 +99,7 @@ module Cronic
       end
 
       return nil if Date.month_overflow?(self.now.year, month.index, day)
-
-      handle_m_d(month, day, tokens[token_range], **options)
+      subhandle_m_d(month, day, tokens[token_range], **options)
     end
 
     # Handle scalar-year/repeater-quarter-name
@@ -515,7 +508,7 @@ module Cronic
     # arrows
 
     # Handle scalar/repeater/pointer helper
-    def handle_srp(tokens, span : SecSpan, **options) : SecSpan?
+    def subhandle_srp(tokens, span : SecSpan, **options) : SecSpan?
       distance = tokens[0].get_tag(Scalar).as(Scalar).type.as(Int32)
       repeater = tokens[1].get_tag(Repeater).as(Repeater)
       pointer = tokens[2].get_tag(Pointer).as(Pointer).dir
@@ -526,19 +519,20 @@ module Cronic
     # Handle scalar/repeater/pointer
     def handle_s_r_p(tokens, **options)
       span = SecSpan.new(self.now, self.now + 1.second)
-      handle_srp(tokens, span, **options)
+      subhandle_srp(tokens, span, **options)
     end
 
     # Handle pointer/scalar/repeater
     def handle_p_s_r(tokens, **options)
+      span = SecSpan.new(self.now, self.now + 1.second)
       new_tokens = [tokens[1], tokens[2], tokens[0]]
-      handle_s_r_p(new_tokens, **options)
+      subhandle_srp(new_tokens, span, **options)
     end
 
     # Handle scalar/repeater/pointer/anchor
     def handle_s_r_p_a(tokens, **options)
       anchor_span = get_anchor(tokens[3..tokens.size - 1], **options)
-      handle_srp(tokens, anchor_span.as(SecSpan), **options)
+      subhandle_srp(tokens, anchor_span.as(SecSpan), **options)
     end
 
     # Handle repeater/scalar/repeater/pointer
@@ -555,28 +549,26 @@ module Cronic
       #                SecSpan.new(self.now, self.now + 1.second)
       #              end
 
-      span = handle_srp(tokens[0..1] + tokens[4..6], anchor_span.as(SecSpan), **options)
-      handle_srp(tokens[2..3] + tokens[4..6], span.as(SecSpan), **options)
+      span = subhandle_srp(tokens[0..1] + tokens[4..6], anchor_span.as(SecSpan), **options)
+      subhandle_srp(tokens[2..3] + tokens[4..6], span.as(SecSpan), **options)
     end
 
-    # narrows
+    # =======
+    # Narrows
+    # =======
 
     # Handle ordinal repeaters
-    def handle_orr(tokens, outer_span, **options)
+    def subhandle_orr(tokens, outer_span, **options)
       ordinal = tokens[0].get_tag(Ordinal).as(Ordinal).type
       repeater = tokens[1].get_tag(Repeater).as(Repeater)
       repeater.start = outer_span.as(SecSpan).begin - 1.second
 
-      # p "O/R/R!! #{ordinal} #{repeater}"
       span = nil
 
       ordinal.as(Int32).times do
         span = repeater.next(PointerDir::Future).as(SecSpan)
-        # p! [span, outer_span]
         if span.begin >= outer_span.as(SecSpan).end
           raise Cronic::InvalidParseError.new("Cannot find Date/Time in span #{outer_span.inspect}")
-          # span = nil
-          # break
         end
       end
 
@@ -586,13 +578,13 @@ module Cronic
     # Handle ordinal/repeater/separator/repeater
     def handle_o_r_s_r(tokens, **options)
       outer_span = get_anchor([tokens[3]], **options)
-      handle_orr(tokens[0..1], outer_span, **options)
+      subhandle_orr(tokens[0..1], outer_span, **options)
     end
 
     # Handle ordinal/repeater/grabber/repeater
     def handle_o_r_g_r(tokens, **options)
       outer_span = get_anchor(tokens[2..3], **options)
-      handle_orr(tokens[0..1], outer_span, **options)
+      subhandle_orr(tokens[0..1], outer_span, **options)
     end
 
     # support methods
