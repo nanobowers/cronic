@@ -15,76 +15,53 @@ module Cronic
   end
 
   class RepeaterMonthName < Repeater
-    # TODO: remove nilability on current-month-begin
-    @current_month_begin : Time?
 
+    @current_month : MonthNames
+    @current_year : Int32
+    
     def initialize(@month : MonthNames, width = nil, **kwargs)
       super(@month.to_s, width)
-      @current_month_begin = nil
+      @current_month = MonthNames.new(@now.month)
+      @current_year = @now.year
+      @first = true
+    end
+    
+    def start=(time : Time)
+      super
+      @current_month = MonthNames.new(time.month)
+      @current_year = time.year
+      @first = true
     end
 
-    def next(pointer) : SecSpan
-      super
-
-      unless @current_month_begin
-        case pointer
-        in PointerDir::Future
-          if @now.month < index
-            @current_month_begin = Cronic.construct(@now.year, index)
-          elsif @now.month > index
-            @current_month_begin = Cronic.construct(@now.year + 1, index)
-          end
-        in PointerDir::None
-          if @now.month <= index
-            @current_month_begin = Cronic.construct(@now.year, index)
-          elsif @now.month > index
-            @current_month_begin = Cronic.construct(@now.year + 1, index)
-          end
-        in PointerDir::Past
-          if @now.month >= index
-            @current_month_begin = Cronic.construct(@now.year, index)
-          elsif @now.month < index
-            @current_month_begin = Cronic.construct(@now.year - 1, index)
-          end
-        end
-
-        @current_month_begin || raise RuntimeError.new("Current month should be set by now")
-      else
-        cmb = @current_month_begin.as(Time)
+    def next(pointer : PointerDir) : SecSpan
+      if @first
+        # First time through adjust year according to if month is
+        # relatively in the past/future.
         case pointer
         in PointerDir::Future, PointerDir::None
-          @current_month_begin = Cronic.construct(cmb.year + 1, cmb.month)
+          @current_year += 1 if @current_month > @month
         in PointerDir::Past
-          @current_month_begin = Cronic.construct(cmb.year - 1, cmb.month)
+          @current_year -= 1 if @current_month < @month
         end
-      end
-
-      cur_month_year = current_month_begin.year
-      cur_month_month = current_month_begin.month
-
-      if cur_month_month == 12
-        next_month_year = cur_month_year + 1
-        next_month_month = 1
+        @current_month = @month
+        @first = false
       else
-        next_month_year = cur_month_year
-        next_month_month = cur_month_month + 1
+        @current_year += pointer.to_dir.value
       end
 
-      SecSpan.new(current_month_begin, Cronic.construct(next_month_year, next_month_month))
+      # Rely on .construct to adjust year if month overflows
+      SecSpan.new(
+        Cronic.construct(@current_year, @current_month.value),
+        Cronic.construct(@current_year, @current_month.value + 1))
+
     end
 
     def current_month_begin
       @current_month_begin.as(Time)
     end
 
-    def this(pointer = PointerDir::Future) : SecSpan
-      super
-      case pointer
-      in PointerDir::Past
-        self.next(pointer)
-      in PointerDir::Future, PointerDir::None
-        self.next(PointerDir::None)
-      end
+    def this(pointer : PointerDir) : SecSpan
+      self.next(pointer)
     end
 
     def width

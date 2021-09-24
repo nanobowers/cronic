@@ -9,10 +9,8 @@ module Cronic
       @current_date = nil
     end
 
-    def next(pointer)
-      super
-
-      direction = (pointer == PointerDir::Future) ? 1 : -1
+    def next(pointer : PointerDir)
+      direction = pointer.to_dir.value
 
       if @current_date.nil?
         @current_date = Time.local(@now.year, @now.month, @now.day) + direction.days
@@ -30,9 +28,7 @@ module Cronic
       SecSpan.new(cdate, ndate)
     end
 
-    def this(pointer = PointerDir::Future)
-      super
-      pointer = PointerDir::Future if pointer == PointerDir::None
+    def this(pointer : PointerDir)
       self.next(pointer)
     end
 

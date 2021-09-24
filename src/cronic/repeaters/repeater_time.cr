@@ -28,10 +28,6 @@ module Cronic
     @tagtype : Tick
     getter :tagtype
 
-    def start=(time : Time)
-      @now = time
-    end
-
     def initialize(time, width = nil, @hours24 : Bool? = nil, **kwargs)
       @type = :time
       @current_time = nil
@@ -70,7 +66,7 @@ module Cronic
       @tagtype = Tick.new(hours + minutes + seconds + subseconds, ambiguous)
     end
 
-    def update_current_time(pointer)
+    def update_current_time(pointer : PointerDir)
       half_day = 12.hours
       full_day = 24.hours
       midnight = Time.local(@now.year, @now.month, @now.day)
@@ -79,7 +75,8 @@ module Cronic
       offset_fix = Time::Span.new(seconds: (midnight.offset - tomorrow_midnight.offset))
       tomorrow_midnight += offset_fix
 
-      if pointer == PointerDir::Future
+      case pointer
+      in PointerDir::Future, PointerDir::None
         if tagtype.ambiguous?
           [midnight + tagtype.timespan + offset_fix, midnight + half_day + tagtype.timespan + offset_fix, tomorrow_midnight + tagtype.timespan].each do |t|
             (@current_time = t; return) if t >= @now
@@ -89,7 +86,7 @@ module Cronic
             (@current_time = t; return) if t >= @now
           end
         end
-      else # pointer == PointerDir::Past
+      in PointerDir::Past
         if tagtype.ambiguous?
           [midnight + half_day + tagtype.timespan + offset_fix, midnight + tagtype.timespan + offset_fix, yesterday_midnight + tagtype.timespan + half_day].each do |t|
             (@current_time = t; return) if t <= @now
@@ -103,30 +100,20 @@ module Cronic
     end
 
     # Return the next past or future Span for the time that this Repeater represents
-    #   pointer - Symbol representing which temporal direction to fetch the next day
-    #             must be either PointerDir::Past or PointerDir::Future
-    def next(pointer)
-      first = false
-
+    #   pointer - which temporal direction to fetch the next day
+    def next(pointer : PointerDir)
       unless @current_time
-        first = true
-
         update_current_time(pointer)
-
         @current_time || raise RuntimeError.new("Current time cannot be nil at this point")
-        # end
-        # @current_time = @current_time.as(Time)
-        # unless first
       else
         increment = tagtype.ambiguous? ? 12.hours : 24.hours
-        @current_time = @current_time.as(Time) + ((pointer == PointerDir::Future) ? increment : -increment)
+        @current_time = @current_time.as(Time) + increment * pointer.to_dir.value
       end
       ctime = @current_time.as(Time)
       SecSpan.new(ctime, ctime + 1.second)
     end
 
-    def this(context = PointerDir::Future)
-      context = PointerDir::Future if context == PointerDir::None
+    def this(context : PointerDir)
       self.next(context)
     end
 
