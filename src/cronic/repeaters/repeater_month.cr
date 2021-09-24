@@ -1,6 +1,6 @@
 module Cronic
-  class RepeaterMonth < Repeater # :nodoc:
-    YEAR_MONTHS   =        12
+  class RepeaterMonth < Repeater
+    YEAR_MONTHS = 12
 
     @current_month_start : Time
 
@@ -8,8 +8,8 @@ module Cronic
       super
       @current_month_start = Cronic.construct(@now.year, @now.month)
     end
-    
-    def start=(time)
+
+    def start=(time : Time)
       super
       @current_month_start = Cronic.construct(@now.year, @now.month)
     end

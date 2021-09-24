@@ -6,8 +6,8 @@ module Cronic
       super
       @current_year_start = Cronic.construct(@now.year)
     end
-    
-    def start=(time)
+
+    def start=(time : Time)
       super
       @current_year_start = Cronic.construct(@now.year)
     end

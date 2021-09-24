@@ -1,7 +1,5 @@
 module Cronic
-  
-  class RepeaterDayPortion < Repeater # :nodoc:
-
+  class RepeaterDayPortion < Repeater
     PORTIONS = {
       :am        => 0..(12 * 60 * 60 - 1),
       :pm        => (12 * 60 * 60)..(24 * 60 * 60 - 1),
@@ -29,7 +27,7 @@ module Cronic
       @range || raise RuntimeError.new("Range should have been set by now")
     end
 
-    def next(pointer)  : SecSpan
+    def next(pointer) : SecSpan
       super
       range_begin = @range.begin.seconds
       range_end = @range.end.seconds

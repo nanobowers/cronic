@@ -1,13 +1,13 @@
 module Cronic
   class RepeaterHour < Repeater
-
     @current_hour_start : Time
 
     def initialize(type, width = nil, **kwargs)
       super
       @current_hour_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour)
     end
-    def start=(time)
+
+    def start=(time : Time)
       super
       @current_hour_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour)
     end

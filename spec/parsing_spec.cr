@@ -376,7 +376,7 @@ describe Cronic::Parser do
     time = parse_now("9.8.13")
     time.should eq Time.local(2013, 8, 9, 12)
     # <<<<<
-    
+
     time = parse_now("30-07-2013 21:53:49")
     time.should eq Time.local(2013, 7, 30, 21, 53, 49)
   end
@@ -832,7 +832,7 @@ describe Cronic::Parser do
       time = parse_now("in an hour")
       time.should eq Time.local(2006, 8, 16, 15, 0, 0)
     end
-    
+
     it "parses hence" do
       time = parse_now("6 months hence")
       time.should eq Time.local(2007, 2, 16, 14)
@@ -846,7 +846,6 @@ describe Cronic::Parser do
       time.should eq Time.local(2006, 8, 16, 14, 20)
     end
 
-
     it "parses more complex clauses" do
       time = Cronic.parse("2 months ago", now: Time.parse("2007-03-07 23:30", "%Y-%m-%d %H:%M", Time::Location::UTC))
       time.should eq Time.local(2007, 1, 7, 23, 30)
@@ -857,12 +856,11 @@ describe Cronic::Parser do
       time = parse_now("24 hours 20 minutes from now")
       time.should eq Time.local(2006, 8, 17, 14, 20, 0)
     end
-    
+
     pending "doesnt parse this case from Cronic.rb #281" do
       time = parse_now("24 hours and 20 minutes ago")
       time.should eq Time.local(2006, 8, 15, 13, 40, 0)
     end
-    
   end
 
   it("parse guess p s r") do
@@ -962,7 +960,7 @@ describe Cronic::Parser do
     time = parse_now("five years after 11 May 2017")
     time.should eq Time.local(2023, 7, 2, 17, 30)
   end
-  
+
   it "parses only complete pointers" do
     parse_now("eat pasty buns today at 2pm").should eq TIME_2006_08_16_14_00_00
     parse_now("futuristically speaking today at 2pm").should eq TIME_2006_08_16_14_00_00

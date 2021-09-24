@@ -1,6 +1,5 @@
 module Cronic
-  class RepeaterSeasonName < RepeaterSeason # :nodoc:
-
+  class RepeaterSeasonName < RepeaterSeason
     def initialize(@season : Season, width = nil)
       super(@season.to_s, width)
     end

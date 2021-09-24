@@ -42,49 +42,49 @@ module Cronic
     end
   end
 
-  class ScalarWide < Scalar # :nodoc:
+  class ScalarWide < Scalar #
     def to_s
       super + "-wide-" + @type.to_s
     end
   end
 
-  class ScalarSubsecond < Scalar # :nodoc:
+  class ScalarSubsecond < Scalar #
     def to_s
       super + "-subsecond-" + @type.to_s
     end
   end
 
-  class ScalarSecond < Scalar # :nodoc:
+  class ScalarSecond < Scalar #
     def to_s
       super + "-second-" + @type.to_s
     end
   end
 
-  class ScalarMinute < Scalar # :nodoc:
+  class ScalarMinute < Scalar #
     def to_s
       super + "-minute-" + @type.to_s
     end
   end
 
-  class ScalarHour < Scalar # :nodoc:
+  class ScalarHour < Scalar #
     def to_s
       super + "-hour-" + @type.to_s
     end
   end
 
-  class ScalarDay < Scalar # :nodoc:
+  class ScalarDay < Scalar #
     def to_s
       super + "-day-" + @type.to_s
     end
   end
 
-  class ScalarMonth < Scalar # :nodoc:
+  class ScalarMonth < Scalar #
     def to_s
       super + "-month-" + @type.to_s
     end
   end
 
-  class ScalarYear < Scalar # :nodoc:
+  class ScalarYear < Scalar #
     def to_s
       super + "-year-" + @type.to_s
     end

@@ -8,8 +8,8 @@ module Cronic
     #
     # Returns an Array of tokens.
     getter :dir
-    
-    def initialize(@dir : PointerDir, width=nil, **options)
+
+    def initialize(@dir : PointerDir, width = nil, **options)
       super(@dir.to_s, width)
     end
 

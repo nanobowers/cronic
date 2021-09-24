@@ -1,5 +1,5 @@
 module Cronic
-  class RepeaterWeek < Repeater # :nodoc:
+  class RepeaterWeek < Repeater
     @current_week_start : Time?
 
     def initialize(xtype, width = nil, week_start : Time::DayOfWeek = Time::DayOfWeek::Sunday, **kwargs)
@@ -12,7 +12,7 @@ module Cronic
       super
 
       if @current_week_start.is_a? Time
-        direction = (pointer == PointerDir::Future) ? 1 : -1
+        direction = pointer.to_dir.value
         @current_week_start = @current_week_start.as(Time) + Time::Span.new(days: 7 * direction)
       else
         case pointer
@@ -61,7 +61,7 @@ module Cronic
     end
 
     def offset(span, amount, pointer) : SecSpan
-      direction = pointer == PointerDir::Future ? 1 : -1
+      direction = pointer.to_dir.value
       span + Time::Span.new(days: 7 * direction * amount)
     end
 

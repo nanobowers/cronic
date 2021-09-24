@@ -1,5 +1,5 @@
 module Cronic
-  class RepeaterMinute < Repeater # :nodoc:
+  class RepeaterMinute < Repeater
     @current_minute_start : Time
 
     def initialize(type, width = nil, **kwargs)
@@ -11,7 +11,7 @@ module Cronic
       super
       @current_minute_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour, @now.minute)
     end
-    
+
     def next(pointer = PointerDir::Future)
       super
       direction = pointer == PointerDir::Future ? 1 : -1

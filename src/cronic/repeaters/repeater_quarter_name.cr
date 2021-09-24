@@ -1,18 +1,16 @@
 module Cronic
-  
   enum QuarterNames
     Q1 = 0
     Q2 = 1
     Q3 = 2
     Q4 = 3
   end
-  
+
   class RepeaterQuarterName < RepeaterQuarter
-    
-    def initialize(@quarter : QuarterNames, width=nil, **opts)
+    def initialize(@quarter : QuarterNames, width = nil, **opts)
       super(@quarter.to_s, width)
     end
-    
+
     def next(pointer)
       if @current_span.nil?
         @current_span = this(pointer)

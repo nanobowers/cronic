@@ -1,6 +1,5 @@
 module Cronic
-  class RepeaterWeekday < Repeater # :nodoc:
-
+  class RepeaterWeekday < Repeater
     @current_weekday_start : Time
 
     def initialize(xtype, width = nil, **kwargs)
@@ -8,7 +7,7 @@ module Cronic
       @current_weekday_start = Cronic.construct(@now.year, @now.month, @now.day)
     end
 
-    def start=(time)
+    def start=(time : Time)
       super
       @current_weekday_start = Cronic.construct(@now.year, @now.month, @now.day)
     end

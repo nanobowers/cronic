@@ -107,8 +107,8 @@ module Cronic
       text = text.to_s.downcase
 
       text = text.gsub(/\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/, "\\3 / \\2 / \\1")
-      text = text.gsub(/\b(\d{1,2})\.(\d{1,2})\.(\d{2})\b/, "\\2 / \\1 / \\3") #Chronic.rb#356 / 2-digit euro-date-format
-      
+      text = text.gsub(/\b(\d{1,2})\.(\d{1,2})\.(\d{2})\b/, "\\2 / \\1 / \\3") # Chronic.rb#356 / 2-digit euro-date-format
+
       # a.m, p.m. => am, pm
       text = text.gsub(/\b([ap])\.m\.?/, "\\1m")
 
@@ -192,7 +192,6 @@ module Cronic
       end
     end
 
-
     # Process text into tagged tokens
     def tokenize(text, **options) : Array(Token)
       text = pre_normalize(text)
@@ -203,9 +202,7 @@ module Cronic
       tokens.select { |token| token.tagged? }
     end
 
-
     private def tokens_to_span(tokens, **opts) : SecSpan
-      
       date_defs = DateDefinitions.new(@now).definitions(**opts)
       anchor_defs = AnchorDefinitions.new(@now).definitions(**opts)
       arrow_defs = ArrowDefinitions.new(@now).definitions(**opts)
@@ -223,7 +220,7 @@ module Cronic
 
       defs.each_with_index do |defn, idx|
         if span.nil? && (hadmatch = match(defn[:match], tokens))
-          #puts "#{idx} #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n" if Cronic.debug
+          # puts "#{idx} #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n" if Cronic.debug
           span = defn[:proc].call(good_tokens)
         end
       end
@@ -234,10 +231,10 @@ module Cronic
           span = defn[:proc].call(arrow_good_tokens)
         end
       end
-      
+
       narrow_defs.each do |defn|
         if span.nil? && (hadmatch = match(defn[:match], tokens))
-          #puts "NARROW #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n" if Cronic.debug
+          # puts "NARROW #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n" if Cronic.debug
           span = defn[:proc].call(tokens)
         end
       end
@@ -247,16 +244,14 @@ module Cronic
       else
         raise UnknownParseError.new("Failed to match tokens against any known patterns #{tokens.map(&.to_s)}")
       end
-
     end
-
 
     #
     # Matching routines, kind of like a poor-man's regex
     # Supports a single Sequence with a single nesting of
     # Or's and Maybe's
     #
-    
+
     private def match_one(pat, tok : Token) : Bool
       if pat.is_a?(Or)
         # puts ">> checking #{tok.inspect} against #{pat}"
@@ -303,6 +298,5 @@ module Cronic
         return match_one(pattern[0], tokens[0]) && match(pattern[1..], tokens[1..])
       end
     end
-    
   end
 end

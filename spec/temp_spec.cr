@@ -1,6 +1,6 @@
 require "./spec_helper"
 
-#Cronic.debug = true
+# Cronic.debug = true
 
 describe Cronic::Token do
   #  it "tokenizes something" do
@@ -66,7 +66,7 @@ describe Cronic::Token do
   end
 
   it "makes a bad time" do
-    #p Time.local(2020, 13, 2) # BAD
-    #p Cronic.construct(2020, 13, 2) # OK
+    # p Time.local(2020, 13, 2) # BAD
+    # p Cronic.construct(2020, 13, 2) # OK
   end
 end

@@ -72,7 +72,7 @@ module Cronic
   @@debug : Bool = false
 
   class_property :debug
-  
+
   # Parses a string containing a natural language date or time.
   #
   # If the parser can find a date or time, a Time

@@ -1,6 +1,5 @@
 module Cronic
-  class RepeaterFortnight < Repeater # :nodoc:
-
+  class RepeaterFortnight < Repeater
     @current_fortnight_start : Time?
 
     def initialize(type, width = nil, **kwargs)

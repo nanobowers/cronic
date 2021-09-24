@@ -1,14 +1,13 @@
 module Cronic
   class RepeaterSecond < Repeater
-
     @second_start : Time
 
     def initialize(type, width = nil, **kwargs)
       super
       @second_start = @now
     end
-    
-    def start=(time)
+
+    def start=(time : Time)
       super
       @second_start = @now
     end

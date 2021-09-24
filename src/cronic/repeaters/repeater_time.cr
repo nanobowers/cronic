@@ -1,5 +1,4 @@
 module Cronic
-
   class Tick
     property :time
     getter? :ambiguous
@@ -25,12 +24,11 @@ module Cronic
   end
 
   class RepeaterTime < Repeater
-
     @current_time : Time?
     @tagtype : Tick
     getter :tagtype
 
-    def start=(time)
+    def start=(time : Time)
       @now = time
     end
 
@@ -116,9 +114,9 @@ module Cronic
         update_current_time(pointer)
 
         @current_time || raise RuntimeError.new("Current time cannot be nil at this point")
-      #end
-      #@current_time = @current_time.as(Time)
-      #unless first
+        # end
+        # @current_time = @current_time.as(Time)
+        # unless first
       else
         increment = tagtype.ambiguous? ? 12.hours : 24.hours
         @current_time = @current_time.as(Time) + ((pointer == PointerDir::Future) ? increment : -increment)

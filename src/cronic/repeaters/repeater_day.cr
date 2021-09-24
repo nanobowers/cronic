@@ -1,6 +1,5 @@
 module Cronic
-  class RepeaterDay < Repeater # :nodoc:
-
+  class RepeaterDay < Repeater
     @current_day_start : Time
 
     def initialize(type, width = nil, **kwargs)
@@ -8,7 +7,7 @@ module Cronic
       @current_day_start = Time.local(@now.year, @now.month, @now.day)
     end
 
-    def start=(time)
+    def start=(time : Time)
       super
       @current_day_start = Time.local(time.year, time.month, time.day)
     end

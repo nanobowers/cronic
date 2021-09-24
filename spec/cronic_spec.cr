@@ -95,12 +95,12 @@ describe Cronic do
 
   it "can parse given all valid keyword args" do
     Cronic.parse("now",
-                 context: Cronic::PointerDir::Future,
-                 now: now_time,
-                 hours24: nil,
-                 week_start: Time::DayOfWeek::Sunday,
-                 ambiguous_time_range: 6,
-                 endian_precedence: [Cronic::DateEndian::MonthDay, Cronic::DateEndian::DayMonth],
-                 ambiguous_year_future_bias: 50)
+      context: Cronic::PointerDir::Future,
+      now: now_time,
+      hours24: nil,
+      week_start: Time::DayOfWeek::Sunday,
+      ambiguous_time_range: 6,
+      endian_precedence: [Cronic::DateEndian::MonthDay, Cronic::DateEndian::DayMonth],
+      ambiguous_year_future_bias: 50)
   end
 end

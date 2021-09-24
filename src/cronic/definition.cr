@@ -1,5 +1,4 @@
 module Cronic
-
   alias SeqType = Array(Tag.class) |
                   Array(Tag.class | Or) |
                   Array(SeparatorAt.class) |
@@ -56,7 +55,7 @@ module Cronic
   # SpanDefinitions subclasses return definitions constructed by Handler instances (see handler.rb)
   # SpanDefinitions subclasses follow a <Type> + Definitions naming pattern
 
-  class SpanDefinitions #< Definitions
+  class SpanDefinitions # < Definitions
 
     include Handlers
     property :now
@@ -83,7 +82,7 @@ module Cronic
     def slashdash
       or(SeparatorSlash, SeparatorDash)
     end
-    
+
     def maybetime
       [maybe(RepeaterTime), maybe(RepeaterDayPortion)]
     end
@@ -92,15 +91,14 @@ module Cronic
     def anchor1
       [maybe(SeparatorOn), maybe(Grabber), Repeater, maybe(SeparatorAt), maybe(Repeater), maybe(Repeater)]
     end
-    
+
     def anchor2
       [maybe(Grabber), Repeater, Repeater, maybe(Separator), maybe(Repeater), maybe(Repeater)]
     end
-    
+
     def anchor3
       [Repeater, Grabber, Repeater]
     end
-
   end
 
   class DateDefinitions < SpanDefinitions
@@ -152,7 +150,7 @@ module Cronic
   end
 
   class AnchorDefinitions < SpanDefinitions
-     def definitions(**opts)
+    def definitions(**opts)
       [
         {match: Sequence.new(anchor1), proc: ->(toks : Array(Token)) { handle_r(toks, **opts) }},
         {match: Sequence.new(anchor2), proc: ->(toks : Array(Token)) { handle_r(toks, **opts) }},
@@ -191,24 +189,21 @@ module Cronic
   end
 
   class EndianDefinitions < SpanDefinitions
-
-
     def month_day(**opts)
       [
         {match: Sequence.new([ScalarMonth, slashdash, ScalarDay, slashdash, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sm_sd_sy(toks, **opts) }},
         {match: Sequence.new([ScalarMonth, slashdash, ScalarDay, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sm_sd(toks, **opts) }},
-       ]
+      ]
     end
-    
+
     def day_month(**opts)
       [
         {match: Sequence.new([ScalarDay, slashdash, ScalarMonth, slashdash, ScalarYear, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_sm_sy(toks, **opts) }},
         {match: Sequence.new([ScalarDay, slashdash, ScalarMonth, maybe(SeparatorAt), *maybetime]), proc: ->(toks : Array(Token)) { handle_sd_sm(toks, **opts) }},
       ]
     end
-    
-    def definitions(endian_precedence : Array(DateEndian), **opts)
 
+    def definitions(endian_precedence : Array(DateEndian), **opts)
       defs = [] of NamedTuple(match: Sequence, proc: Proc(Array(Token), SecSpan?))
 
       endian_precedence.each do |endian|
@@ -220,7 +215,6 @@ module Cronic
         end
       end
       return defs
-      
     end
   end
 end

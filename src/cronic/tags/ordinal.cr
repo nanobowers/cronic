@@ -32,19 +32,19 @@ module Cronic
     end
   end
 
-  class OrdinalDay < Ordinal # :nodoc:
+  class OrdinalDay < Ordinal #
     def to_s
       super + "-day-" + @type.to_s
     end
   end
 
-  class OrdinalMonth < Ordinal # :nodoc:
+  class OrdinalMonth < Ordinal #
     def to_s
       super + "-month-" + @type.to_s
     end
   end
 
-  class OrdinalYear < Ordinal # :nodoc:
+  class OrdinalYear < Ordinal #
     def to_s
       super + "-year-" + @type.to_s
     end

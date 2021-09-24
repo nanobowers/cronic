@@ -11,14 +11,18 @@ module Cronic
   end
 
   enum PointerDir
-    Past = -1
-    None = 0
-    Future = 1
+    Past   = -1
+    None   =  0
+    Future =  1
+
+    def to_dir
+      return Direction::Forward if self == Future
+      return Direction::Backward
+    end
   end
-  
+
   enum DateEndian
     MonthDay # aka :middle from chronic
     DayMonth # aka :little from chronic
   end
-  
 end
