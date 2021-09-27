@@ -9,7 +9,7 @@ def end_daylight_savings
 end
 
 describe "daylight-savings" do
-  it("begin past") do
+  it "begin past" do
     t = Cronic::RepeaterTime.new("900")
     t.start = begin_daylight_savings
     t.next(Cronic::PointerDir::Past).begin.should eq Time.local(2008, 3, 8, 21)
@@ -26,7 +26,7 @@ describe "daylight-savings" do
     t.start = begin_daylight_savings
     t.next(Cronic::PointerDir::Past).begin.should eq Time.local(2008, 3, 8, 13)
   end
-  it("begin future") do
+  it "begin future" do
     t = Cronic::RepeaterTime.new("900")
     t.start = begin_daylight_savings
     t.next(Cronic::PointerDir::Future).begin.should eq Time.local(2008, 3, 9, 9)
@@ -43,7 +43,7 @@ describe "daylight-savings" do
     t.start = begin_daylight_savings
     t.next(Cronic::PointerDir::Future).begin.should eq Time.local(2008, 3, 10, 4)
   end
-  it("end past") do
+  it "end past" do
     t = Cronic::RepeaterTime.new("900")
     t.start = end_daylight_savings
     t.next(Cronic::PointerDir::Past).begin.should eq Time.local(2008, 11, 1, 21)
@@ -60,7 +60,7 @@ describe "daylight-savings" do
     t.start = end_daylight_savings
     t.next(Cronic::PointerDir::Past).begin.should eq Time.local(2008, 11, 1, 13)
   end
-  it("end future") do
+  it "end future" do
     t = Cronic::RepeaterTime.new("900")
     t.start = end_daylight_savings
     t.next(Cronic::PointerDir::Future).begin.should eq Time.local(2008, 11, 2, 9)

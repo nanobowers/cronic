@@ -15,17 +15,16 @@ module Cronic
   end
 
   class RepeaterMonthName < Repeater
-
     @current_month : MonthNames
     @current_year : Int32
-    
+
     def initialize(@month : MonthNames, width = nil, **kwargs)
       super(@month.to_s, width)
       @current_month = MonthNames.new(@now.month)
       @current_year = @now.year
       @first = true
     end
-    
+
     def start=(time : Time)
       super
       @current_month = MonthNames.new(time.month)
@@ -53,7 +52,6 @@ module Cronic
       SecSpan.new(
         Cronic.construct(@current_year, @current_month.value),
         Cronic.construct(@current_year, @current_month.value + 1))
-
     end
 
     def current_month_begin

@@ -5,7 +5,7 @@ def now_time
 end
 
 describe Cronic::RepeaterFortnight do
-  it("next future") do
+  it "next future" do
     fortnights = Cronic::RepeaterFortnight.new(:fortnight)
     fortnights.start = now_time
     next_fortnight = fortnights.next(Cronic::PointerDir::Future).as(Cronic::SecSpan)
@@ -15,7 +15,7 @@ describe Cronic::RepeaterFortnight do
     next_next_fortnight.begin.should eq Time.local(2006, 9, 3)
     next_next_fortnight.end.should eq Time.local(2006, 9, 17)
   end
-  it("next past") do
+  it "next past" do
     fortnights = Cronic::RepeaterFortnight.new(:fortnight)
     fortnights.start = now_time
     last_fortnight = fortnights.next(Cronic::PointerDir::Past).as(Cronic::SecSpan)
@@ -25,21 +25,21 @@ describe Cronic::RepeaterFortnight do
     last_last_fortnight.begin.should eq Time.local(2006, 7, 16)
     last_last_fortnight.end.should eq Time.local(2006, 7, 30)
   end
-  it("this future") do
+  it "this future" do
     fortnights = Cronic::RepeaterFortnight.new(:fortnight)
     fortnights.start = now_time
     this_fortnight = fortnights.this(Cronic::PointerDir::Future).as(Cronic::SecSpan)
     this_fortnight.begin.should eq Time.local(2006, 8, 16, 15)
     this_fortnight.end.should eq Time.local(2006, 8, 27)
   end
-  it("this past") do
+  it "this past" do
     fortnights = Cronic::RepeaterFortnight.new(:fortnight)
     fortnights.start = now_time
     this_fortnight = fortnights.this(Cronic::PointerDir::Past).as(Cronic::SecSpan)
     this_fortnight.begin.should eq Time.local(2006, 8, 13, 0)
     this_fortnight.end.should eq Time.local(2006, 8, 16, 14)
   end
-  it("offset") do
+  it "offset" do
     span = Cronic::SecSpan.new(now_time, (now_time + Time::Span.new(seconds: 1)))
     offset_span = Cronic::RepeaterWeek.new(:week).offset(span, 3, Cronic::PointerDir::Future)
     offset_span.begin.should eq Time.local(2006, 9, 6, 14)

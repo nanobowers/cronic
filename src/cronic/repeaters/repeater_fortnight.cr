@@ -1,8 +1,7 @@
 module Cronic
   class RepeaterFortnight < Repeater
-
     FORTNIGHT_SPAN = 14.days
-    
+
     @current_fortnight_start : Time?
 
     def initialize(type, width = nil, **kwargs)

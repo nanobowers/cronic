@@ -5,7 +5,7 @@ def now_time
 end
 
 describe Cronic::RepeaterHour do
-  it("next future") do
+  it "next future" do
     hours = Cronic::RepeaterHour.new(:hour)
     hours.start = now_time
     next_hour = hours.next(Cronic::PointerDir::Future)
@@ -15,7 +15,7 @@ describe Cronic::RepeaterHour do
     next_next_hour.begin.should eq Time.local(2006, 8, 16, 16)
     next_next_hour.end.should eq Time.local(2006, 8, 16, 17)
   end
-  it("next past") do
+  it "next past" do
     hours = Cronic::RepeaterHour.new(:hour)
     hours.start = now_time
     past_hour = hours.next(Cronic::PointerDir::Past)
@@ -25,7 +25,7 @@ describe Cronic::RepeaterHour do
     past_past_hour.begin.should eq Time.local(2006, 8, 16, 12)
     past_past_hour.end.should eq Time.local(2006, 8, 16, 13)
   end
-  it("this") do
+  it "this" do
     now = Time.local(2006, 8, 16, 14, 30)
     hours = Cronic::RepeaterHour.new(:hour)
     hours.start = now
@@ -39,7 +39,7 @@ describe Cronic::RepeaterHour do
     this_hour.begin.should eq Time.local(2006, 8, 16, 14)
     this_hour.end.should eq Time.local(2006, 8, 16, 15)
   end
-  it("offset") do
+  it "offset" do
     span = Cronic::SecSpan.new(now_time, (now_time + Time::Span.new(seconds: 1)))
     offset_span = Cronic::RepeaterHour.new(:hour).offset(span, 3, Cronic::PointerDir::Future)
     offset_span.begin.should eq Time.local(2006, 8, 16, 17)

@@ -82,7 +82,7 @@ describe Cronic::RepeaterQuarterName do
     time.try(&.begin).should eq Time.local(2006, 10, 1)
     time.try(&.end).should eq Time.local(2007, 1, 1)
   end
-  it("next future") do
+  it "next future" do
     quarter = Cronic::RepeaterQuarterName.new(:q1)
     quarter.start = now_time
     time = quarter.next(Cronic::PointerDir::Future)
@@ -116,7 +116,7 @@ describe Cronic::RepeaterQuarterName do
     time.try(&.begin).should eq Time.local(2007, 10, 1)
     time.try(&.end).should eq Time.local(2008, 1, 1)
   end
-  it("next past") do
+  it "next past" do
     quarter = Cronic::RepeaterQuarterName.new(:q1)
     quarter.start = now_time
     time = quarter.next(Cronic::PointerDir::Past)

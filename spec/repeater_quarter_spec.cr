@@ -5,20 +5,20 @@ def now_time
 end
 
 describe Cronic::RepeaterQuarter do
-  it("matches") do
+  it "matches" do
     token = Cronic::Token.new("q")
     repeater = Cronic::Repeater.scan_for_units(token)
     repeater.class.should eq Cronic::RepeaterQuarter
     repeater.try(&.type).should eq :quarter
   end
-  it("this") do
+  it "this" do
     quarter = Cronic::RepeaterQuarter.new(:quarter)
     quarter.start = now_time
     time = quarter.this(nil)
     time.begin.should eq Time.local(2006, 7, 1)
     time.end.should eq Time.local(2006, 10, 1)
   end
-  it("next future") do
+  it "next future" do
     quarter = Cronic::RepeaterQuarter.new(:quarter)
     quarter.start = now_time
     time = quarter.next(Cronic::PointerDir::Future)
@@ -31,7 +31,7 @@ describe Cronic::RepeaterQuarter do
     time.begin.should eq Time.local(2007, 4, 1)
     time.end.should eq Time.local(2007, 7, 1)
   end
-  it("next past") do
+  it "next past" do
     quarter = Cronic::RepeaterQuarter.new(:quarter)
     quarter.start = now_time
     time = quarter.next(Cronic::PointerDir::Past)
@@ -44,7 +44,7 @@ describe Cronic::RepeaterQuarter do
     time.begin.should eq Time.local(2005, 10, 1)
     time.end.should eq Time.local(2006, 1, 1)
   end
-  it("offset") do
+  it "offset" do
     quarter = Cronic::RepeaterQuarter.new(:quarter)
     span = Cronic::SecSpan.new(now_time, (now_time + ::Time::Span.new(seconds: 1)))
     time = quarter.offset(span, 1, Cronic::PointerDir::Future)

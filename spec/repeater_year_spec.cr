@@ -1,7 +1,7 @@
 require "./spec_helper"
 
 describe Cronic::RepeaterYear do
-  it("next future") do
+  it "next future" do
     years = Cronic::RepeaterYear.new(:year)
     years.start = now_time
     next_year = years.next(Cronic::PointerDir::Future)
@@ -11,7 +11,7 @@ describe Cronic::RepeaterYear do
     next_next_year.begin.should eq Time.local(2008, 1, 1)
     next_next_year.end.should eq Time.local(2009, 1, 1)
   end
-  it("next past") do
+  it "next past" do
     years = Cronic::RepeaterYear.new(:year)
     years.start = now_time
     last_year = years.next(Cronic::PointerDir::Past)
@@ -21,7 +21,7 @@ describe Cronic::RepeaterYear do
     last_last_year.begin.should eq Time.local(2004, 1, 1)
     last_last_year.end.should eq Time.local(2005, 1, 1)
   end
-  it("this") do
+  it "this" do
     years = Cronic::RepeaterYear.new(:year)
     years.start = now_time
     this_year = years.this(Cronic::PointerDir::Future)
@@ -31,7 +31,7 @@ describe Cronic::RepeaterYear do
     this_year.begin.should eq Time.local(2006, 1, 1)
     this_year.end.should eq Time.local(2006, 8, 16)
   end
-  it("offset") do
+  it "offset" do
     span = Cronic::SecSpan.new(now_time, (now_time + ::Time::Span.new(seconds: 1)))
     offset_span = Cronic::RepeaterYear.new(:year).offset(span, 3, Cronic::PointerDir::Future)
     offset_span.begin.should eq Time.local(2009, 8, 16, 14)

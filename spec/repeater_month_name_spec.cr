@@ -5,7 +5,7 @@ def now_time
 end
 
 describe Cronic::RepeaterMonthName do
-  it("next") do
+  it "next" do
     mays = Cronic::RepeaterMonthName.new(:may)
     mays.start = now_time
     next_may = mays.next(Cronic::PointerDir::Future)
@@ -24,7 +24,7 @@ describe Cronic::RepeaterMonthName do
     mays.next(Cronic::PointerDir::Past).begin.should eq Time.local(2006, 5, 1)
     mays.next(Cronic::PointerDir::Past).begin.should eq Time.local(2005, 5, 1)
   end
-  it("this") do
+  it "this" do
     octobers = Cronic::RepeaterMonthName.new(:october)
     octobers.start = now_time
     this_october = octobers.this(Cronic::PointerDir::Future)

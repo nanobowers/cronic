@@ -5,7 +5,7 @@ def now_time
 end
 
 describe Cronic::RepeaterDayPortion do
-  it("am future") do
+  it "am future" do
     day_portion = Cronic::RepeaterDayPortion.new(:am)
     day_portion.start = now_time
     next_time = day_portion.next(Cronic::PointerDir::Future)
@@ -15,7 +15,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2006, 8, 18, 0)
     next_next_time.end.should eq Time.local(2006, 8, 18, 11, 59, 59)
   end
-  it("am past") do
+  it "am past" do
     day_portion = Cronic::RepeaterDayPortion.new(:am)
     day_portion.start = now_time
     next_time = day_portion.next(Cronic::PointerDir::Past)
@@ -25,7 +25,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2006, 8, 15, 0)
     next_next_time.end.should eq Time.local(2006, 8, 15, 11, 59, 59)
   end
-  it("am future with daylight savings time boundary") do
+  it "am future with daylight savings time boundary" do
     now = Time.local(2012, 11, 3, 0, 0, 0)
     day_portion = Cronic::RepeaterDayPortion.new(:am)
     day_portion.start = now
@@ -36,7 +36,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2012, 11, 5, 0)
     next_next_time.end.should eq Time.local(2012, 11, 5, 11, 59, 59)
   end
-  it("pm future") do
+  it "pm future" do
     day_portion = Cronic::RepeaterDayPortion.new(:pm)
     day_portion.start = now_time
     next_time = day_portion.next(Cronic::PointerDir::Future)
@@ -46,7 +46,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2006, 8, 18, 12)
     next_next_time.end.should eq Time.local(2006, 8, 18, 23, 59, 59)
   end
-  it("pm past") do
+  it "pm past" do
     day_portion = Cronic::RepeaterDayPortion.new(:pm)
     day_portion.start = now_time
     next_time = day_portion.next(Cronic::PointerDir::Past)
@@ -56,7 +56,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2006, 8, 14, 12)
     next_next_time.end.should eq Time.local(2006, 8, 14, 23, 59, 59)
   end
-  it("pm future with daylight savings time boundary") do
+  it "pm future with daylight savings time boundary" do
     now = Time.local(2012, 11, 3, 0, 0, 0)
     day_portion = Cronic::RepeaterDayPortion.new(:pm)
     day_portion.start = now
@@ -67,7 +67,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2012, 11, 4, 12)
     next_next_time.end.should eq Time.local(2012, 11, 4, 23, 59, 59)
   end
-  it("morning future") do
+  it "morning future" do
     day_portion = Cronic::RepeaterDayPortion.new(:morning)
     day_portion.start = now_time
     next_time = day_portion.next(Cronic::PointerDir::Future)
@@ -77,7 +77,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2006, 8, 18, 6)
     next_next_time.end.should eq Time.local(2006, 8, 18, 12)
   end
-  it("morning past") do
+  it "morning past" do
     day_portion = Cronic::RepeaterDayPortion.new(:morning)
     day_portion.start = now_time
     next_time = day_portion.next(Cronic::PointerDir::Past)
@@ -87,7 +87,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2006, 8, 15, 6)
     next_next_time.end.should eq Time.local(2006, 8, 15, 12)
   end
-  it("morning future with daylight savings time boundary") do
+  it "morning future with daylight savings time boundary" do
     now = Time.local(2012, 11, 3, 0, 0, 0)
     day_portion = Cronic::RepeaterDayPortion.new(:morning)
     day_portion.start = now
@@ -98,7 +98,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2012, 11, 4, 6)
     next_next_time.end.should eq Time.local(2012, 11, 4, 12)
   end
-  it("afternoon future") do
+  it "afternoon future" do
     day_portion = Cronic::RepeaterDayPortion.new(:afternoon)
     day_portion.start = now_time
     next_time = day_portion.next(Cronic::PointerDir::Future)
@@ -108,7 +108,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2006, 8, 18, 13)
     next_next_time.end.should eq Time.local(2006, 8, 18, 17)
   end
-  it("afternoon past") do
+  it "afternoon past" do
     day_portion = Cronic::RepeaterDayPortion.new(:afternoon)
     day_portion.start = now_time
     next_time = day_portion.next(Cronic::PointerDir::Past)
@@ -118,7 +118,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2006, 8, 14, 13)
     next_next_time.end.should eq Time.local(2006, 8, 14, 17)
   end
-  it("afternoon future with daylight savings time boundary") do
+  it "afternoon future with daylight savings time boundary" do
     now = Time.local(2012, 11, 3, 0, 0, 0)
     day_portion = Cronic::RepeaterDayPortion.new(:afternoon)
     day_portion.start = now
@@ -129,7 +129,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2012, 11, 4, 13)
     next_next_time.end.should eq Time.local(2012, 11, 4, 17)
   end
-  it("evening future") do
+  it "evening future" do
     day_portion = Cronic::RepeaterDayPortion.new(:evening)
     day_portion.start = now_time
     next_time = day_portion.next(Cronic::PointerDir::Future)
@@ -139,7 +139,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2006, 8, 17, 17)
     next_next_time.end.should eq Time.local(2006, 8, 17, 20)
   end
-  it("evening past") do
+  it "evening past" do
     day_portion = Cronic::RepeaterDayPortion.new(:evening)
     day_portion.start = now_time
     next_time = day_portion.next(Cronic::PointerDir::Past)
@@ -149,7 +149,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2006, 8, 14, 17)
     next_next_time.end.should eq Time.local(2006, 8, 14, 20)
   end
-  it("evening future with daylight savings time boundary") do
+  it "evening future with daylight savings time boundary" do
     now = Time.local(2012, 11, 3, 0, 0, 0)
     day_portion = Cronic::RepeaterDayPortion.new(:evening)
     day_portion.start = now
@@ -160,7 +160,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2012, 11, 4, 17)
     next_next_time.end.should eq Time.local(2012, 11, 4, 20)
   end
-  it("night future") do
+  it "night future" do
     day_portion = Cronic::RepeaterDayPortion.new(:night)
     day_portion.start = now_time
     next_time = day_portion.next(Cronic::PointerDir::Future)
@@ -170,7 +170,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2006, 8, 17, 20)
     next_next_time.end.should eq Time.local(2006, 8, 18, 0)
   end
-  it("night past") do
+  it "night past" do
     day_portion = Cronic::RepeaterDayPortion.new(:night)
     day_portion.start = now_time
     next_time = day_portion.next(Cronic::PointerDir::Past)
@@ -180,7 +180,7 @@ describe Cronic::RepeaterDayPortion do
     next_next_time.begin.should eq Time.local(2006, 8, 14, 20)
     next_next_time.end.should eq Time.local(2006, 8, 15, 0)
   end
-  it("night future with daylight savings time boundary") do
+  it "night future with daylight savings time boundary" do
     now = Time.local(2012, 11, 3, 0, 0, 0)
     day_portion = Cronic::RepeaterDayPortion.new(:night)
     day_portion.start = now

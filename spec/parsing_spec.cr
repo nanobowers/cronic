@@ -18,7 +18,7 @@ end
 include Cronic
 
 describe Cronic::Parser do
-  it("parses generics") do
+  it "parses generics" do
     time = Cronic.parse("2012-08-02T13:00:00")
     time.should eq Time.local(2012, 8, 2, 13)
     time = Cronic.parse("2012-08-02T13:00:00+01:00")
@@ -41,7 +41,7 @@ describe Cronic::Parser do
     (time - time2).abs.to_f.should be_close(0, 0.001)
   end
 
-  it "parses generics (2)" do
+  it "parses generics  2 " do
     time = Cronic.parse("2012-08-02T12:00:00Z")
     time.should eq Time.utc(2012, 8, 2, 12)
 
@@ -66,7 +66,7 @@ describe Cronic::Parser do
   end
 
   describe "RepeaterMonthName ScalarDay" do
-    it("handles basic cases") do
+    it "handles basic cases" do
       time = parse_now("aug 3")
       time.should eq Time.local(2007, 8, 3, 12)
       time = parse_now("aug. 3")
@@ -103,7 +103,7 @@ describe Cronic::Parser do
     end
   end
 
-  it("handle rmn sd on") do
+  it "handles rmn sd on" do
     time = parse_now("5pm on may 28")
     time.should eq Time.local(2007, 5, 28, 17)
     time = parse_now("5pm may 28")
@@ -125,18 +125,18 @@ describe Cronic::Parser do
       time = parse_now("may 27th 5:00 pm", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 5, 27, 17)
     end
-    it "parses a date in the past with a time (2)" do
+    it "parses a date in the past with a time  2 " do
       time = parse_now("may 27th at 5pm", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 5, 27, 17)
     end
-    it "parses a date in the past with a time (3)" do
+    it "parses a date in the past with a time  3 " do
       time = parse_now("may 27th at 5", ambiguous_time_range: nil)
       time.should eq Time.local(2007, 5, 27, 5)
     end
   end
 
   describe "OrdinalDay RepeaterMonthName" do
-    it("handles relative to the now-month") do
+    it "handles relative to the now-month" do
       time = parse_now("fifteenth of this month")
       time.should eq Time.local(2007, 8, 15, 12)
     end
@@ -151,7 +151,7 @@ describe Cronic::Parser do
       time = parse_now("31st of may at 6:30pm")
       time.should eq Time.local(2007, 5, 31, 18, 30)
     end
-    it "handles od rmn with time (2)" do
+    it "handles od rmn with time  2 " do
       time = parse_now("11th december 8am")
       time.should eq Time.local(2006, 12, 11, 8)
     end
@@ -164,7 +164,7 @@ describe Cronic::Parser do
     end
   end
   describe "ScalarDay-RepeaterMonthName" do
-    it("parses basic cases") do
+    it "parses basic cases" do
       time = parse_now("22 February")
       time.should eq Time.local(2007, 2, 22, 12)
       time = parse_now("22 feb")
@@ -179,8 +179,8 @@ describe Cronic::Parser do
       time.should eq Time.local(2006, 12, 11, 8)
     end
   end
-  describe "RepeaterMonthName-ScalarDay-ON" do
-    it "parses" do
+  describe "RepeaterMonthName-Ordinal" do
+    it "parses with a leading time" do
       time = parse_now("5:00 pm may 27th", context: Cronic::PointerDir::Past)
       time.should eq Time.local(2006, 5, 27, 17)
       time = parse_now("05:00 pm may 27th", context: Cronic::PointerDir::Past)
@@ -193,7 +193,7 @@ describe Cronic::Parser do
   end
 
   describe "RepeaterMonthName-ScalarYear" do
-    it "parses 1997" do
+    it "parses 1997 from a two-digit year" do
       time = parse_now("may 97")
       time.should eq Time.local(1997, 5, 16, 12)
     end
@@ -209,12 +209,12 @@ describe Cronic::Parser do
     end
   end
 
-  it("handle rdn rmn sd t tz sy") do
+  it "handles rdn rmn sd t tz sy" do
     time = parse_now("Mon Apr 02 17:00:00 PDT 2007")
     time.to_unix.should eq 1175558400
   end
 
-  it("handle sy sm sd t tz") do
+  it "handles sy sm sd t tz" do
     time = parse_now("2011-07-03 22:11:35 +0100")
     time.to_unix.should eq 1309727495
     time = parse_now("2011-07-03 22:11:35 +01:00")
@@ -228,7 +228,7 @@ describe Cronic::Parser do
   end
 
   describe "RepeaterMonthName-ScalarDay-ScalarYear" do
-    it("parses basic cases") do
+    it "parses basic cases" do
       time = parse_now("November 18, 2010")
       time.should eq Time.local(2010, 11, 18, 12)
       time = parse_now("Jan 1,2010")
@@ -252,7 +252,7 @@ describe Cronic::Parser do
       time.should eq Time.local(1979, 5, 27, 12)
     end
 
-    it "parses in the past (shortyear)" do
+    it "parses in the past  shortyear " do
       time = parse_now("may 27 79")
       time.should eq Time.local(1979, 5, 27, 12)
     end
@@ -319,7 +319,7 @@ describe Cronic::Parser do
     end
   end
 
-  it "handle sd rmn sy" do
+  it "handles sd rmn sy" do
     time = parse_now("3 jan 2010")
     time.should eq Time.local(2010, 1, 3, 12)
     time = parse_now("3 jan 2010 4pm")
@@ -333,7 +333,7 @@ describe Cronic::Parser do
     time = parse_now("3 jan 10", endian_precedence: [DateEndian::MonthDay])
     time.should eq Time.local(2010, 1, 3, 12)
   end
-  it "handle sm sd sy" do
+  it "handles sm sd sy" do
     time = parse_now("5/27/1979")
     time.should eq Time.local(1979, 5, 27, 12)
     time = parse_now("5/27/1979 4am")
@@ -354,7 +354,7 @@ describe Cronic::Parser do
     time.should eq Time.local(2013, 3, 12, 17, 0, 0)
   end
 
-  it "handle sd sm sy" do
+  it "handles sd sm sy" do
     time = parse_now("27/5/1979")
     time.should eq Time.local(1979, 5, 27, 12)
     time = parse_now("27/5/1979 @ 0700")
@@ -380,7 +380,7 @@ describe Cronic::Parser do
     time = parse_now("30-07-2013 21:53:49")
     time.should eq Time.local(2013, 7, 30, 21, 53, 49)
   end
-  it("handle sy sm sd") do
+  it "handles sy sm sd" do
     time = parse_now("2000-1-1")
     time.should eq Time.local(2000, 1, 1, 12)
     time = parse_now("2006-08-20")
@@ -407,7 +407,7 @@ describe Cronic::Parser do
     time = parse_now("2012:05:25 22:06:50")
     time.should eq Time.local(2012, 5, 25, 22, 6, 50)
   end
-  it("handle sm sd") do
+  it "handles sm sd" do
     time = parse_now("05/06")
     time.should eq Time.local(2007, 5, 6, 12)
     time = parse_now("05/06", endian_precedence: ([DateEndian::DayMonth, DateEndian::MonthDay]))
@@ -444,14 +444,14 @@ describe Cronic::Parser do
     time.should eq Time.local(2006, 1, 1, 12)
   end
 
-  it("handle sy sm") do
+  it "handles sy sm" do
     time = parse_now("2012-06")
     time.should eq Time.local(2012, 6, 16)
     time = parse_now("2013/12")
     time.should eq Time.local(2013, 12, 16, 12, 0)
   end
 
-  it("handle r") do
+  it "handles r" do
     time = parse_now("9am on Saturday")
     time.should eq Time.local(2006, 8, 19, 9)
     time = parse_now("on Tuesday")
@@ -472,18 +472,30 @@ describe Cronic::Parser do
     time.should eq Time.local(2006, 8, 17, 4)
   end
 
-  it("handle r g r") { nil }
-  it("handle srp") { nil }
-  it("handle s r p") { nil }
-  it("handle p s r") { nil }
+  # Unclear why these were not tested in the Chronic.rb
+  it "handles r g r" do
+    nil
+  end
 
-  it("handle s r p a") do
+  it "handles srp" do
+    nil
+  end
+
+  it "handles s r p" do
+    nil
+  end
+
+  it "handles p s r" do
+    nil
+  end
+
+  it "handles s r p a" do
     time1 = parse_now("two days ago 0:0:0am")
     time2 = parse_now("two days ago 00:00:00am")
     time2.should eq time1
   end
 
-  it("handle orr") do
+  it "handles orr" do
     time = parse_now("5th tuesday in january")
     time.should eq Time.local(2007, 1, 30, 12)
     expect_raises(Cronic::InvalidParseError) {
@@ -500,14 +512,14 @@ describe Cronic::Parser do
       }
     end
   end
-  it("handle o r s r") do
+  it "handles o r s r" do
     time = parse_now("3rd wednesday in november")
     time.should eq Time.local(2006, 11, 15, 12)
     expect_raises(Cronic::InvalidParseError) {
       parse_now("10th wednesday in november")
     }
   end
-  it "parses ScalarMonth-RepeaterMonthName-ScalarYear(2-digit)" do
+  it "parses ScalarMonth-RepeaterMonthName-ScalarYear 2-digit " do
     time = parse_now("30-Mar-11")
     time.should eq Time.local(2011, 3, 30, 12)
     time = parse_now("31-Aug-12")
@@ -578,7 +590,7 @@ describe Cronic::Parser do
       time.should eq Time.local(2006, 8, 24, 12)
     end
   end
-  it("parse guess rrr") do
+  it "parses guess rrr" do
     time = parse_now("friday 1 pm")
     time.should eq Time.local(2006, 8, 18, 13)
     time = parse_now("friday 11 at night")
@@ -713,7 +725,7 @@ describe Cronic::Parser do
     end
   end
 
-  it("parse guess grr") do
+  it "parses guess grr" do
     time = parse_now("today at 9:00")
     time.should eq Time.local(2006, 8, 16, 9)
     time = parse_now("today at 2100")
@@ -741,7 +753,7 @@ describe Cronic::Parser do
     time = parse_now("7 tonight")
     time.should eq Time.local(2006, 8, 16, 19)
   end
-  it("parse guess grrr") do
+  it "parses guess grrr" do
     time = parse_now("today at 6:00pm")
     time.should eq Time.local(2006, 8, 16, 18)
     time = parse_now("today at 6:00am")
@@ -762,7 +774,7 @@ describe Cronic::Parser do
     time.should eq Time.local(2006, 8, 13, 20, 15)
   end
 
-  it("parse guess rgr") do
+  it "parses guess rgr" do
     time = parse_now("afternoon yesterday")
     time.should eq Time.local(2006, 8, 15, 15)
     time = parse_now("tuesday last week")
@@ -863,12 +875,12 @@ describe Cronic::Parser do
     end
   end
 
-  it("parse guess p s r") do
+  it "parses guess p s r" do
     time = parse_now("in 3 hours")
     time.should eq Time.local(2006, 8, 16, 17)
   end
 
-  it("parse guess s r p a") do
+  it "parses guess s r p a" do
     time = parse_now("3 years ago tomorrow")
     time.should eq Time.local(2003, 8, 17, 12)
     time = parse_now("3 years ago this friday")
@@ -881,7 +893,7 @@ describe Cronic::Parser do
     time.should eq Time.local(2006, 8, 17, 17)
   end
 
-  it("parse guess rmn s r p") do
+  it "parses guess rmn s r p" do
     time = parse_now("september 3 years ago", guess: Cronic::Guess::Begin)
     time.should eq Time.local(2003, 9, 1)
   end
@@ -906,13 +918,13 @@ describe Cronic::Parser do
     end
   end
 
-  it("parse guess nonsense") do
+  it "parses guess nonsense" do
     expect_raises(Cronic::UnknownParseError) { parse_now("some stupid nonsense") }
     expect_raises(Cronic::UnknownParseError) { parse_now("Ham Sandwich") }
     expect_raises(Cronic::UnknownParseError) { parse_now("t") }
   end
 
-  it("parse span") do
+  it "parses span" do
     span = parse_now_span("friday")
     span.begin.should eq Time.local(2006, 8, 18)
     span.end.should eq Time.local(2006, 8, 19)
@@ -923,7 +935,7 @@ describe Cronic::Parser do
     span.begin.should eq Time.local(2006, 8, 19)
     span.end.should eq Time.local(2006, 8, 21)
   end
-  it("parse with endian precedence") do
+  it "parses with endian precedence" do
     date = "11/02/2007"
     expect_for_middle_endian = Time.local(2007, 11, 2, 12)
     expect_for_little_endian = Time.local(2007, 2, 11, 12)
@@ -932,7 +944,7 @@ describe Cronic::Parser do
     Cronic.parse(date, endian_precedence: ([DateEndian::DayMonth, DateEndian::MonthDay])).should eq expect_for_little_endian
   end
 
-  it("parse words") do
+  it "parses words" do
     parse_now("thirty-three days from now").should eq parse_now("33 days from now")
     parse_now("two million eight hundred and sixty seven thousand five hundred and thirty two seconds from now").should eq parse_now("2867532 seconds from now")
     parse_now("may tenth").should eq parse_now("may 10th")
@@ -967,17 +979,17 @@ describe Cronic::Parser do
     parse_now("meeting today at 2pm").should eq TIME_2006_08_16_14_00_00
   end
 
-  it("am pm") do
+  it "parses am pm" do
     parse_now("8/16/2006 at 12am").should eq Time.local(2006, 8, 16)
     parse_now("8/16/2006 at 12pm").should eq Time.local(2006, 8, 16, 12)
   end
 
-  it("a p") do
+  it "parses a p" do
     parse_now("8/16/2006 at 12:15a").should eq Time.local(2006, 8, 16, 0, 15)
     parse_now("8/16/2006 at 6:30p").should eq Time.local(2006, 8, 16, 18, 30)
   end
 
-  it("seasons") do
+  it "parses seasons" do
     t = parse_now_span("this spring")
     t.begin.should eq Time.local(2007, 3, 20)
     t.end.should eq Time.local(2007, 6, 20)
@@ -994,7 +1006,7 @@ describe Cronic::Parser do
     t.begin.should eq Time.local(2007, 3, 20)
     t.end.should eq Time.local(2007, 6, 20)
   end
-  it("quarters") do
+  it "parses quarters" do
     time = parse_now_span("this quarter")
     time.begin.should eq Time.local(2006, 7, 1)
     time.end.should eq Time.local(2006, 10, 1)
@@ -1005,7 +1017,7 @@ describe Cronic::Parser do
     time.begin.should eq Time.local(2006, 4, 1)
     time.end.should eq Time.local(2006, 7, 1)
   end
-  it("quarters srp") do
+  it "parses quarters srp" do
     time = parse_now_span("1 quarter ago")
     time.begin.should eq Time.local(2006, 4, 1)
     time.end.should eq Time.local(2006, 7, 1)
@@ -1016,7 +1028,7 @@ describe Cronic::Parser do
     time.begin.should eq Time.local(2006, 10, 1)
     time.end.should eq Time.local(2007, 1, 1)
   end
-  it("quarters named") do
+  it "parses quarters named" do
     ["Q1", "first quarter", "1st quarter"].each do |string|
       time = parse_now_span(string, context: Cronic::PointerDir::None)
       time.begin.should eq Time.local(2006, 1, 1)
@@ -1170,7 +1182,7 @@ describe Cronic::Parser do
       time.end.should eq Time.local(2007, 1, 1)
     end
   end
-  it("days in november") do
+  it "parses days in november" do
     t1 = Cronic.parse("1st thursday in november", now: Time.local(2007, 1, 1))
     t1.should eq Time.local(2007, 11, 1, 12)
     t1 = Cronic.parse("1st friday in november", now: Time.local(2007, 1, 1))
@@ -1184,17 +1196,17 @@ describe Cronic::Parser do
     t1 = Cronic.parse("1st monday in november", now: Time.local(2007, 1, 1))
     t1.should eq Time.local(2007, 11, 5, 12)
   end
-  it("now changes") do
+  it "parses now differently after a short delay" do
     t1 = Cronic.parse("now")
     sleep(0.1)
     t2 = Cronic.parse("now")
     t2.should_not eq t1
   end
-  it("noon") do
+  it "parses noon" do
     t1 = Cronic.parse("2011-01-01 at noon", ambiguous_time_range: nil)
     t1.should eq Time.local(2011, 1, 1, 12, 0)
   end
-  it("handle rdn rmn sd") do
+  it "handles rdn rmn sd" do
     time = parse_now("Thu Aug 10")
     time.should eq Time.local(2006, 8, 10, 12)
     time = parse_now("Thursday July 31")
@@ -1202,17 +1214,17 @@ describe Cronic::Parser do
     time = parse_now("Thursday December 31")
     time.should eq Time.local(2006, 12, 31, 12)
   end
-  it("handle rdn rmn sd rt") do
+  it "handles rdn rmn sd rt" do
     time = parse_now("Thu Aug 10 4pm")
     time.should eq Time.local(2006, 8, 10, 16)
     time = parse_now("Thu Aug 10 at 4pm")
     time.should eq Time.local(2006, 8, 10, 16)
   end
-  it("handle rdn rmn od rt") do
+  it "handles rdn rmn od rt" do
     time = parse_now("Thu Aug 10th at 4pm")
     time.should eq Time.local(2006, 8, 10, 16)
   end
-  it("handle rdn od rt") do
+  it "handles rdn od rt" do
     time = parse_now("Thu 17th at 4pm")
     time.should eq Time.local(2006, 8, 17, 16)
     time = parse_now("Thu 16th at 4pm")
@@ -1222,11 +1234,11 @@ describe Cronic::Parser do
     time = parse_now("Thu 1st at 4pm", context: Cronic::PointerDir::Past)
     time.should eq Time.local(2006, 8, 1, 16)
   end
-  it("handle rdn od") do
+  it "handles rdn od" do
     time = parse_now("Thu 17th")
     time.should eq Time.local(2006, 8, 17, 12)
   end
-  it("handle rdn rmn sd sy") do
+  it "handles rdn rmn sd sy" do
     time = parse_now("Thu Aug 10 2006")
     time.should eq Time.local(2006, 8, 10, 12)
     time = parse_now("Thursday July 31 2006")
@@ -1236,7 +1248,7 @@ describe Cronic::Parser do
     time = parse_now("Thursday December 30 2006")
     time.should eq Time.local(2006, 12, 30, 12)
   end
-  it("handle rdn rmn od") do
+  it "handles rdn rmn od" do
     time = parse_now("Thu Aug 10th")
     time.should eq Time.local(2006, 8, 10, 12)
     time = parse_now("Thursday July 31st")
@@ -1244,7 +1256,7 @@ describe Cronic::Parser do
     time = parse_now("Thursday December 31st")
     time.should eq Time.local(2006, 12, 31, 12)
   end
-  it("handle rdn rmn od sy") do
+  it "handles rdn rmn od sy" do
     time = parse_now("Wed Aug 10th 2005")
     time.should eq Time.local(2005, 8, 10, 12)
     time = parse_now("Sun July 31st 2005")
@@ -1254,10 +1266,10 @@ describe Cronic::Parser do
     time = parse_now("Fri December 30th 2005")
     time.should eq Time.local(2005, 12, 30, 12)
   end
-  it("normalizing day portions") do
+  it "normalizes day portions" do
     pre_normalize("8:00 p.m. February 11").should eq pre_normalize("8:00 pm February 11")
   end
-  it("normalizing time of day phrases") do
+  it "normalizes time of day phrases" do
     pre_normalize("12:00 p.m. February 11").should eq pre_normalize("midday February 11")
   end
 end

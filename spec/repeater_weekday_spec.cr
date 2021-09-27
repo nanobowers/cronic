@@ -5,7 +5,7 @@ def ref_wkdy_time
 end
 
 describe Cronic::RepeaterWeekday do
-  it("next future") do
+  it "next future" do
     weekdays = Cronic::RepeaterWeekday.new(:weekday)
     weekdays.start = ref_wkdy_time
     next1_weekday = weekdays.next(Cronic::PointerDir::Future)
@@ -24,7 +24,7 @@ describe Cronic::RepeaterWeekday do
     next5_weekday.begin.should eq Time.local(2007, 6, 18)
     next5_weekday.end.should eq Time.local(2007, 6, 19)
   end
-  it("next past") do
+  it "next past" do
     weekdays = Cronic::RepeaterWeekday.new(:weekday)
     weekdays.start = ref_wkdy_time
     last1_weekday = weekdays.next(Cronic::PointerDir::Past)
@@ -34,7 +34,7 @@ describe Cronic::RepeaterWeekday do
     last2_weekday.begin.should eq Time.local(2007, 6, 7)
     last2_weekday.end.should eq Time.local(2007, 6, 8)
   end
-  it("offset") do
+  it "offset" do
     span = Cronic::SecSpan.new(ref_wkdy_time, (ref_wkdy_time + 1.second))
     offset_span = Cronic::RepeaterWeekday.new(:weekday).offset(span, 5, Cronic::PointerDir::Future)
     offset_span.begin.should eq Time.local(2007, 6, 18, 14)

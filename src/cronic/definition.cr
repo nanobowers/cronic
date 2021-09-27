@@ -5,6 +5,7 @@ module Cronic
                   Array(Separator.class) |
                   Array(Scalar.class | Or) |
                   Array(Repeater.class | Or) |
+                  Array(Repeater.class) |
                   Array(OrdinalDay.class)
 
   alias OrSeqType = Array(Tag.class) |
@@ -23,6 +24,7 @@ module Cronic
                     Array(Or | Tag.class) |
                     Array(Or | Scalar.class) |
                     Array(Or | Repeater.class) |
+                    Array(Or | RepeaterTime.class) |
                     Array(Tag.class | Or)
 
   class Or
@@ -30,6 +32,16 @@ module Cronic
     getter? :maybe
 
     def initialize(@items : OrSeqType, @maybe = false)
+    end
+
+    # Factory method to make an Or from one..N args
+    def self.or(*items)
+      self.new(items.to_a, maybe: false)
+    end
+
+    # Factory method to make an Or/Maybe from one..N args
+    def self.maybe(*items)
+      self.new(items.to_a, maybe: true)
     end
   end
 
@@ -39,12 +51,21 @@ module Cronic
     def initialize(@items : SeqType)
     end
 
+    # Factory method to make a Sequence
+    def self.seq(*items)
+      self.new(items.to_a)
+    end
+
     def empty?
       @items.empty?
     end
 
     def first
       @items[0]
+    end
+
+    def rest
+      @items[1..]
     end
 
     def [](arg)

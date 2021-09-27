@@ -5,7 +5,7 @@ def ref_time_min
 end
 
 describe Cronic::RepeaterMinute do
-  it("next future") do
+  it "next future" do
     minutes = Cronic::RepeaterMinute.new(:minute)
     minutes.start = ref_time_min
     next_minute = minutes.next(Cronic::PointerDir::Future)
@@ -15,7 +15,7 @@ describe Cronic::RepeaterMinute do
     next_next_minute.begin.should eq Time.local(2008, 6, 25, 7, 17)
     next_next_minute.end.should eq Time.local(2008, 6, 25, 7, 18)
   end
-  it("next past") do
+  it "next past" do
     minutes = Cronic::RepeaterMinute.new(:minute)
     minutes.start = ref_time_min
     prev_minute = minutes.next(Cronic::PointerDir::Past)

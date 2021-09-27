@@ -219,21 +219,21 @@ module Cronic
       defs = endian_defs + date_defs + anchor_defs
 
       defs.each_with_index do |defn, idx|
-        if span.nil? && (hadmatch = match(defn[:match], tokens))
+        if span.nil? && (hadmatch = SeqMatcher.match(defn[:match], tokens))
           # puts "#{idx} #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n" if Cronic.debug
           span = defn[:proc].call(good_tokens)
         end
       end
 
       arrow_defs.each do |defn|
-        if span.nil? && (hadmatch = match(defn[:match], tokens))
+        if span.nil? && (hadmatch = SeqMatcher.match(defn[:match], tokens))
           arrow_good_tokens = tokens.reject { |o| o.get_tag(SeparatorAt) || o.get_tag(SeparatorSlash) || o.get_tag(SeparatorDash) || o.get_tag(SeparatorComma) || o.get_tag(SeparatorAnd) }
           span = defn[:proc].call(arrow_good_tokens)
         end
       end
 
       narrow_defs.each do |defn|
-        if span.nil? && (hadmatch = match(defn[:match], tokens))
+        if span.nil? && (hadmatch = SeqMatcher.match(defn[:match], tokens))
           # puts "NARROW #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n" if Cronic.debug
           span = defn[:proc].call(tokens)
         end
@@ -243,59 +243,6 @@ module Cronic
         return span
       else
         raise UnknownParseError.new("Failed to match tokens against any known patterns #{tokens.map(&.to_s)}")
-      end
-    end
-
-    #
-    # Matching routines, kind of like a poor-man's regex
-    # Supports a single Sequence with a single nesting of
-    # Or's and Maybe's
-    #
-
-    private def match_one(pat, tok : Token) : Bool
-      if pat.is_a?(Or)
-        # puts ">> checking #{tok.inspect} against #{pat}"
-        return pat.items.any? { |x| match_one(x, tok) }
-      else
-        # puts ">> checking #{tok.inspect} against #{pat}"
-        return tok.tags.any? { |t| pat >= t.class }
-      end
-    end
-
-    private def match_maybe(pattern, tokens) : Bool
-      if match_one(pattern.first, tokens.first) && match(pattern[1..], tokens[1..])
-        return true
-      else
-        return match(pattern[1..], tokens)
-      end
-    end
-
-    private def match(pattern, tokens) : Bool
-      # puts ">> matching #{pattern.inspect}<<"
-      if pattern.empty?
-        return true if tokens.empty?
-        return false
-      elsif pattern.first.is_a?(Or)
-        firstpat = pattern.first.as(Or)
-        oritems = firstpat.items
-        anyormatch = oritems.any? { |oritem|
-          tokens.empty? ? false : match_one(oritem, tokens[0])
-        }
-        orclause = anyormatch && match(pattern[1..], tokens[1..])
-        if orclause
-          # if any of the or-cases plus the rest matched then good
-          return true
-        elsif firstpat.maybe?
-          # if we had a maybe, then try the case where we skip the first
-          # item in the pattern
-          return match(pattern[1..], tokens)
-        else
-          false
-        end
-      elsif tokens.empty?
-        return false # fail b/c no tokens left
-      else
-        return match_one(pattern[0], tokens[0]) && match(pattern[1..], tokens[1..])
       end
     end
   end

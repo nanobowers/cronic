@@ -1,13 +1,13 @@
 require "./spec_helper"
 
 describe Cronic::RepeaterTime do
-  it("generic") do
+  it "generic" do
     expect_raises(ArgumentError) {
       Cronic::RepeaterTime.new("00:01:02:03:004")
     }
   end
 
-  it("next future") do
+  it "next future" do
     t = Cronic::RepeaterTime.new("4:00")
     t.start = now_time
     t.next(Cronic::PointerDir::Future).begin.should eq Time.local(2006, 8, 16, 16)
@@ -25,7 +25,7 @@ describe Cronic::RepeaterTime do
     t.next(Cronic::PointerDir::Future).begin.should eq Time.local(2006, 8, 17, 0)
     t.next(Cronic::PointerDir::Future).begin.should eq Time.local(2006, 8, 18, 0)
   end
-  it("next past") do
+  it "next past" do
     t = Cronic::RepeaterTime.new("4:00")
     t.start = now_time
     t.next(Cronic::PointerDir::Past).begin.should eq Time.local(2006, 8, 16, 4)
@@ -39,7 +39,7 @@ describe Cronic::RepeaterTime do
     t.next(Cronic::PointerDir::Past).begin.should eq Time.local(2006, 8, 16, 0)
     t.next(Cronic::PointerDir::Past).begin.should eq Time.local(2006, 8, 15, 0)
   end
-  it("type") do
+  it "type" do
     t1 = Cronic::RepeaterTime.new("4") # 4 hours
     t1.tagtype.time.should eq 14400
     t1 = Cronic::RepeaterTime.new("14") # 14 hours

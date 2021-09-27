@@ -1,11 +1,11 @@
 require "./spec_helper"
 
 describe Cronic do
-  it("pre normalize") do
+  it "pre normalizes a time" do
     Cronic::Parser.new.pre_normalize("12.55 pm").should eq Cronic::Parser.new.pre_normalize("12:55 pm")
   end
 
-  it("pre normalize numerized string") do
+  it "pre normalizes a numerized string" do
     string = "two and a half years"
     Cronic::Parser.new.pre_normalize(string).should eq NumberParser.parse(string)
   end
@@ -35,31 +35,6 @@ describe Cronic do
     span = Cronic::SecSpan.new(Time.local(2006, 11, 1), Time.local(2006, 12, 1))
     Cronic::Parser.new.guess(span).should eq Time.local(2006, 11, 16)
   end
-
-  pending("endian definitions") do
-    endians = [Cronic::Handler.new([:scalar_month, [:separator_slash, :separator_dash], :scalar_day, [:separator_slash, :separator_dash], :scalar_year, :separator_at?, "time?"], :handle_sm_sd_sy), Cronic::Handler.new([:scalar_month, [:separator_slash, :separator_dash], :scalar_day, :separator_at?, "time?"], :handle_sm_sd), Cronic::Handler.new([:scalar_day, [:separator_slash, :separator_dash], :scalar_month, :separator_at?, "time?"], :handle_sd_sm), Cronic::Handler.new([:scalar_day, [:separator_slash, :separator_dash], :scalar_month, [:separator_slash, :separator_dash], :scalar_year, :separator_at?, "time?"], :handle_sd_sm_sy), Cronic::Handler.new([:scalar_day, :repeater_month_name, :scalar_year, :separator_at?, "time?"], :handle_sd_rmn_sy)]
-    Cronic::SpanDictionary.new.definitions[:endian].should eq endians
-    defs = Cronic::SpanDictionary.new(endian_precedence: [Cronic::DateEndian::DayMonth]).definitions
-    defs[:endian].should eq endians.reverse
-    defs = Cronic::SpanDictionary.new(endian_precedence: [Cronic::DateEndian::DayMonth, Cronic::DateEndian::MonthDay]).definitions
-    defs[:endian].should eq endians.reverse
-    expect do
-      Cronic::SpanDictionary.new(endian_precedence: :invalid).definitions
-    end.to(raise_error(ArgumentError))
-  end
-
-  #  it("debug") do
-  #    begin
-  #      (require("stringio")
-  #      $stdout = StringIO.new
-  #      Cronic.debug = true
-  #      Cronic.parse("now")
-  #      $stdout.string.include?("this(grabber-this)").should eq true)
-  #    ensure
-  #      ($stdout = STDOUT
-  #      Cronic.debug = false)
-  #    end
-  #  end
 
   describe "construct" do
     it "constructs like Time.local" do

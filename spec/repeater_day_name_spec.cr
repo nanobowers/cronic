@@ -5,7 +5,7 @@ def now_time
 end
 
 describe Cronic::RepeaterDayName do
-  it("match") do
+  it "match" do
     token = Cronic::Token.new("saturday")
     repeater = Cronic::Repeater.scan_for_day_names(token)
     repeater.class.should eq Cronic::RepeaterDayName
@@ -15,7 +15,7 @@ describe Cronic::RepeaterDayName do
     repeater.class.should eq Cronic::RepeaterDayName
     repeater.try(&.day).should eq Time::DayOfWeek::Sunday
   end
-  it("next future") do
+  it "next future" do
     mondays = Cronic::RepeaterDayName.new(:monday)
     mondays.start = now_time
     span = mondays.next(Cronic::PointerDir::Future)
@@ -25,7 +25,7 @@ describe Cronic::RepeaterDayName do
     span.begin.should eq Time.local(2006, 8, 28)
     span.end.should eq Time.local(2006, 8, 29)
   end
-  it("next past") do
+  it "next past" do
     mondays = Cronic::RepeaterDayName.new(:monday)
     mondays.start = now_time
     span = mondays.next(Cronic::PointerDir::Past)
