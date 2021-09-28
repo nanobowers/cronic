@@ -8,12 +8,7 @@ module Cronic
 
     # Scan an Array of Token objects and apply any necessary TimeZone
     # tags to each token.
-    #
-    # tokens - An Array of tokens to scan.
-    # options - The Hash of options specified in Cronic::parse.
-    #
-    # Returns an Array of tokens.
-    def self.scan(tokens, **options)
+    def self.scan(tokens : Array(Token), **options) : Void
       tokens.each do |token|
         if mat = token.word.match(/^(?<sign> tzminus|tzplus|\+|\-)? (?<hours> 0[0-9]|1[0-4]) :? (?<minutes> \d{2})/x)
           sign = (mat["sign"]? && (mat["sign"].downcase == "tzminus" || mat["sign"].downcase == "-")) ? -1 : 1
@@ -23,7 +18,7 @@ module Cronic
           token.tag(TimeZone.new(Time::Location::Zone.new(nil, offset, false)))
         elsif mat = token.word.match(/^(?<zone> [PMCE]) (?<daystd> [DS]) T/xi)
           zonename = token.word.upcase
-          # Ruby version identified these North American timezones
+          # Ruby version identified these four North American timezones
           offset = case mat["zone"].upcase
                    when "E" then 3600*-5 # Eastern
                    when "C" then 3600*-6 # Central
@@ -37,20 +32,8 @@ module Cronic
         elsif token.word =~ /utc/i
           token.tag(TimeZone.new(Time::Location::Zone::UTC))
         end
-        # token.tag scan_for_all(token)
       end
     end
-
-    # token - The Token object we want to scan.
-    #
-    # Returns a new Pointer object.
-    #    def self.scan_for_all(token)
-    #      scan_for token, self,
-    #      {
-    #        /[PMCE][DS]T|UTC/i => :tz,
-    #        /(tzminus|tzplus)?\d{2}:?\d{2}/ => :tz
-    #      }
-    #    end
 
     def to_s
       "timezone"

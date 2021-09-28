@@ -3,12 +3,15 @@ require "./spec_helper"
 def ref_spring_day
   Time.local(2008, 4, 8, 0, 0, 0)
 end
+
 def ref_summer_day
   Time.local(2008, 7, 4, 0, 0, 0)
 end
+
 def ref_autumn_day
   Time.local(2008, 10, 10, 0, 0, 0)
 end
+
 def ref_winter_day
   Time.local(2008, 12, 31, 0, 0, 0)
 end
@@ -16,7 +19,6 @@ end
 include Cronic
 
 describe Season do
-
   it "finds the next winter from spring" do
     span = Season.span_for_next_season(ref_spring_day, Season::Winter, PointerDir::Future)
     span.begin.year.should eq 2008
@@ -24,7 +26,7 @@ describe Season do
     span.end.year.should eq 2009
     span.end.month.should eq 3
   end
-  
+
   it "finds the next autumn from spring" do
     span = Season.span_for_next_season(ref_spring_day, Season::Autumn, PointerDir::Future)
     span.begin.year.should eq 2008
@@ -32,7 +34,7 @@ describe Season do
     span.end.year.should eq 2008
     span.end.month.should eq 12
   end
-  
+
   it "finds next year's spring from summer" do
     span = Season.span_for_next_season(ref_summer_day, Season::Spring, PointerDir::Future)
     span.begin.year.should eq 2009
@@ -74,5 +76,4 @@ describe Season do
     span.end.year.should eq 2008
     span.end.month.should eq 6
   end
-  
 end

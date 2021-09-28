@@ -6,7 +6,7 @@ module Cronic
 
     def next(pointer)
       @current_span ||= quarter(@now)
-      offset_quarter_amount = pointer == PointerDir::Future ? 1 : -1
+      offset_quarter_amount = pointer.to_dir.value
       @current_span = offset_quarter(@current_span.as(SecSpan).begin, offset_quarter_amount)
     end
 
@@ -32,20 +32,20 @@ module Cronic
       (month - 1) // MONTHS_PER_QUARTER
     end
 
-    protected def quarter(time) : SecSpan
+    protected def quarter(time : Time) : SecSpan
       year, month = time.year, time.month
 
       quarter_index = quarter_index(month)
       quarter_month_start = (quarter_index * MONTHS_PER_QUARTER) + 1
       quarter_month_end = quarter_month_start + MONTHS_PER_QUARTER
 
-      quarter_start = Cronic.construct(year, quarter_month_start)
-      quarter_end = Cronic.construct(year, quarter_month_end)
-
-      SecSpan.new(quarter_start, quarter_end)
+      SecSpan.new(
+        Cronic.construct(year, quarter_month_start),
+        Cronic.construct(year, quarter_month_end)
+      )
     end
 
-    protected def offset_quarter(time, amount) : SecSpan
+    protected def offset_quarter(time : Time, amount) : SecSpan
       new_month = time.month - 1
       new_month = new_month + MONTHS_PER_QUARTER * amount
       new_year = time.year + new_month // 12

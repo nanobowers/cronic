@@ -2,12 +2,7 @@ module Cronic
   class Separator < Tag
     # Scan an Array of Token objects and apply any necessary Separator
     # tags to each token.
-    #
-    # tokens - An Array of tokens to scan.
-    # options - The Hash of options specified in Cronic::parse.
-    #
-    # Returns an Array of tokens.
-    def self.scan(tokens, **options)
+    def self.scan(tokens : Array(Token), **options) : Void
       tokens.each do |token|
         token.tag scan_for(token, SeparatorComma, {:"," => :comma})
         token.tag scan_for(token, SeparatorDot, {:"." => :dot})
@@ -26,9 +21,7 @@ module Cronic
     end
 
     # token - The Token object we want to scan.
-    #
-    # Returns a new SeparatorQuote object.
-    def self.scan_for_quote(token)
+    def self.scan_for_quote(token : Token) : SeparatorQuote?
       scan_for(token, SeparatorQuote, {'\'' => :single_quote, '"' => :double_quote})
     end
 
@@ -37,79 +30,79 @@ module Cronic
     end
   end
 
-  class SeparatorComma < Separator #
+  class SeparatorComma < Separator
     def to_s
       super + "-comma"
     end
   end
 
-  class SeparatorDot < Separator #
+  class SeparatorDot < Separator
     def to_s
       super + "-dot"
     end
   end
 
-  class SeparatorColon < Separator #
+  class SeparatorColon < Separator
     def to_s
       super + "-colon"
     end
   end
 
-  class SeparatorSpace < Separator #
+  class SeparatorSpace < Separator
     def to_s
       super + "-space"
     end
   end
 
-  class SeparatorSlash < Separator #
+  class SeparatorSlash < Separator
     def to_s
       super + "-slash"
     end
   end
 
-  class SeparatorDash < Separator #
+  class SeparatorDash < Separator
     def to_s
       super + "-dash"
     end
   end
 
-  class SeparatorQuote < Separator #
+  class SeparatorQuote < Separator
     def to_s
       super + "-quote-" + @type.to_s
     end
   end
 
-  class SeparatorAt < Separator #
+  class SeparatorAt < Separator
     def to_s
       super + "-at"
     end
   end
 
-  class SeparatorIn < Separator #
+  class SeparatorIn < Separator
     def to_s
       super + "-in"
     end
   end
 
-  class SeparatorOn < Separator #
+  class SeparatorOn < Separator
     def to_s
       super + "-on"
     end
   end
 
-  class SeparatorAnd < Separator #
+  class SeparatorAnd < Separator
     def to_s
       super + "-and"
     end
   end
 
-  class SeparatorT < Separator #
+  class SeparatorT < Separator
     def to_s
       super + "-T"
     end
   end
 
-  class SeparatorW < Separator #
+  class SeparatorW < Separator
     def to_s
       super + "-W"
     end

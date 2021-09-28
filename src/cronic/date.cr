@@ -64,6 +64,5 @@ module Cronic
     def self.month_overflow?(year : Int32, month : Int32, day : Int32) : Bool
       day > days_in_month(year, month)
     end
-
   end
 end

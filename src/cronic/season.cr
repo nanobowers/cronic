@@ -1,5 +1,4 @@
 module Cronic
-
   enum Season
     Spring
     Summer
@@ -37,7 +36,7 @@ module Cronic
             mon == 11 || (mon == 12 && day <= 21)
         return Season::Autumn
       elsif (mon == 12 && day >= 22) || mon == 1 ||
-             mon == 2 || (mon == 3 && day <= 19)
+            mon == 2 || (mon == 3 && day <= 19)
         return Season::Winter
       end
       # Default return in case nothing else matched (??)
@@ -50,7 +49,6 @@ module Cronic
     end
 
     def self.span_for_next_season(curtime : Time, nextssn : Season, pointer : PointerDir)
-
       year = curtime.year
       curssn = Season.find_current_season(curtime)
 
@@ -65,17 +63,15 @@ module Cronic
       sy, sm, sd, ey, em, ed = SEASON_ADJUSTS[nextssn]
       start_year = sy + year
       end_year = ey + year
-      
-      SecSpan.new( Cronic.construct(start_year, sm, sd), Cronic.construct(end_year, em, ed))
+
+      SecSpan.new(Cronic.construct(start_year, sm, sd), Cronic.construct(end_year, em, ed))
     end
   end
 
-  
   SEASON_ADJUSTS = {
     Season::Spring => [0, 3, 20, 0, 6, 20],
     Season::Summer => [0, 6, 21, 0, 9, 22],
     Season::Autumn => [0, 9, 23, 0, 12, 21],
     Season::Winter => [0, 12, 22, 1, 3, 19],
   }
-      
 end

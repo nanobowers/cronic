@@ -2,14 +2,9 @@ module Cronic
   class Ordinal < Tag
     # Scan an Array of Token objects and apply any necessary Ordinal
     # tags to each token.
-    #
-    # tokens - An Array of tokens to scan.
-    # options - The Hash of options specified in Cronic::parse.
-    #
-    # Returns an Array of tokens.
-    def self.scan(tokens,
+    def self.scan(tokens : Array(Token),
                   ambiguous_year_future_bias : Int32 = 50,
-                  **options)
+                  **options) : Void
       tokens.each_index do |i|
         if tokens[i].word =~ /^(\d+)(st|nd|rd|th|\.)$/
           width = $1.size
@@ -21,7 +16,7 @@ module Cronic
             year = Cronic::Date.make_year(ordinal, ambiguous_year_future_bias)
             tokens[i].tag(OrdinalYear.new(year.to_i, width))
           end
-        elsif tokens[i].word =~ /^second$/
+        elsif tokens[i].word == "second"
           tokens[i].tag(Ordinal.new(2, 1))
         end
       end
@@ -32,19 +27,19 @@ module Cronic
     end
   end
 
-  class OrdinalDay < Ordinal #
+  class OrdinalDay < Ordinal
     def to_s
       super + "-day-" + @type.to_s
     end
   end
 
-  class OrdinalMonth < Ordinal #
+  class OrdinalMonth < Ordinal
     def to_s
       super + "-month-" + @type.to_s
     end
   end
 
-  class OrdinalYear < Ordinal #
+  class OrdinalYear < Ordinal
     def to_s
       super + "-year-" + @type.to_s
     end

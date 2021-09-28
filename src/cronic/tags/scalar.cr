@@ -4,15 +4,10 @@ module Cronic
 
     # Scan an Array of Token objects and apply any necessary Scalar
     # tags to each token.
-    #
-    # tokens - An Array of tokens to scan.
-    # options - The Hash of options specified in Cronic::parse.
-    #
-    # Returns an Array of tokens.
-    def self.scan(tokens,
+    def self.scan(tokens : Array(Token),
                   hours24 : Bool? = nil,
                   ambiguous_year_future_bias : Int32 = 50,
-                  **options)
+                  **options) : Void
       tokens.each_index do |i|
         token = tokens[i]
         post_token = tokens[i + 1]?
@@ -42,49 +37,49 @@ module Cronic
     end
   end
 
-  class ScalarWide < Scalar #
+  class ScalarWide < Scalar
     def to_s
       super + "-wide-" + @type.to_s
     end
   end
 
-  class ScalarSubsecond < Scalar #
+  class ScalarSubsecond < Scalar
     def to_s
       super + "-subsecond-" + @type.to_s
     end
   end
 
-  class ScalarSecond < Scalar #
+  class ScalarSecond < Scalar
     def to_s
       super + "-second-" + @type.to_s
     end
   end
 
-  class ScalarMinute < Scalar #
+  class ScalarMinute < Scalar
     def to_s
       super + "-minute-" + @type.to_s
     end
   end
 
-  class ScalarHour < Scalar #
+  class ScalarHour < Scalar
     def to_s
       super + "-hour-" + @type.to_s
     end
   end
 
-  class ScalarDay < Scalar #
+  class ScalarDay < Scalar
     def to_s
       super + "-day-" + @type.to_s
     end
   end
 
-  class ScalarMonth < Scalar #
+  class ScalarMonth < Scalar
     def to_s
       super + "-month-" + @type.to_s
     end
   end
 
-  class ScalarYear < Scalar #
+  class ScalarYear < Scalar
     def to_s
       super + "-year-" + @type.to_s
     end

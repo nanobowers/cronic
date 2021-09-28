@@ -1,6 +1,5 @@
 module Cronic
   class RepeaterSeason < Repeater
-
     @next_season_start : Time
     @next_season_end : Time
 
@@ -41,7 +40,7 @@ module Cronic
 
     def offset(span, amount, pointer : PointerDir) : SecSpan
       SecSpan.new(offset_by(span.begin, amount, pointer),
-                  offset_by(span.end, amount, pointer))
+        offset_by(span.end, amount, pointer))
     end
 
     def offset_by(time, amount, pointer : PointerDir)
@@ -58,11 +57,10 @@ module Cronic
     end
 
     private def find_next_season_span(pointer : PointerDir, next_season)
-      next_season_span = Season.span_for_next_season(@now,next_season, pointer)
+      next_season_span = Season.span_for_next_season(@now, next_season, pointer)
       @next_season_start = next_season_span.begin
       @next_season_end = next_season_span.end
       return next_season_span
     end
-
   end
 end

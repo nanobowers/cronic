@@ -23,10 +23,10 @@ module Cronic
         return season_span
       end
     end
-    
+
     def offset(span, amount, pointer : PointerDir) : SecSpan
       SecSpan.new(offset_by(span.begin, amount, pointer),
-                  offset_by(span.end, amount, pointer))
+        offset_by(span.end, amount, pointer))
     end
 
     def offset_by(time, amount : Int32, pointer : PointerDir)

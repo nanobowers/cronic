@@ -2,12 +2,7 @@ module Cronic
   class Sign < Tag
     # Scan an Array of Token objects and apply any necessary Sign
     # tags to each token.
-    #
-    # tokens - An Array of tokens to scan.
-    # options - The Hash of options specified in Cronic::parse.
-    #
-    # Returns an Array of tokens.
-    def self.scan(tokens, **options)
+    def self.scan(tokens : Array(Token), **options) : Void
       tokens.each do |token|
         token.tag scan_for(token, SignPlus, {:+ => :plus})
         token.tag scan_for(token, SignMinus, {:- => :minus})
@@ -19,13 +14,13 @@ module Cronic
     end
   end
 
-  class SignPlus < Sign #
+  class SignPlus < Sign
     def to_s
       super + "-plus"
     end
   end
 
-  class SignMinus < Sign #
+  class SignMinus < Sign
     def to_s
       super + "-minus"
     end

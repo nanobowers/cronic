@@ -4,12 +4,7 @@ module Cronic
 
     # Scan an Array of Token objects and apply any necessary Repeater
     # tags to each token.
-    #
-    # tokens - An Array of tokens to scan.
-    # options - The Hash of options specified in Cronic::parse.
-    #
-    # Returns an Array of tokens.
-    def self.scan(tokens : Array(Token), **options)
+    def self.scan(tokens : Array(Token), **options) : Void
       tokens.each do |token|
         token.tag scan_for_quarter_names(token, **options)
         token.tag scan_for_season_names(token, **options)
@@ -22,9 +17,7 @@ module Cronic
     end
 
     # token - The Token object we want to scan.
-    #
-    # Returns a new Repeater object.
-    def self.scan_for_quarter_names(token, **kwargs)
+    def self.scan_for_quarter_names(token : Token, **kwargs) : RepeaterQuarterName?
       scan_for token, RepeaterQuarterName,
         {
           /^q1$/ => QuarterNames::Q1,
@@ -35,9 +28,7 @@ module Cronic
     end
 
     # token - The Token object we want to scan.
-    #
-    # Returns a new Repeater object.
-    def self.scan_for_season_names(token, **kwargs)
+    def self.scan_for_season_names(token : Token, **kwargs) : RepeaterSeasonName?
       case token.word
       when /^springs?$/          then RepeaterSeasonName.new(Season::Spring, nil)
       when /^summers?$/          then RepeaterSeasonName.new(Season::Summer, nil)
@@ -46,20 +37,10 @@ module Cronic
       else
         nil
       end
-
-      # scan_for token, RepeaterSeasonName,
-      # {
-      #  /^springs?$/ => :spring,
-      #  /^summers?$/ => :summer,
-      #  /^(autumn)|(fall)s?$/ => :autumn,
-      #  /^winters?$/ => :winter
-      # }, **kwargs
     end
 
     # token - The Token object we want to scan.
-    #
-    # Returns a new Repeater object.
-    def self.scan_for_month_names(token, **kwargs)
+    def self.scan_for_month_names(token : Token, **kwargs) : RepeaterMonthName?
       scan_for token, RepeaterMonthName,
         {
           /^jan[:\.]?(uary)?$/           => MonthNames::January,
@@ -78,9 +59,7 @@ module Cronic
     end
 
     # token - The Token object we want to scan.
-    #
-    # Returns a new Repeater object.
-    def self.scan_for_day_names(token, **kwargs)
+    def self.scan_for_day_names(token : Token, **kwargs) : RepeaterDayName?
       case token.word
       when /^m[ou]n(day)?$/             then RepeaterDayName.new(Time::DayOfWeek::Monday)
       when /^t(ue|eu|oo|u)s?(day)?$/    then RepeaterDayName.new(Time::DayOfWeek::Tuesday)
@@ -94,9 +73,7 @@ module Cronic
     end
 
     # token - The Token object we want to scan.
-    #
-    # Returns a new Repeater object.
-    def self.scan_for_day_portions(token, **kwargs)
+    def self.scan_for_day_portions(token : Token, **kwargs) : RepeaterDayPortion?
       scan_for token, RepeaterDayPortion,
         {
           /^ams?$/           => :am,
@@ -109,17 +86,13 @@ module Cronic
     end
 
     # token - The Token object we want to scan.
-    #
-    # Returns a new Repeater object.
-    def self.scan_for_times(token, **kwargs)
+    def self.scan_for_times(token : Token, **kwargs) : RepeaterTime?
       # hour, min, seconds, and fractions of a second down to nanoseconds
       scan_for token, RepeaterTime, /^\d{1,2}(:?\d{1,2})?([\.:]?\d{1,2}([\.:]\d{1,9})?)?$/, **kwargs
     end
 
     # token - The Token object we want to scan.
-    #
-    # Returns a new Repeater object.
-    def self.scan_for_units(token, **kwargs)
+    def self.scan_for_units(token : Token, **kwargs)
       case token.word
       when /^years?$/               then RepeaterYear.new(:year, nil, **kwargs)
       when /^q$/                    then RepeaterQuarter.new(:quarter, nil, **kwargs)
@@ -138,6 +111,7 @@ module Cronic
       end
     end
 
+    # Compare width property of two Repeaters
     def <=>(other)
       width <=> other.width
     end

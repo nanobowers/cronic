@@ -15,9 +15,10 @@ module Cronic
       if @current_span.nil?
         @current_span = this(pointer)
       else
-        year_offset = (pointer == PointerDir::Future) ? 1 : -1
-        new_year = @current_span.as(SecSpan).begin.year + year_offset
-        time_basis = Cronic.construct(new_year, @current_span.as(SecSpan).begin.month)
+        span_begin = @current_span.as(SecSpan).begin
+        year_offset = pointer.to_dir.value
+        new_year = span_begin.year + year_offset
+        time_basis = Cronic.construct(new_year, span_begin.month)
         @current_span = quarter(time_basis)
       end
 

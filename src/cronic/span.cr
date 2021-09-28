@@ -13,7 +13,7 @@ module Cronic
       (self.end - self.begin).to_i
     end
 
-    # Returns true if 
+    # Returns true if
     def includes?(val) : Bool
       (@begin..@end).includes?(val)
     end
