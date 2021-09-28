@@ -17,7 +17,6 @@ require "./cronic/date"
 require "./cronic/time"
 
 require "./cronic/handlers"
-require "./cronic/mini_date"
 require "./cronic/span"
 require "./cronic/token"
 require "./cronic/tokenizer"

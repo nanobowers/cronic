@@ -10,13 +10,13 @@ module Cronic
       @current_span = offset_quarter(@current_span.as(SecSpan).begin, offset_quarter_amount)
     end
 
-    # For some reason we do not use the context (PointerDir::Future/PointerDir::Past/PointerDir::None)
+    # For some reason we do not use the context (Future/Past/None)
     def this(context : _)
       @current_span = quarter(@now)
     end
 
     def offset(span, amount, pointer)
-      direction = pointer == PointerDir::Future ? 1 : -1
+      direction = pointer.to_dir.value
       offset_quarter(span.begin, amount * direction)
     end
 
