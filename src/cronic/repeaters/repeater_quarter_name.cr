@@ -16,7 +16,7 @@ module Cronic
       if @current_span.nil?
         @current_span = this(pointer)
       else
-        span_begin = @current_span.as(SecSpan).begin
+        span_begin = @current_span.as(Timespan).begin
         year_offset = pointer.to_dir.value
         new_year = span_begin.year + year_offset
         time_basis = Cronic.construct(new_year, span_begin.month)

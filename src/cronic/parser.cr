@@ -49,15 +49,15 @@ module Cronic
     # Parse *text* to a singular `Time`.
     #
     # Setting *guess* to `Guess::End` will return last time from
-    # the `SecSpan`, to `Guess::Middle` for the middle of the span
+    # the `Timespan`, to `Guess::Middle` for the middle of the span
     # and `Guess::Begin` for first time in the span.
     def parse(text : String, guess = Cronic::Guess::Middle)
       span = parse_span(text)
       guess(span, guess)
     end
 
-    # Parse *text* into a `SecSpan`
-    def parse_span(text : String) : SecSpan
+    # Parse *text* into a `Timespan`
+    def parse_span(text : String) : Timespan
       tokens = tokenize(text, context: @context,
         now: @now,
         hours24: @hours24,
@@ -180,7 +180,7 @@ module Cronic
 
     # Guess a specific time within the given *span*.
     # *mode* can be provided to select begin/middle/end of the *span*.
-    def guess(span : SecSpan, mode : Guess = Guess::Middle) : Time
+    def guess(span : Timespan, mode : Guess = Guess::Middle) : Time
       if (span.width > 1) && (mode == Guess::Middle)
         span.middle
       elsif mode == Guess::End
@@ -200,7 +200,7 @@ module Cronic
       tokens.select(&.tagged?)
     end
 
-    private def tokens_to_span(tokens, **opts) : SecSpan
+    private def tokens_to_span(tokens, **opts) : Timespan
       date_defs = DateDefinitions.new(@now).definitions(**opts)
       anchor_defs = AnchorDefinitions.new(@now).definitions(**opts)
       arrow_defs = ArrowDefinitions.new(@now).definitions(**opts)
@@ -212,7 +212,7 @@ module Cronic
       # TODO: Generic needs to be replaced with a real handler for
       # Crystal since we do not have Ruby's Date.parse
 
-      span : SecSpan? = nil
+      span : Timespan? = nil
 
       defs = endian_defs + date_defs + anchor_defs
 
@@ -237,7 +237,7 @@ module Cronic
         end
       end
 
-      if span.is_a?(SecSpan)
+      if span.is_a?(Timespan)
         return span
       else
         raise UnknownParseError.new("Failed to match tokens against any known patterns #{tokens.map(&.to_s)}")

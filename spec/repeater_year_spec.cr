@@ -32,7 +32,7 @@ describe Cronic::RepeaterYear do
     this_year.end.should eq Time.local(2006, 8, 16)
   end
   it "offset" do
-    span = Cronic::SecSpan.new(now_time, (now_time + ::Time::Span.new(seconds: 1)))
+    span = Cronic::Timespan.new(now_time, (now_time + ::Time::Span.new(seconds: 1)))
     offset_span = Cronic::RepeaterYear.new(:year).offset(span, 3, Cronic::PointerDir::Future)
     offset_span.begin.should eq Time.local(2009, 8, 16, 14)
     offset_span.end.should eq Time.local(2009, 8, 16, 14, 0, 1)
@@ -41,7 +41,7 @@ describe Cronic::RepeaterYear do
     offset_span.end.should eq Time.local(1996, 8, 16, 14, 0, 1)
 
     newnow = Time.local(2008, 2, 29)
-    span = Cronic::SecSpan.new(newnow, (newnow + ::Time::Span.new(seconds: 1)))
+    span = Cronic::Timespan.new(newnow, (newnow + ::Time::Span.new(seconds: 1)))
     offset_span = Cronic::RepeaterYear.new(:year).offset(span, 1, Cronic::PointerDir::Past)
     offset_span.begin.should eq Time.local(2007, 2, 28)
     offset_span.end.should eq Time.local(2007, 2, 28, 0, 0, 1)

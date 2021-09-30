@@ -13,19 +13,19 @@ module Cronic
       @second_start = @now
     end
 
-    def next(pointer : PointerDir) : SecSpan
+    def next(pointer : PointerDir) : Timespan
       super
       direction = pointer == PointerDir::Future ? 1 : -1
       @second_start += direction.seconds
-      SecSpan.new(@second_start, @second_start + 1.second)
+      Timespan.new(@second_start, @second_start + 1.second)
     end
 
-    def this(pointer : PointerDir) : SecSpan
+    def this(pointer : PointerDir) : Timespan
       super
-      SecSpan.new(@now, @now + 1.second)
+      Timespan.new(@now, @now + 1.second)
     end
 
-    def offset(span : SecSpan, amount : Int32, pointer : PointerDir)
+    def offset(span : Timespan, amount : Int32, pointer : PointerDir)
       direction = pointer.to_dir.value
       span + direction * amount * width
     end

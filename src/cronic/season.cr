@@ -65,7 +65,7 @@ module Cronic
       start_year = sy + year
       end_year = ey + year
 
-      SecSpan.new(Cronic.construct(start_year, sm, sd), Cronic.construct(end_year, em, ed))
+      Timespan.new(Cronic.construct(start_year, sm, sd), Cronic.construct(end_year, em, ed))
     end
   end
 

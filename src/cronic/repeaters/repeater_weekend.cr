@@ -31,7 +31,7 @@ module Cronic
         @current_week_start = @current_week_start.as(Time) + Time::Span.new(days: 7 * direction)
       end
       cws = @current_week_start.as(Time)
-      SecSpan.new(cws, cws + WEEKEND_SPAN)
+      Timespan.new(cws, cws + WEEKEND_SPAN)
     end
 
     def this(pointer = PointerDir::Future)
@@ -42,12 +42,12 @@ module Cronic
         saturday_repeater = RepeaterDayName.new(Time::DayOfWeek::Saturday)
         saturday_repeater.start = @now
         this_saturday_span = saturday_repeater.this(PointerDir::Future)
-        SecSpan.new(this_saturday_span.begin, this_saturday_span.begin + WEEKEND_SPAN)
+        Timespan.new(this_saturday_span.begin, this_saturday_span.begin + WEEKEND_SPAN)
       in PointerDir::Past
         saturday_repeater = RepeaterDayName.new(Time::DayOfWeek::Saturday)
         saturday_repeater.start = @now
         last_saturday_span = saturday_repeater.this(PointerDir::Past)
-        SecSpan.new(last_saturday_span.begin, last_saturday_span.begin + WEEKEND_SPAN)
+        Timespan.new(last_saturday_span.begin, last_saturday_span.begin + WEEKEND_SPAN)
       end
     end
 
@@ -56,7 +56,7 @@ module Cronic
       weekend = RepeaterWeekend.new(:weekend)
       weekend.start = span.begin
       start = weekend.next(pointer).begin + Time::Span.new(days: 7 * direction * (amount - 1))
-      SecSpan.new(start, start + (span.end - span.begin))
+      Timespan.new(start, start + (span.end - span.begin))
     end
 
     def width

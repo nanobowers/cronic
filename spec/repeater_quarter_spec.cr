@@ -46,7 +46,7 @@ describe Cronic::RepeaterQuarter do
   end
   it "offset" do
     quarter = Cronic::RepeaterQuarter.new(:quarter)
-    span = Cronic::SecSpan.new(now_time, (now_time + ::Time::Span.new(seconds: 1)))
+    span = Cronic::Timespan.new(now_time, (now_time + ::Time::Span.new(seconds: 1)))
     time = quarter.offset(span, 1, Cronic::PointerDir::Future)
     time.begin.should eq Time.local(2006, 10, 1)
     time.end.should eq Time.local(2007, 1, 1)

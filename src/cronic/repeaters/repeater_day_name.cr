@@ -26,7 +26,7 @@ module Cronic
       end
       cdate = @current_date.as(Time)
       ndate = TimeUtil.add_days(cdate, 1)
-      SecSpan.new(cdate, ndate)
+      Timespan.new(cdate, ndate)
     end
 
     def this(pointer : PointerDir)

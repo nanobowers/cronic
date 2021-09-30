@@ -36,7 +36,7 @@ describe Cronic::RepeaterWeek do
     this_week.end.should eq Time.local(2006, 8, 16, 14)
   end
   it "offset" do
-    span = Cronic::SecSpan.new(now_time, (now_time + Time::Span.new(seconds: 1)))
+    span = Cronic::Timespan.new(now_time, (now_time + Time::Span.new(seconds: 1)))
     offset_span = Cronic::RepeaterWeek.new(:week).offset(span, 3, Cronic::PointerDir::Future)
     offset_span.begin.should eq Time.local(2006, 9, 6, 14)
     offset_span.end.should eq Time.local(2006, 9, 6, 14, 0, 1)
@@ -77,7 +77,7 @@ describe Cronic::RepeaterWeek do
   end
   it "offset starting on monday" do
     weeks = Cronic::RepeaterWeek.new(:week, nil, week_start: :monday)
-    span = Cronic::SecSpan.new(now_time, (now_time + Time::Span.new(seconds: 1)))
+    span = Cronic::Timespan.new(now_time, (now_time + Time::Span.new(seconds: 1)))
     offset_span = weeks.offset(span, 3, Cronic::PointerDir::Future)
     offset_span.begin.should eq Time.local(2006, 9, 6, 14)
     offset_span.end.should eq Time.local(2006, 9, 6, 14, 0, 1)

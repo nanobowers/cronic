@@ -60,7 +60,7 @@ require "./cronic/seq_matcher"
 require "./cronic/parser"
 
 # Parse natural language dates and times into `Time` or
-# `Cronic::SecSpan` objects.
+# `Cronic::Timespan` objects.
 #
 # Examples:
 # ```
@@ -99,10 +99,10 @@ module Cronic
 
   # Parses a *text* String containing natural language date or time.
   #
-  # Similar to `self.parse`, but returns a `Cronic::SecSpan` of the
+  # Similar to `self.parse`, but returns a `Cronic::Timespan` of the
   # begin-end time for the generated time-span instead of guessing a
   # specific time-point during that range.
-  def self.parse_span(text, **kwargs) : SecSpan
+  def self.parse_span(text, **kwargs) : Timespan
     Parser.new(**kwargs).parse_span(text)
   end
 

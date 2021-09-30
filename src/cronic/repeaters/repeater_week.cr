@@ -28,7 +28,7 @@ module Cronic
         end
       end
       cws = @current_week_start.as(Time)
-      SecSpan.new(cws, cws + 7.days)
+      Timespan.new(cws, cws + 7.days)
     end
 
     def this(pointer : PointerDir)
@@ -39,20 +39,20 @@ module Cronic
         this_span = first_week_day_repeater.this(PointerDir::Future)
         this_week_start = Time.local(@now.year, @now.month, @now.day, @now.hour) + 1.hours
         this_week_end = this_span.begin
-        SecSpan.new(this_week_start, this_week_end)
+        Timespan.new(this_week_start, this_week_end)
       in PointerDir::Past
         last_span = first_week_day_repeater.next(PointerDir::Past)
         this_week_start = last_span.begin
         this_week_end = Time.local(@now.year, @now.month, @now.day, @now.hour)
-        SecSpan.new(this_week_start, this_week_end)
+        Timespan.new(this_week_start, this_week_end)
       in PointerDir::None
         last_span = first_week_day_repeater.next(PointerDir::Past)
         this_week_start = last_span.begin
-        SecSpan.new(this_week_start, this_week_start + 7.days)
+        Timespan.new(this_week_start, this_week_start + 7.days)
       end
     end
 
-    def offset(span : SecSpan, amount : Int32, pointer : PointerDir)
+    def offset(span : Timespan, amount : Int32, pointer : PointerDir)
       direction = pointer.to_dir.value
       span + direction * amount * width
     end

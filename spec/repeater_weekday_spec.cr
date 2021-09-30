@@ -35,7 +35,7 @@ describe Cronic::RepeaterWeekday do
     last2_weekday.end.should eq Time.local(2007, 6, 8)
   end
   it "offset" do
-    span = Cronic::SecSpan.new(ref_wkdy_time, (ref_wkdy_time + 1.second))
+    span = Cronic::Timespan.new(ref_wkdy_time, (ref_wkdy_time + 1.second))
     offset_span = Cronic::RepeaterWeekday.new(:weekday).offset(span, 5, Cronic::PointerDir::Future)
     offset_span.begin.should eq Time.local(2007, 6, 18, 14)
     offset_span.end.should eq Time.local(2007, 6, 18, 14, 0, 1)

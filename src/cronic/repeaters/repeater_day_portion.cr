@@ -11,7 +11,7 @@ module Cronic
     }
 
     @range : Range(Int32, Int32)
-    @current_span : SecSpan?
+    @current_span : Timespan?
 
     def initialize(type, width = nil, **kwargs)
       super
@@ -28,7 +28,7 @@ module Cronic
       @range || raise RuntimeError.new("Range should have been set by now")
     end
 
-    def next(pointer) : SecSpan
+    def next(pointer) : Timespan
       super
       range_begin = @range.begin.seconds
       range_end = @range.end.seconds
@@ -58,25 +58,25 @@ module Cronic
         end
         offset = (@range.end - @range.begin)
         range_end = construct_date_from_reference_and_offset(range_start, offset)
-        @current_span = SecSpan.new(range_start, range_end)
+        @current_span = Timespan.new(range_start, range_end)
       else
         days_to_shift_window = (pointer == PointerDir::Past) ? -1 : 1
-        cspan = @current_span.as(SecSpan)
+        cspan = @current_span.as(Timespan)
         new_begin = Cronic.construct(cspan.begin.year, cspan.begin.month, cspan.begin.day + days_to_shift_window, cspan.begin.hour, cspan.begin.minute, cspan.begin.second)
         new_end = Cronic.construct(cspan.end.year, cspan.end.month, cspan.end.day + days_to_shift_window, cspan.end.hour, cspan.end.minute, cspan.end.second)
-        @current_span = SecSpan.new(new_begin, new_end)
+        @current_span = Timespan.new(new_begin, new_end)
       end
     end
 
-    def this(context = PointerDir::Future) : SecSpan
+    def this(context = PointerDir::Future) : Timespan
       super
 
       range_start = Cronic.construct(@now.year, @now.month, @now.day) + @range.begin.seconds
       range_end = construct_date_from_reference_and_offset(range_start)
-      @current_span = SecSpan.new(range_start, range_end)
+      @current_span = Timespan.new(range_start, range_end)
     end
 
-    def offset(span, amount, pointer) : SecSpan
+    def offset(span, amount, pointer) : Timespan
       @now = span.begin
       portion_span = self.next(pointer)
       direction = pointer == PointerDir::Future ? 1 : -1
@@ -85,8 +85,8 @@ module Cronic
 
     def width
       @range || raise RuntimeError.new("Range has not been set")
-      if @current_span.is_a?(SecSpan)
-        return @current_span.as(SecSpan).width
+      if @current_span.is_a?(Timespan)
+        return @current_span.as(Timespan).width
       end
       # return the width
       if @type.is_a?(Int32)

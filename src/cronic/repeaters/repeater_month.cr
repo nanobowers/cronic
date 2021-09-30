@@ -20,7 +20,7 @@ module Cronic
       cms = @current_month_start
       @current_month_start = offset_by(Cronic.construct(cms.year, cms.month), 1, pointer)
       cms = @current_month_start
-      SecSpan.new(cms, Cronic.construct(cms.year, cms.month) + 1.month)
+      Timespan.new(cms, Cronic.construct(cms.year, cms.month) + 1.month)
     end
 
     def this(pointer = PointerDir::Future)
@@ -38,11 +38,11 @@ module Cronic
         month_end = self.offset_by(Cronic.construct(@now.year, @now.month), 1, PointerDir::Future)
       end
 
-      SecSpan.new(month_start, month_end)
+      Timespan.new(month_start, month_end)
     end
 
-    def offset(span, amount, pointer) : SecSpan
-      SecSpan.new(offset_by(span.begin, amount, pointer), offset_by(span.end, amount, pointer))
+    def offset(span, amount, pointer) : Timespan
+      Timespan.new(offset_by(span.begin, amount, pointer), offset_by(span.end, amount, pointer))
     end
 
     def offset_by(time, amount, pointer)

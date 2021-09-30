@@ -31,7 +31,7 @@ module Cronic
         @current_fortnight_start = @current_fortnight_start.as(Time) + FORTNIGHT_SPAN * direction
       end
 
-      SecSpan.new(@current_fortnight_start.as(Time), @current_fortnight_start.as(Time) + FORTNIGHT_SPAN)
+      Timespan.new(@current_fortnight_start.as(Time), @current_fortnight_start.as(Time) + FORTNIGHT_SPAN)
     end
 
     def this(pointer : PointerDir)
@@ -42,17 +42,17 @@ module Cronic
         last_sunday_span = sunday_repeater.next(PointerDir::Past)
         this_fortnight_start = last_sunday_span.begin
         this_fortnight_end = Cronic.construct(@now.year, @now.month, @now.day, @now.hour)
-        SecSpan.new(this_fortnight_start, this_fortnight_end)
+        Timespan.new(this_fortnight_start, this_fortnight_end)
       in PointerDir::Future, PointerDir::None
         sunday_repeater.this(PointerDir::Future)
         this_sunday_span = sunday_repeater.this(PointerDir::Future)
         this_fortnight_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour) + Time::Span.new(seconds: TimeUtil::HOUR_SECONDS)
         this_fortnight_end = this_sunday_span.begin
-        SecSpan.new(this_fortnight_start, this_fortnight_end)
+        Timespan.new(this_fortnight_start, this_fortnight_end)
       end
     end
 
-    def offset(span : SecSpan, amount : Int32, pointer : PointerDir)
+    def offset(span : Timespan, amount : Int32, pointer : PointerDir)
       direction = pointer.to_dir.value
       span + direction * amount * width
     end

@@ -1,6 +1,6 @@
 module Cronic
-  # A `SecSpan` is a container for a time-span.
-  class SecSpan
+  # A `Timespan` is a container for a time-span.
+  class Timespan
     getter :begin, :end
     property :precision
 
@@ -18,22 +18,22 @@ module Cronic
     end
 
     # Add an integer number of seconds to this span, returning
-    # a new `SecSpan`
-    def +(seconds : Int32) : SecSpan
+    # a new `Timespan`
+    def +(seconds : Int32) : Timespan
       adjust = Time::Span.new(seconds: seconds)
-      SecSpan.new(self.begin + adjust, self.end + adjust)
+      Timespan.new(self.begin + adjust, self.end + adjust)
     end
 
     # Add a `Time::Span` to this span, returning
-    # a new `SecSpan`
-    def +(seconds : Time::Span) : SecSpan
-      SecSpan.new(self.begin + seconds, self.end + seconds)
+    # a new `Timespan`
+    def +(seconds : Time::Span) : Timespan
+      Timespan.new(self.begin + seconds, self.end + seconds)
     end
 
     # Subtract a number of seconds to this span, returning
-    # a new SecSpan
-    def -(seconds) : SecSpan
-      SecSpan.new(self.begin - seconds, self.end - seconds)
+    # a new Timespan
+    def -(seconds) : Timespan
+      Timespan.new(self.begin - seconds, self.end - seconds)
     end
 
     # Prints this span in a nice fashion

@@ -20,12 +20,12 @@ describe Cronic::RepeaterMonth do
   end
 
   it "offset" do
-    span = Cronic::SecSpan.new(now_time, (now_time + Time::Span.new(seconds: 60)))
+    span = Cronic::Timespan.new(now_time, (now_time + Time::Span.new(seconds: 60)))
     offset_span = Cronic::RepeaterMonth.new(:month).offset(span, 1, Cronic::PointerDir::Future)
     offset_span.begin.should eq Time.local(2006, 9, 16, 14)
     offset_span.end.should eq Time.local(2006, 9, 16, 14, 1)
 
-    span = Cronic::SecSpan.new(now_time, (now_time + Time::Span.new(seconds: 60)))
+    span = Cronic::Timespan.new(now_time, (now_time + Time::Span.new(seconds: 60)))
     offset_span = Cronic::RepeaterMonth.new(:month).offset(span, 1, Cronic::PointerDir::Past)
     offset_span.begin.should eq Time.local(2006, 7, 16, 14)
     offset_span.end.should eq Time.local(2006, 7, 16, 14, 1)

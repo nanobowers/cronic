@@ -1,9 +1,9 @@
 Cronic
 =======
 
-Cronic is a natural language date/time parser written for Crystal. It is
-primarily a port of Chronic (from Ruby) but with attempting to do things
-the Crystal way.
+Cronic is a natural language date/time parser for Crystal. 
+It is primarily a port of Chronic (from Ruby) but tried to do
+things the Crystal way.
 
 See below for the wide variety of formats Cronic will parse.
 
@@ -21,7 +21,7 @@ dependencies:
 
 ## Usage
 
-```
+```crystal
 require "cronic"
 include Cronic
 
@@ -53,7 +53,7 @@ p! Cronic.parse?("INVALID DATE")
   # => nil
 ```
 
-If the parser can find a date or time, either a `Time` (for Cronic.parse) or `Cronic::SecSpan` for Cronic.parse_span will be returned.
+If the parser can find a date or time, either a `Time` (for Cronic.parse) or `Cronic::Timespan` for Cronic.parse_span will be returned.
 
 If no date or time can be found, an exception will be thrown.
 

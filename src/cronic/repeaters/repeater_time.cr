@@ -112,7 +112,7 @@ module Cronic
         @current_time = @current_time.as(Time) + increment * pointer.to_dir.value
       end
       ctime = @current_time.as(Time)
-      SecSpan.new(ctime, ctime + 1.second)
+      Timespan.new(ctime, ctime + 1.second)
     end
 
     def this(context : PointerDir)

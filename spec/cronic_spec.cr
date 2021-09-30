@@ -27,12 +27,12 @@ describe Cronic do
     tokens.size.should eq 2
   end
 
-  it "guesses within a SecSpan" do
-    span = Cronic::SecSpan.new(Time.local(2006, 8, 16, 0), Time.local(2006, 8, 17, 0))
+  it "guesses within a Timespan" do
+    span = Cronic::Timespan.new(Time.local(2006, 8, 16, 0), Time.local(2006, 8, 17, 0))
     Cronic::Parser.new.guess(span).should eq Time.local(2006, 8, 16, 12)
-    span = Cronic::SecSpan.new(Time.local(2006, 8, 16, 0), Time.local(2006, 8, 17, 0, 0, 1))
+    span = Cronic::Timespan.new(Time.local(2006, 8, 16, 0), Time.local(2006, 8, 17, 0, 0, 1))
     Cronic::Parser.new.guess(span).should eq Time.local(2006, 8, 16, 12)
-    span = Cronic::SecSpan.new(Time.local(2006, 11, 1), Time.local(2006, 12, 1))
+    span = Cronic::Timespan.new(Time.local(2006, 11, 1), Time.local(2006, 12, 1))
     Cronic::Parser.new.guess(span).should eq Time.local(2006, 11, 16)
   end
 

@@ -33,7 +33,7 @@ module Cronic
       @first = true
     end
 
-    def next(pointer : PointerDir) : SecSpan
+    def next(pointer : PointerDir) : Timespan
       if @first
         # First time through adjust year according to if month is
         # relatively in the past/future.
@@ -50,7 +50,7 @@ module Cronic
       end
 
       # Rely on .construct to adjust year if month overflows
-      SecSpan.new(
+      Timespan.new(
         Cronic.construct(@current_year, @current_month.value),
         Cronic.construct(@current_year, @current_month.value + 1))
     end
@@ -59,7 +59,7 @@ module Cronic
       @current_month_begin.as(Time)
     end
 
-    def this(pointer : PointerDir) : SecSpan
+    def this(pointer : PointerDir) : Timespan
       self.next(pointer)
     end
 

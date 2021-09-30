@@ -16,7 +16,7 @@ module Cronic
     def next(pointer)
       direction = pointer.to_dir.value
       @current_hour_start = @current_hour_start.as(Time) + direction.hours
-      SecSpan.new(@current_hour_start, @current_hour_start + 1.hour)
+      Timespan.new(@current_hour_start, @current_hour_start + 1.hour)
     end
 
     def this(pointer = PointerDir::Future)
@@ -31,10 +31,10 @@ module Cronic
         hour_start = Cronic.construct(@now.year, @now.month, @now.day, @now.hour)
         hour_end = hour_start + 1.hour
       end
-      SecSpan.new(hour_start, hour_end)
+      Timespan.new(hour_start, hour_end)
     end
 
-    def offset(span : SecSpan, amount : Int32, pointer : PointerDir)
+    def offset(span : Timespan, amount : Int32, pointer : PointerDir)
       direction = pointer.to_dir.value
       span + direction * amount * width
     end

@@ -236,7 +236,7 @@ module Cronic
     end
 
     def definitions(endian_precedence : Array(DateEndian), **opts)
-      defs = [] of NamedTuple(match: Sequence, proc: Proc(Array(Token), SecSpan?))
+      defs = [] of NamedTuple(match: Sequence, proc: Proc(Array(Token), Timespan?))
 
       endian_precedence.each do |endian|
         case endian

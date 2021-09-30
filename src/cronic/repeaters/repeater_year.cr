@@ -17,7 +17,7 @@ module Cronic
       super
       diff = pointer == PointerDir::Future ? 1 : -1
       @current_year_start += diff.years
-      SecSpan.new(@current_year_start, @current_year_start + 1.year)
+      Timespan.new(@current_year_start, @current_year_start + 1.year)
     end
 
     def this(pointer = PointerDir::Future)
@@ -35,14 +35,14 @@ module Cronic
         this_year_end = Cronic.construct(@now.year + 1, 1, 1)
       end
 
-      SecSpan.new(this_year_start, this_year_end)
+      Timespan.new(this_year_start, this_year_end)
     end
 
-    def offset(span, amount, pointer) : SecSpan
+    def offset(span, amount, pointer) : Timespan
       direction = pointer == PointerDir::Future ? 1 : -1
       new_begin = build_offset_time(span.begin, amount, direction)
       new_end = build_offset_time(span.end, amount, direction)
-      SecSpan.new(new_begin, new_end)
+      Timespan.new(new_begin, new_end)
     end
 
     def width

@@ -40,7 +40,7 @@ describe Cronic::RepeaterHour do
     this_hour.end.should eq Time.local(2006, 8, 16, 15)
   end
   it "offset" do
-    span = Cronic::SecSpan.new(now_time, (now_time + Time::Span.new(seconds: 1)))
+    span = Cronic::Timespan.new(now_time, (now_time + Time::Span.new(seconds: 1)))
     offset_span = Cronic::RepeaterHour.new(:hour).offset(span, 3, Cronic::PointerDir::Future)
     offset_span.begin.should eq Time.local(2006, 8, 16, 17)
     offset_span.end.should eq Time.local(2006, 8, 16, 17, 0, 1)

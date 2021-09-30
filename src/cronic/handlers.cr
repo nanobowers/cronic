@@ -53,7 +53,7 @@ module Cronic
     end
 
     # Handle ordinal-day/repeater-month-name
-    def handle_od_rmn(tokens, **options) : SecSpan?
+    def handle_od_rmn(tokens, **options) : Timespan?
       month = tokens[1].get_tag(RepeaterMonthName).as(RepeaterMonthName)
       day = tokens[0].get_tag(OrdinalDay).as(OrdinalDay).type.as(Int32)
       return nil if Date.month_overflow?(self.now.year, month.index, day)
@@ -130,7 +130,7 @@ module Cronic
 
       begin
         end_time = Time.local(next_month_year, next_month_month, 1)
-        SecSpan.new(Time.local(year, month, 1), end_time)
+        Timespan.new(Time.local(year, month, 1), end_time)
       rescue ArgumentError
         nil
       end
@@ -153,7 +153,7 @@ module Cronic
       newtext = date + "T" + time + tz
       # p ["full-rfc3339!!", text, newtext]
       t = Time.parse_rfc3339(newtext)
-      SecSpan.new(t, t + 1.second)
+      Timespan.new(t, t + 1.second)
     end
 
     # timestamp similar to rfc3339 but without trailing timezone
@@ -168,7 +168,7 @@ module Cronic
             Time.parse(newtext, "%Y-%m-%dT%H:%M:%S", Time::Location.local)
           end
       # p ["part-rfc3339!!", text, newtext]
-      SecSpan.new(t, t + 1.second)
+      Timespan.new(t, t + 1.second)
     end
 
     # Actually SY-SM-SD-RT
@@ -179,7 +179,7 @@ module Cronic
       timesecs = tokens[3].get_tag(RepeaterTime).as(RepeaterTime).tagtype.as(Tick).timespan
       # p timesecs
       t = Time.local(year, month, day) + timesecs
-      SecSpan.new(t, t + 1.second)
+      Timespan.new(t, t + 1.second)
     end
 
     def handle_rdn_rmn_sd_t_tz_sy(tokens, text = "", **opts)
@@ -189,7 +189,7 @@ module Cronic
       timesecs = tokens[3].get_tag(RepeaterTime).as(RepeaterTime).tagtype.as(Tick).timespan
       tz = tokens[4].get_tag(TimeZone).as(TimeZone).zone
       t = Time.utc(year, month, day) + timesecs - tz.offset.seconds
-      SecSpan.new(t, t + 1.second)
+      Timespan.new(t, t + 1.second)
     end
 
     # Handle generic timestamp
@@ -197,7 +197,7 @@ module Cronic
       # p! ["generic!!", text]
       # guaranteed to not work since Crystal Time.parse way diff than ruby Time.parse
       t = Time.parse!(text, "%Y-%m-%d")
-      SecSpan.new(t, t + 1.second)
+      Timespan.new(t, t + 1.second)
     rescue ex : Time::Format::Error
       nil
     rescue e : ArgumentError
@@ -207,7 +207,7 @@ module Cronic
     def handle_ordday(tokens, text = "", **options)
       day_num = tokens[0].get_tag(OrdinalDay).as(OrdinalDay).type.as(Int32)
       t = Time.local(Time.local.year, Time.local.month, day_num)
-      SecSpan.new(t, t + 1.second)
+      Timespan.new(t, t + 1.second)
     end
 
     # Handle repeater-month-name/scalar-day/scalar-year
@@ -341,7 +341,7 @@ module Cronic
 
       begin
         end_time = Time.local(next_month_year, next_month_month, 1)
-        SecSpan.new(Time.local(year, month, 1), end_time)
+        Timespan.new(Time.local(year, month, 1), end_time)
       rescue ArgumentError
         nil
       end
@@ -374,7 +374,7 @@ module Cronic
         if time_tokens.empty?
           start_time = Time.local(year, month.index, day)
           end_time = Cronic.construct(year, month.index, day + 1)
-          SecSpan.new(start_time, end_time)
+          Timespan.new(start_time, end_time)
         else
           day_start = Time.local(year, month.index, day)
           day_or_time(day_start, time_tokens, **options)
@@ -395,7 +395,7 @@ module Cronic
       begin
         start_time = Time.local(year, month.index, day)
         end_time = Cronic.construct(year, month.index, day + 1)
-        SecSpan.new(start_time, end_time)
+        Timespan.new(start_time, end_time)
       rescue ArgumentError
         nil
       end
@@ -424,7 +424,7 @@ module Cronic
         if time_tokens.empty?
           start_time = Time.local(year, month, day)
           end_time = Cronic.construct(year, month, day + 1)
-          SecSpan.new(start_time, end_time)
+          Timespan.new(start_time, end_time)
         else
           day_start = Time.local(year, month, day)
           day_or_time(day_start, time_tokens, **options)
@@ -447,7 +447,7 @@ module Cronic
         if time_tokens.empty?
           start_time = Time.local(year, month.index, day)
           end_time = Cronic.construct(year, month.index, day + 1)
-          SecSpan.new(start_time, end_time)
+          Timespan.new(start_time, end_time)
         else
           day_start = Time.local(year, month.index, day)
           day_or_time(day_start, time_tokens, **options)
@@ -468,7 +468,7 @@ module Cronic
       begin
         start_time = Time.local(year, month.index, day)
         end_time = Cronic.construct(year, month.index, day + 1)
-        SecSpan.new(start_time, end_time)
+        Timespan.new(start_time, end_time)
       rescue ArgumentError
         nil
       end
@@ -479,7 +479,7 @@ module Cronic
       month = tokens[1].get_tag(RepeaterMonthName).as(RepeaterMonthName).index
       year = tokens[2].get_tag(ScalarYear).as(ScalarYear).type.as(Int32)
       if tokens.size > 3
-        time = get_anchor([tokens.last], **options).as(SecSpan).begin
+        time = get_anchor([tokens.last], **options).as(Timespan).begin
         h, m, s = time.hour, time.minute, time.second
         time = Time.local(year, month, day, h, m, s)
         end_time = Time.local(year, month, day + 1, h, m, s)
@@ -488,7 +488,7 @@ module Cronic
         day += 1 unless day >= 31
         end_time = Time.local(year, month, day)
       end
-      SecSpan.new(time, end_time)
+      Timespan.new(time, end_time)
     end
 
     # anchors
@@ -508,7 +508,7 @@ module Cronic
     # arrows
 
     # Handle scalar/repeater/pointer helper
-    def subhandle_srp(tokens, span : SecSpan, **options) : SecSpan?
+    def subhandle_srp(tokens, span : Timespan, **options) : Timespan?
       distance = tokens[0].get_tag(Scalar).as(Scalar).type.as(Int32)
       repeater = tokens[1].get_tag(Repeater).as(Repeater)
       pointer = tokens[2].get_tag(Pointer).as(Pointer).dir
@@ -518,13 +518,13 @@ module Cronic
 
     # Handle scalar/repeater/pointer
     def handle_s_r_p(tokens, **options)
-      span = SecSpan.new(self.now, self.now + 1.second)
+      span = Timespan.new(self.now, self.now + 1.second)
       subhandle_srp(tokens, span, **options)
     end
 
     # Handle pointer/scalar/repeater
     def handle_p_s_r(tokens, **options)
-      span = SecSpan.new(self.now, self.now + 1.second)
+      span = Timespan.new(self.now, self.now + 1.second)
       new_tokens = [tokens[1], tokens[2], tokens[0]]
       subhandle_srp(new_tokens, span, **options)
     end
@@ -532,7 +532,7 @@ module Cronic
     # Handle scalar/repeater/pointer/anchor
     def handle_s_r_p_a(tokens, **options)
       anchor_span = get_anchor(tokens[3..tokens.size - 1], **options)
-      subhandle_srp(tokens, anchor_span.as(SecSpan), **options)
+      subhandle_srp(tokens, anchor_span.as(Timespan), **options)
     end
 
     # Handle repeater/scalar/repeater/pointer
@@ -546,11 +546,11 @@ module Cronic
       # anchor_span = if anchor_tokens.size > 1
       #                get_anchor(anchor_tokens, options)
       #              else
-      #                SecSpan.new(self.now, self.now + 1.second)
+      #                Timespan.new(self.now, self.now + 1.second)
       #              end
 
-      span = subhandle_srp(tokens[0..1] + tokens[4..6], anchor_span.as(SecSpan), **options)
-      subhandle_srp(tokens[2..3] + tokens[4..6], span.as(SecSpan), **options)
+      span = subhandle_srp(tokens[0..1] + tokens[4..6], anchor_span.as(Timespan), **options)
+      subhandle_srp(tokens[2..3] + tokens[4..6], span.as(Timespan), **options)
     end
 
     # =======
@@ -561,13 +561,13 @@ module Cronic
     def subhandle_orr(tokens, outer_span, **options)
       ordinal = tokens[0].get_tag(Ordinal).as(Ordinal).type
       repeater = tokens[1].get_tag(Repeater).as(Repeater)
-      repeater.start = outer_span.as(SecSpan).begin - 1.second
+      repeater.start = outer_span.as(Timespan).begin - 1.second
 
       span = nil
 
       ordinal.as(Int32).times do
-        span = repeater.next(PointerDir::Future).as(SecSpan)
-        if span.begin >= outer_span.as(SecSpan).end
+        span = repeater.next(PointerDir::Future).as(Timespan)
+        if span.begin >= outer_span.as(Timespan).end
           raise Cronic::InvalidParseError.new("Cannot find Date/Time in span #{outer_span.inspect}")
         end
       end
@@ -589,8 +589,8 @@ module Cronic
 
     # support methods
 
-    def day_or_time(day_start : Time, time_tokens, context : PointerDir = PointerDir::Future, **options) : SecSpan?
-      outer_span = SecSpan.new(day_start, day_start + 24.hours)
+    def day_or_time(day_start : Time, time_tokens, context : PointerDir = PointerDir::Future, **options) : Timespan?
+      outer_span = Timespan.new(day_start, day_start + 24.hours)
 
       if time_tokens.empty?
         outer_span
@@ -644,15 +644,15 @@ module Cronic
     end
 
     # Recursively finds repeaters within other repeaters.
-    # Returns a SecSpan representing the innermost time span
+    # Returns a Timespan representing the innermost time span
     # or nil if no repeater union could be found
-    def find_within(tags, span : SecSpan, pointer : PointerDir) : SecSpan?
+    def find_within(tags, span : Timespan, pointer : PointerDir) : Timespan?
       puts "--#{span}" if Cronic.debug
       return span if tags.empty?
 
       head = tags.shift
       head.start = (pointer == PointerDir::Future) ? span.begin : span.end
-      h = head.this(PointerDir::None).as(SecSpan)
+      h = head.this(PointerDir::None).as(Timespan)
 
       if span.includes?(h.begin) || span.includes?(h.end)
         find_within(tags, h, pointer)

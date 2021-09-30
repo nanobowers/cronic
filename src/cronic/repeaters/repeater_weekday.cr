@@ -23,7 +23,7 @@ module Cronic
         break if @current_weekday_start.weekday?
       end
 
-      SecSpan.new(@current_weekday_start, @current_weekday_start + 1.day)
+      Timespan.new(@current_weekday_start, @current_weekday_start + 1.day)
     end
 
     def this(pointer = PointerDir::Future)
