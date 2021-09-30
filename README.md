@@ -150,6 +150,14 @@ insensitive and will handle common abbreviations and misspellings.
 * 2013-08-01T19:30:00.345-07:00
 * 2013-08-01T19:30:00.34-07:00
 
+## Testing
+
+The testsuite from Chronic.rb was borrowed and used to validate Cronic.  Due to the somewhat fragile nature of the Regex's and NLP techniques used, additional tests would be helpful.
+
+## Bugs
+
+There are four tests set to **pending** and three of them relate to known bugs.  Two of these are reported and unfixed bugs in Chronic.rb, and one results from a daylight-savings time calculation difference between the Ruby and Crystal versions.
+
 ## Contribute
 
 If you'd like to hack on Cronic, start by forking the repo on GitHub:
