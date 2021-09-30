@@ -1,4 +1,5 @@
 module Cronic
+  # :nodoc:
   class RepeaterDayName < Repeater
     @current_date : Time?
 

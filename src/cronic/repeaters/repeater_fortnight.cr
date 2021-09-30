@@ -1,4 +1,5 @@
 module Cronic
+  # :nodoc:
   class RepeaterFortnight < Repeater
     FORTNIGHT_SPAN = 14.days
 

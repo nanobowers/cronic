@@ -1,4 +1,5 @@
 module Cronic
+  # :nodoc:
   class RepeaterMonth < Repeater
     YEAR_MONTHS = 12
 

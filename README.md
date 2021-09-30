@@ -11,56 +11,57 @@ See below for the wide variety of formats Cronic will parse.
 
 1. Add the dependency to your `shard.yml`:
 
-   ```yaml
-   dependencies:
-     cronic:
-       github: nanobowers/cronic
-   ```
+```yaml
+dependencies:
+  cronic:
+    github: nanobowers/cronic
+```
 
 2. Run `shards install`
 
 ## Usage
 
-```crystal
+```
 require "cronic"
 include Cronic
 
-Time.now   #=> Sun Aug 27 23:18:25 PDT 2006
+p! Time.local 
+  # => 2006-08-27 23:18:25.0 -04:00 Local
 
-Cronic.parse("tomorrow")
-  #=> Mon Aug 28 12:00:00 PDT 2006
+p! Cronic.parse("tomorrow") 
+  # => 2006-08-28 12:00:00.0 -04:00 Local
 
-Cronic.parse("monday", context: Direction::Past)
-  #=> Mon Aug 21 12:00:00 PDT 2006
+p! Cronic.parse("monday", context: PointerDir::Past) 
+  # => 2006-08-21 12:00:00.0 -04:00 Local
 
-Cronic.parse("this tuesday 5:00")
-  #=> Tue Aug 29 17:00:00 PDT 2006
+p! Cronic.parse("this tuesday 5:00") 
+  # => 2006-08-29 17:00:00.0 -04:00 Local
 
-Cronic.parse("this tuesday 5:00", ambiguous_time_range: nil)
-  #=> Tue Aug 29 05:00:00 PDT 2006
+p! Cronic.parse("this tuesday 5:00", ambiguous_time_range: nil) 
+  # => 2006-08-29 05:00:00.0 -04:00 Local
 
-Cronic.parse("may 27th", now: Time.local(2000, 1, 1))
-  #=> Sat May 27 12:00:00 PDT 2000
+p! Cronic.parse("may 27th", now: Time.local(2000, 1, 1)) 
+  # => 2000-05-27 12:00:00.0 -04:00 Local
 
-Cronic.parse_span("may 27th")
-  #=> Sun May 27 00:00:00 PDT 2007..Mon May 28 00:00:00 PDT 2007
+p! Cronic.parse_span("may 27th") 
+  # => (2007-05-27 00:00:00 -04:00..2007-05-28 00:00:00 -04:00)
 
-Cronic.parse("6/4/2012", endian_precedence: DateEndian::DayMonth)
-  #=> Fri Apr 06 00:00:00 PDT 2012
+p! Cronic.parse("6/4/2012", endian_precedence: [DateEndian::DayMonth]) 
+  # => 2012-04-06 12:00:00.0 -04:00 Local
 
-Cronic.parse("INVALID DATE")
-  #=> nil
+p! Cronic.parse?("INVALID DATE") 
+  # => nil
 ```
 
-If the parser can find a date or time, either a Time or Cronic::Span
-will be returned (depending on the value of `:guess`). If no
-date or time can be found, `nil` will be returned.
+If the parser can find a date or time, either a `Time` (for Cronic.parse) or `Cronic::SecSpan` for Cronic.parse_span will be returned.
 
-See `Cronic.parse` for detailed usage instructions.
+If no date or time can be found, an exception will be thrown.
+
+See `Cronic.parse` and `Cronic.parse_span` for detailed usage instructions.
 
 ## Examples
 
-Cronic can parse a huge variety of date and time formats. Following is a
+Cronic can parse a large variety of date and time formats. Following is a
 small sample of strings that will be properly parsed. Parsing is case
 insensitive and will handle common abbreviations and misspellings.
 
@@ -148,7 +149,6 @@ insensitive and will handle common abbreviations and misspellings.
 * 03/01/2012 07:25:09.234567
 * 2013-08-01T19:30:00.345-07:00
 * 2013-08-01T19:30:00.34-07:00
-* etc
 
 ## Contribute
 

@@ -1,4 +1,5 @@
 module Cronic
+  # :nodoc:
   class RepeaterSecond < Repeater
     @second_start : Time
 

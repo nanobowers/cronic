@@ -30,78 +30,91 @@ module Cronic
     end
   end
 
+  # :nodoc:
   class SeparatorComma < Separator
     def to_s
       super + "-comma"
     end
   end
 
+  # :nodoc:
   class SeparatorDot < Separator
     def to_s
       super + "-dot"
     end
   end
 
+  # :nodoc:
   class SeparatorColon < Separator
     def to_s
       super + "-colon"
     end
   end
 
+  # :nodoc:
   class SeparatorSpace < Separator
     def to_s
       super + "-space"
     end
   end
 
+  # :nodoc:
   class SeparatorSlash < Separator
     def to_s
       super + "-slash"
     end
   end
 
+  # :nodoc:
   class SeparatorDash < Separator
     def to_s
       super + "-dash"
     end
   end
 
+  # :nodoc:
   class SeparatorQuote < Separator
     def to_s
       super + "-quote-" + @type.to_s
     end
   end
 
+  # :nodoc:
   class SeparatorAt < Separator
     def to_s
       super + "-at"
     end
   end
 
+  # :nodoc:
   class SeparatorIn < Separator
     def to_s
       super + "-in"
     end
   end
 
+  # :nodoc:
   class SeparatorOn < Separator
     def to_s
       super + "-on"
     end
   end
 
+  # :nodoc:
   class SeparatorAnd < Separator
     def to_s
       super + "-and"
     end
   end
 
+  # :nodoc:
   class SeparatorT < Separator
     def to_s
       super + "-T"
     end
   end
 
+  # :nodoc:
   class SeparatorW < Separator
     def to_s
       super + "-W"

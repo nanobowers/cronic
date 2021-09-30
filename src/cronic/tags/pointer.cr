@@ -16,8 +16,12 @@ module Cronic
 
     def self.patterns
       @@patterns ||= {
-        "past"         => PointerDir::Past,
-        /^future|in$/i => PointerDir::Future,
+        "past"   => PointerDir::Past,
+        "future" => PointerDir::Future,
+        "in"     => PointerDir::Future,
+        "hence"  => PointerDir::Future,
+        "after"  => PointerDir::Future,
+        "from"   => PointerDir::Future,
       }
     end
 

@@ -199,7 +199,7 @@ module Cronic
       t = Time.parse!(text, "%Y-%m-%d")
       SecSpan.new(t, t + 1.second)
     rescue ex : Time::Format::Error
-      return nil
+      nil
     rescue e : ArgumentError
       raise e unless e.message =~ /out of range/
     end
@@ -373,7 +373,7 @@ module Cronic
       begin
         if time_tokens.empty?
           start_time = Time.local(year, month.index, day)
-          end_time = time_with_rollover(year, month.index, day + 1)
+          end_time = Cronic.construct(year, month.index, day + 1)
           SecSpan.new(start_time, end_time)
         else
           day_start = Time.local(year, month.index, day)
@@ -394,7 +394,7 @@ module Cronic
 
       begin
         start_time = Time.local(year, month.index, day)
-        end_time = time_with_rollover(year, month.index, day + 1)
+        end_time = Cronic.construct(year, month.index, day + 1)
         SecSpan.new(start_time, end_time)
       rescue ArgumentError
         nil
@@ -423,7 +423,7 @@ module Cronic
       begin
         if time_tokens.empty?
           start_time = Time.local(year, month, day)
-          end_time = time_with_rollover(year, month, day + 1)
+          end_time = Cronic.construct(year, month, day + 1)
           SecSpan.new(start_time, end_time)
         else
           day_start = Time.local(year, month, day)
@@ -446,7 +446,7 @@ module Cronic
       begin
         if time_tokens.empty?
           start_time = Time.local(year, month.index, day)
-          end_time = time_with_rollover(year, month.index, day + 1)
+          end_time = Cronic.construct(year, month.index, day + 1)
           SecSpan.new(start_time, end_time)
         else
           day_start = Time.local(year, month.index, day)
@@ -467,7 +467,7 @@ module Cronic
 
       begin
         start_time = Time.local(year, month.index, day)
-        end_time = time_with_rollover(year, month.index, day + 1)
+        end_time = Cronic.construct(year, month.index, day + 1)
         SecSpan.new(start_time, end_time)
       rescue ArgumentError
         nil
@@ -589,14 +589,14 @@ module Cronic
 
     # support methods
 
-    def day_or_time(day_start : Time, time_tokens, context : PointerDir = PointerDir::Future, **options)
-      outer_span = SecSpan.new(day_start, day_start + Time::Span.new(hours: 24))
+    def day_or_time(day_start : Time, time_tokens, context : PointerDir = PointerDir::Future, **options) : SecSpan?
+      outer_span = SecSpan.new(day_start, day_start + 24.hours)
 
-      unless time_tokens.empty?
+      if time_tokens.empty?
+        outer_span
+      else
         self.now = outer_span.begin
         get_anchor(Handlers.dealias_and_disambiguate_times(time_tokens, **options), context: context)
-      else
-        outer_span
       end
     end
 
@@ -614,20 +614,20 @@ module Cronic
       head = repeaters.shift
       head.start = self.now
 
-      case grabber.grab
-      in GrabberEnum::Last
-        outer_span = head.next(PointerDir::Past)
-      in GrabberEnum::This
-        if (context != PointerDir::Past) && (repeaters.size > 0)
-          outer_span = head.this(PointerDir::None)
-        else
-          outer_span = head.this(context)
-        end
-      in GrabberEnum::Next
-        outer_span = head.next(PointerDir::Future)
-      end
+      outer_span = case grabber.grab
+                   in GrabberEnum::Last
+                     head.next(PointerDir::Past)
+                   in GrabberEnum::This
+                     if (context != PointerDir::Past) && (repeaters.size > 0)
+                       head.this(PointerDir::None)
+                     else
+                       head.this(context)
+                     end
+                   in GrabberEnum::Next
+                     head.next(PointerDir::Future)
+                   end
 
-      raise Exception.new("Invalid nil for outer_span") if outer_span.nil?
+      # raise Exception.new("Invalid nil for outer_span") if outer_span.nil?
 
       if Cronic.debug
         puts "Handler-class: #{head.class}"
@@ -638,7 +638,7 @@ module Cronic
     end
 
     def get_repeaters(tokens)
-      repeaters = tokens.map { |token| token.get_tag(Repeater) }
+      repeaters = tokens.map(&.get_tag(Repeater))
       repeaters = repeaters.compact.map { |rpt| rpt.as(Repeater) }
       repeaters.sort.reverse
     end
@@ -659,20 +659,9 @@ module Cronic
       end
     end
 
+    # Method overload. If span is nil, output is nil.
     def find_within(tags, span : Nil, pointer : PointerDir)
-      return nil
-    end
-
-    def time_with_rollover(year, month, day)
-      if Date.month_overflow?(year, month, day)
-        if month == 12
-          Time.local(year + 1, 1, 1)
-        else
-          Time.local(year, month + 1, 1)
-        end
-      else
-        Time.local(year, month, day)
-      end
+      nil
     end
 
     def self.dealias_and_disambiguate_times(tokens, ambiguous_time_range : Int32? = 6, **options)

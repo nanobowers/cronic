@@ -14,6 +14,7 @@ module Cronic
     December  = 12
   end
 
+  # :nodoc:
   class RepeaterMonthName < Repeater
     @current_month : MonthNames
     @current_year : Int32

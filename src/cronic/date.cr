@@ -34,19 +34,19 @@ module Cronic
       year >= 0 && year <= 9999 && (width.nil? || width == 2 || width == 4)
     end
 
-    # Build a year from a 2 digit suffix.
+    # Build a 4-digit year from a 2 digit suffix.
     #
     # year - The two digit Integer year to build from.
     # bias - The Integer amount of future years to bias.
     #
     # Examples:
-    #
+    # ```
     #   make_year(96, 50) #=> 1996
     #   make_year(79, 20) #=> 2079
     #   make_year(00, 50) #=> 2000
-    #
+    # ```
     # Returns The Integer 4 digit year.
-    def self.make_year(year : Int32, bias)
+    def self.make_year(year : Int32, bias) : Int32
       return year if year.to_s.size > 2
       start_year = Time.local.year - bias
       century = (start_year // 100) * 100

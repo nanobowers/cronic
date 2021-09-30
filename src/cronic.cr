@@ -1,13 +1,17 @@
 require "number_parser" # aka numerizer
 
 module Cronic
+  # :nodoc:
+  abstract class ParseError < Exception
+  end
+
   # Raised when we try to parse an invalid date or time, mostly because
   # a certain span was exceeded.  e.g. "10th tuesday in january"
-  class InvalidParseError < Exception
+  class InvalidParseError < ParseError
   end
 
   # Raised when we try to parse an unknown string
-  class UnknownParseError < Exception
+  class UnknownParseError < ParseError
   end
 end
 
@@ -55,54 +59,64 @@ require "./cronic/definition"
 require "./cronic/seq_matcher"
 require "./cronic/parser"
 
-# Parse natural language dates and times into Time or Cronic::Span objects.
+# Parse natural language dates and times into `Time` or
+# `Cronic::SecSpan` objects.
 #
 # Examples:
+# ```
+# require "cronic"
 #
-#   require "cronic"
+# Time.local
+# # => Sun Aug 27 23:18:25 PDT 2006
 #
-#   Time.local   #=> Sun Aug 27 23:18:25 PDT 2006
+# Cronic.parse("tomorrow")
+# # => Mon Aug 28 12:00:00 PDT 2006
 #
-#   Cronic.parse("tomorrow")
-#     #=> Mon Aug 28 12:00:00 PDT 2006
-#
-#   Cronic.parse("monday", context: :past)
-#     #=> Mon Aug 21 12:00:00 PDT 2006
+# Cronic.parse("monday", context: PointerDir::Past)
+# # => Mon Aug 21 12:00:00 PDT 2006
+# ```
 module Cronic
   @@debug : Bool = false
 
+  # Enable debug-mode printing for `Cronic`
   class_property :debug
 
-  # Parses a string containing a natural language date or time.
+  # Parses a *text* String containing a natural language date or time.
   #
-  # If the parser can find a date or time, a Time
-  # will be returned (depending on the value of `guess:`). If no
+  # If the parser can find a date or time, a `Time`
+  # will be returned (depending on the value of *guess*). If no
   # date/time can be found, `nil` will be returned.
-  #
-  # text - The String text to parse.
-  def self.parse(text, guess : Guess = Guess::Middle, **kwargs)
+  def self.parse(text, guess : Guess = Guess::Middle, **kwargs) : Time
     Parser.new(**kwargs).parse(text, guess: guess)
   end
 
-  # Parses a String containing natural language date or time.
-  # Similar to self.parse, but returns a Cronic::SecSpan of the
+  # Parses like `self.parse`, but will return `nil` if a `ParseError` is raised
+  def self.parse?(*args, **kwargs) : Time?
+    self.parse(*args, **kwargs)
+  rescue ParseError
+    nil
+  end
+
+  # Parses a *text* String containing natural language date or time.
+  #
+  # Similar to `self.parse`, but returns a `Cronic::SecSpan` of the
   # begin-end time for the generated time-span instead of guessing a
   # specific time-point during that range.
-  def self.parse_span(text, **kwargs)
+  def self.parse_span(text, **kwargs) : SecSpan
     Parser.new(**kwargs).parse_span(text)
   end
 
-  # Construct a new time object determining possible month overflows
-  # and leap years.
+  # Construct a new `Time` object determining possible month overflows
+  # and leap years.  Accounts for overflows in the values
   #
-  # year   - Integer year.
-  # month  - Integer month.
-  # day    - Integer day.
-  # hour   - Integer hour.
-  # minute - Integer minute.
-  # second - Integer second.
+  # + *year*   - Int32 year.
+  # + *month*  - Int32 month.
+  # + *day*    - Int32 day.
+  # + *hour*   - Int32 hour.
+  # + *minute* - Int32 minute.
+  # + *second* - Int32 second.
   #
-  # Returns a new Time object constructed from these params.
+  # Returns a new `Time` object constructed from these params.
   def self.construct(year : Int32, month : Int32 = 1, day : Int32 = 1, hour : Int32 = 0, minute : Int32 = 0, second : Int32 = 0, offset = nil) : Time
     if second >= 60
       minute += second // 60
@@ -119,12 +133,15 @@ module Cronic
       hour = hour % 24
     end
 
-    # determine if there is a day overflow. this is complicated by our crappy calendar
+    # determine if there is a day overflow.
+    # this is complicated by our crappy calendar
     # system (non-constant number of days per month)
-    day <= 56 || raise("day must be no more than 56 (makes month resolution easier)")
+    if day > 56
+      raise Exception.new("Day must be no more than 56 (makes month resolution easier)")
+    end
+
     if day > 28 # no month ever has fewer than 28 days, so only do this if necessary
-      days_this_month = Time.leap_year?(year) ? Date::MONTH_DAYS_LEAP[month] : Date::MONTH_DAYS[month]
-      days_this_month = days_this_month.as(Int32)
+      days_this_month = Date.days_in_month(year, month)
       if day > days_this_month
         month += day // days_this_month
         day = day % days_this_month
@@ -141,6 +158,6 @@ module Cronic
       end
     end
 
-    return Time.local(year, month, day, hour, minute, second)
+    Time.local(year, month, day, hour, minute, second)
   end
 end

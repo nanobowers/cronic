@@ -1,4 +1,5 @@
 module Cronic
+  # :nodoc:
   class RepeaterSeason < Repeater
     @next_season_start : Time
     @next_season_end : Time
@@ -22,19 +23,19 @@ module Cronic
       find_next_season_span(pointer, next_season)
     end
 
-    def this(pointer = PointerDir::Future)
+    def this(pointer = PointerDir::Future) : SecSpan
       super
 
       today = Cronic.construct(@now.year, @now.month, @now.day)
       this_ssn = Season.find_current_season(@now)
       season_span = Season.span_for_next_season(today, this_ssn, pointer)
-      case pointer
+      case pointer # returns
       in PointerDir::Past
-        return SecSpan.new(season_span.begin, today)
+        SecSpan.new(season_span.begin, today)
       in PointerDir::Future
-        return SecSpan.new(today + 1.day, season_span.end)
+        SecSpan.new(today + 1.day, season_span.end)
       in PointerDir::None
-        return season_span
+        season_span
       end
     end
 
@@ -60,7 +61,7 @@ module Cronic
       next_season_span = Season.span_for_next_season(@now, next_season, pointer)
       @next_season_start = next_season_span.begin
       @next_season_end = next_season_span.end
-      return next_season_span
+      next_season_span
     end
   end
 end

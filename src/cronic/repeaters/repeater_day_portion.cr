@@ -1,4 +1,5 @@
 module Cronic
+  # :nodoc:
   class RepeaterDayPortion < Repeater
     PORTIONS = {
       :am        => 0..(12 * 60 * 60 - 1),
@@ -31,7 +32,7 @@ module Cronic
       super
       range_begin = @range.begin.seconds
       range_end = @range.end.seconds
-      unless @current_span
+      if @current_span.nil?
         now_seconds = @now - Cronic.construct(@now.year, @now.month, @now.day)
         if now_seconds < range_begin
           case pointer
@@ -87,8 +88,9 @@ module Cronic
       if @current_span.is_a?(SecSpan)
         return @current_span.as(SecSpan).width
       end
+      # return the width
       if @type.is_a?(Int32)
-        return (12 * 60 * 60)
+        12 * 60 * 60
       else
         @range.end - @range.begin
       end

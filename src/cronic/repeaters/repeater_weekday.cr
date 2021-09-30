@@ -1,4 +1,5 @@
 module Cronic
+  # :nodoc:
   class RepeaterWeekday < Repeater
     @current_weekday_start : Time
 

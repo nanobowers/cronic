@@ -18,7 +18,7 @@ module Cronic
     def to_dir
       return Direction::Forward if self == Future
       return Direction::Forward if self == None
-      return Direction::Backward
+      Direction::Backward
     end
   end
 

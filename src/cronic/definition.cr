@@ -27,6 +27,7 @@ module Cronic
                     Array(Or | RepeaterTime.class) |
                     Array(Tag.class | Or)
 
+  # Holds either an Or / maybe clause for use with matching.  If the maybe flag is set, then none of the items are required to match.
   class Or
     getter :items
     getter? :maybe
@@ -45,6 +46,7 @@ module Cronic
     end
   end
 
+  # A matching sequence.  The sequence is an Array of class names or `Or` / maybe clauses.  Used in conjunction with `SeqMatcher`
   class Sequence
     getter :items
 
@@ -56,10 +58,12 @@ module Cronic
       self.new(items.to_a)
     end
 
+    # Returns true if the Sequence is empty
     def empty?
       @items.empty?
     end
 
+    # Get first element of the sequence
     def first
       @items[0]
     end
@@ -73,11 +77,8 @@ module Cronic
     end
   end
 
-  # SpanDefinitions subclasses return definitions constructed by Handler instances (see handler.rb)
-  # SpanDefinitions subclasses follow a <Type> + Definitions naming pattern
-
-  class SpanDefinitions # < Definitions
-
+  # SpanDefinitions subclasses return an Array of NamedTuples containing a match sequence and a Proc that calls a token handler (see handler.cr)
+  class SpanDefinitions
     include Handlers
     property :now
 
@@ -99,29 +100,34 @@ module Cronic
       Or.new([item, item2], maybe: true)
     end
 
-    # common date separators
+    # Shortcut for common date separators
     def slashdash
       or(SeparatorSlash, SeparatorDash)
     end
 
+    # Shortcut for a time and day-portion
+    # TODO: Actually should be: `ormaybe(RepeaterTime, seq(RepeaterTime, RepeaterDayPortion))`, but this is not supported by our matching engine.
     def maybetime
       [maybe(RepeaterTime), maybe(RepeaterDayPortion)]
     end
 
-    # shared anchors
+    # Shortcut for shared anchor #1
     def anchor1
       [maybe(SeparatorOn), maybe(Grabber), Repeater, maybe(SeparatorAt), maybe(Repeater), maybe(Repeater)]
     end
 
+    # Shortcut for shared anchor #2
     def anchor2
       [maybe(Grabber), Repeater, Repeater, maybe(Separator), maybe(Repeater), maybe(Repeater)]
     end
 
+    # Shortcut for shared anchor #3
     def anchor3
       [Repeater, Grabber, Repeater]
     end
   end
 
+  # Matchers and handlers for a variety of date formats
   class DateDefinitions < SpanDefinitions
     def definitions(**opts)
       [
@@ -170,6 +176,7 @@ module Cronic
     end
   end
 
+  # Matchers and handlers for a variety of bare "anchors"
   class AnchorDefinitions < SpanDefinitions
     def definitions(**opts)
       [
@@ -180,6 +187,7 @@ module Cronic
     end
   end
 
+  # Matchers and handlers for a variety of complex combos of `Scalar`, `Repeater` and `Cronic::Pointer`
   class ArrowDefinitions < SpanDefinitions
     def definitions(**opts)
       sr_and_srp_at = [Scalar, Repeater, maybe(SeparatorAnd), Scalar, Repeater, Pointer, maybe(SeparatorAt)]
@@ -200,6 +208,7 @@ module Cronic
     end
   end
 
+  # Matchers and handlers for a things that narrow a time-span
   class NarrowDefinitions < SpanDefinitions
     def definitions(**opts)
       [
@@ -209,6 +218,8 @@ module Cronic
     end
   end
 
+  # Matchers and handlers for ScalarMonth/ScalarDay cases that can have
+  # their endian precedence changed based on user specification.
   class EndianDefinitions < SpanDefinitions
     def month_day(**opts)
       [
@@ -235,7 +246,7 @@ module Cronic
           defs += day_month(**opts)
         end
       end
-      return defs
+      defs
     end
   end
 end

@@ -1,4 +1,5 @@
 module Cronic
+  # :nodoc:
   class Tick
     property :time
     getter? :ambiguous
@@ -23,6 +24,7 @@ module Cronic
     end
   end
 
+  # :nodoc:
   class RepeaterTime < Repeater
     @current_time : Time?
     @tagtype : Tick
@@ -102,7 +104,7 @@ module Cronic
     # Return the next past or future Span for the time that this Repeater represents
     #   pointer - which temporal direction to fetch the next day
     def next(pointer : PointerDir)
-      unless @current_time
+      if @current_time.nil?
         update_current_time(pointer)
         @current_time || raise RuntimeError.new("Current time cannot be nil at this point")
       else

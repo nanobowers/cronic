@@ -15,32 +15,29 @@ module Cronic
       @now = Time.local
     end
 
-    # time - Set the start Time for this Tag.
-    def start=(time)
+    # Set the start Time for this Tag.
+    def start=(time : Time)
       @now = time
     end
 
-    # Public: Scan an Array of Token objects.
-    #
-    # tokens  - An Array of tokens to scan.
-    # options - The Hash of options specified in Cronic::parse.
-    #
+    # Scan an Array of Token objects.
     # Returns an Array of tokens.
     def self.scan(tokens, **options)
       raise NotImplementedError.new("Subclasses must override scan!")
     end
 
-    # Internal: Match item and create respective Tag class.
-    #           When item is a Symbol it will match only when it's identical to Token.
-    #           When it's a String it will case-insesitively match partial token,
-    #           but only if item's last char have different type than token text's next char.
-    #           When item is a Regexp it will match by it.
+    # Match item and create respective Tag class.
+    # When item is a Symbol it will match only when it's identical to Token.
+    # When it's a String it will case-insesitively match partial token,
+    # but only if item's last char have different type than token text's
+    # next char.
+    # When item is a Regexp it will match by it.
     #
-    # item    - Item to match. It can be String, Symbol or Regexp.
-    # klass   - Tag class to create.
-    # symbol  - Tag type as symbol or string to pass to Tag class.
-    # token   - Token to match against.
-    # options - Options as hash to pass to Tag class.
+    # *item*    - Item to match. It can be String, Symbol or Regexp.
+    # *klass*   - Tag class to create.
+    # *symbol*  - Tag type as symbol or string to pass to Tag class.
+    # *token*   - Token to match against.
+    # *options* - Options NamedTuple
     #
     # Returns an instance of specified Tag klass or nil if item didn't match.
     private def self.match_item(item, klass, symbol, token, **options)
@@ -62,17 +59,16 @@ module Cronic
       nil
     end
 
-    # Internal: Scan for specified items and create respective Tag class.
+    # Scan for specified items and create respective Tag class.
     #
-    # token   - Token to match against.
-    # klass   - Tag class to create.
-    # items   - Item(s) to match. It can be Hash, String, Symbol or Regexp.
-    #           Hash keys can be String, Symbol or Regexp, but values much be Symbol.
-    # options - Options as hash to pass to Tag class.
+    # + *token*   - `Token` to match against.
+    # + *klass*   - `Tag` class to create.
+    # + *items*   - Item(s) to match. It can be Hash, String, Symbol or Regexp.
+    #    Hash keys can be String, Symbol or Regexp, but values much be Symbol.
+    # + *options* - Options NamedTuple to pass to Tag class.
     #
     # Returns an instance of specified Tag klass or nil if item(s) didn't match.
-    # private
-    def self.scan_for(token : Token, klass : Class, items, **options)
+    private def self.scan_for(token : Token, klass : Class, items, **options)
       # #p! token, klass, items
       if items.is_a?(Hash)
         items.each do |item, symbol|

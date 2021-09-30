@@ -1,11 +1,14 @@
 module Cronic
+  #
+  # Contains a set of matching routines, which work kind of
+  # like a weak Regex, but for matching Classes against the Tags on a token.
+  # Supports a single `Sequence` with a single nesting of
+  # `Or` / `maybe`.
+  #
+  # The methods contained within work recursively
+  #
+  # TODO: Support nesting of sub-sequences within an Or sequence.
   class SeqMatcher
-    #
-    # Matching routines, kind of like a poor-man's regex
-    # Supports a single Sequence with a single nesting of
-    # Or's and Maybe's
-    #
-
     def self.match_one(pat, tok : Token) : Bool
       if pat.is_a?(Or)
         # puts ">> checking #{tok.inspect} against #{pat}"

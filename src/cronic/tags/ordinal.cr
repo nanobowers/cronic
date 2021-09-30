@@ -27,18 +27,21 @@ module Cronic
     end
   end
 
+  # :nodoc:
   class OrdinalDay < Ordinal
     def to_s
       super + "-day-" + @type.to_s
     end
   end
 
+  # :nodoc:
   class OrdinalMonth < Ordinal
     def to_s
       super + "-month-" + @type.to_s
     end
   end
 
+  # :nodoc:
   class OrdinalYear < Ordinal
     def to_s
       super + "-year-" + @type.to_s

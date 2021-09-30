@@ -28,19 +28,20 @@ module Cronic
       day = time.day
       if (mon == 3 && day >= 20) || mon == 4 ||
          mon == 5 || mon == (6 && day <= 20)
-        return Season::Spring
+        Season::Spring
       elsif (mon == 6 && day >= 21) || mon == 7 ||
             mon == 8 || mon == (9 && day <= 22)
-        return Season::Summer
+        Season::Summer
       elsif (mon == 9 && day >= 23) || mon == 10 ||
             mon == 11 || (mon == 12 && day <= 21)
-        return Season::Autumn
+        Season::Autumn
       elsif (mon == 12 && day >= 22) || mon == 1 ||
             mon == 2 || (mon == 3 && day <= 19)
-        return Season::Winter
+        Season::Winter
+      else
+        # Default return in case nothing else matched (??)
+        Season::Spring
       end
-      # Default return in case nothing else matched (??)
-      Season::Spring
     end
 
     def self.find_next_season(season : Season, pointer : Int32)

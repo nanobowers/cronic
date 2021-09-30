@@ -6,6 +6,7 @@ module Cronic
     Q4 = 3
   end
 
+  # :nodoc:
   class RepeaterQuarterName < RepeaterQuarter
     def initialize(@quarter : QuarterNames, width = nil, **opts)
       super(@quarter.to_s, width)

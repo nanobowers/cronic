@@ -1,4 +1,5 @@
 module Cronic
+  # :nodoc:
   class RepeaterWeekend < Repeater
     WEEKEND_SPAN = 2.days
 

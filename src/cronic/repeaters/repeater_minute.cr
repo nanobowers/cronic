@@ -1,4 +1,5 @@
 module Cronic
+  # :nodoc:
   class RepeaterMinute < Repeater
     @current_minute_start : Time
 

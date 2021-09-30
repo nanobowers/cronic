@@ -1,4 +1,5 @@
 module Cronic
+  # :nodoc:
   class RepeaterQuarter < Repeater
     MONTHS_PER_QUARTER = 3
 

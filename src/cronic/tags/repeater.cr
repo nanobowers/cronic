@@ -78,6 +78,8 @@ module Cronic
         {
           /^ams?$/           => :am,
           /^pms?$/           => :pm,
+          /^a\.m\.?$/        => :am,
+          /^p\.m\.?$/        => :pm,
           /^mornings?$/      => :morning,
           /^afternoons?$/    => :afternoon,
           /^evenings?$/      => :evening,
@@ -106,8 +108,7 @@ module Cronic
       when /^h(ou)?rs?$/            then RepeaterHour.new(:hour, nil, **kwargs)
       when /^min(ute)?s?$/          then RepeaterMinute.new(:minute, nil, **kwargs)
       when /^sec(ond)?s?$/          then RepeaterSecond.new(:second, nil, **kwargs)
-      else
-        return nil
+      else                               nil
       end
     end
 
@@ -116,12 +117,12 @@ module Cronic
       width <=> other.width
     end
 
-    # returns the width (in seconds or months) of this repeatable.
+    # Returns the width (in seconds or months) of this repeatable.
     def width
       raise RuntimeError.new("Repeater#width must be overridden in subclasses")
     end
 
-    # returns the next occurance of this repeatable.
+    # Returns the next occurance of this repeatable.
     def next(pointer)
       raise RuntimeError.new("Start point must be set before calling #next") unless @now
     end

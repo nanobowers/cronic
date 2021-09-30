@@ -1,4 +1,5 @@
 module Cronic
+  # :nodoc:
   class RepeaterYear < Repeater
     @current_year_start : Time
 

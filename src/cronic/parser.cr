@@ -1,42 +1,40 @@
 module Cronic
   class Parser
     include Handlers
+
+    # The current reference `Time`.  Defaults to `Time.local`
     property :now
 
-    # options - An optional Hash of configuration options:
-    #        :context - If your string represents a birthday, you can set
-    #                   this value to :past and if an ambiguous string is
-    #                   given, it will assume it is in the past.
-    #        :now - Time, all computations will be based off of time
-    #               instead of Time.now.
-    #        :hours24 - Time will be parsed as it would be 24 hour clock.
-    #        :week_start - By default, the parser assesses weeks start on
-    #                  sunday but you can change this value to :monday if
-    #                  needed.
-    #        :guess - By default the parser will guess a single point in time
-    #                 for the given date or time. If you'd rather have the
-    #                 entire time span returned, set this to false
-    #                 and a Cronic::Span will be returned. Setting :guess to :end
-    #                 will return last time from Span, to :middle for middle (same as just true)
-    #                 and :begin for first time from span.
-    #        :ambiguous_time_range - If an Integer is given, ambiguous times
-    #                  (like 5:00) will be assumed to be within the range of
-    #                  that time in the AM to that time in the PM. For
-    #                  example, if you set it to `7`, then the parser will
-    #                  look for the time between 7am and 7pm. In the case of
-    #                  5:00, it would assume that means 5:00pm. If `:none`
-    #                  is given, no assumption will be made, and the first
-    #                  matching instance of that time will be used.
-    #        :endian_precedence - By default, Cronic will parse "03/04/2011"
-    #                 as the fourth day of the third month. Alternatively you
-    #                 can tell Cronic to parse this as the third day of the
-    #                 fourth month by setting this to [:little, :middle].
-    #        :ambiguous_year_future_bias - When parsing two digit years
-    #                 (ie 79) unlike Rubys Time class, Cronic will attempt
-    #                 to assume the full year using this figure. Cronic will
-    #                 look x amount of years into the future and past. If the
-    #                 two digit year is `now + x years` it's assumed to be the
-    #                 future, `now - x years` is assumed to be the past.
+    # Constructs and holds options for a Parser object.
+    #
+    # Options include:
+    # + *context* - If your string represents a birthday, you can set
+    #   this value to `PointerDir::Past` and if an ambiguous string is
+    #   given, it will assume it is in the past.
+    # + *now* - Time, all computations will be based off of this time
+    #   instead of `Time.now`.
+    # + *hours24* - Time will be parsed as it would be 24 hour clock.
+    # + *week_start* - By default, the parser assesses weeks start on
+    #   sunday but you can change this value to `Time::DayOfWeek::Monday`
+    #   if needed.
+    # + *ambiguous_time_range* - If an Integer is given, ambiguous times
+    #   (like 5:00) will be assumed to be within the range of
+    #   that time in the AM to that time in the PM. For
+    #   example, if you set it to `7`, then the parser will
+    #   look for the time between 7am and 7pm. In the case of
+    #   5:00, it would assume that means 5:00pm. If `:none`
+    #   is given, no assumption will be made, and the first
+    #   matching instance of that time will be used.
+    # + *endian_precedence* - By default, Cronic will parse "03/04/2011"
+    #   as the fourth day of the third month. Alternatively you
+    #   can tell Cronic to parse this as the third day of the
+    #   fourth month by setting this to `[DateEndian::DayMonth, DateEndian::MonthDay]`.
+    # + *ambiguous_year_future_bias* - When parsing two digit years
+    #   (i.e. `79`), Cronic will attempt
+    #   to assume the full year using this figure. Cronic will
+    #   look `x` amount of years into the future and past. If the
+    #   two digit year is `now + x` years it's assumed to be the
+    #   future, `now - x` years is assumed to be the past.
     def initialize(
       @context : PointerDir = PointerDir::Future,
       @now : Time = Time.local,
@@ -48,15 +46,18 @@ module Cronic
     )
     end
 
-    # Parse "text" with the given options
-    # Returns either a Time or Cronic::Span, depending on the value of options[:guess]
-    def parse(text, guess = Cronic::Guess::Middle)
+    # Parse *text* to a singular `Time`.
+    #
+    # Setting *guess* to `Guess::End` will return last time from
+    # the `SecSpan`, to `Guess::Middle` for the middle of the span
+    # and `Guess::Begin` for first time in the span.
+    def parse(text : String, guess = Cronic::Guess::Middle)
       span = parse_span(text)
       guess(span, guess)
     end
 
-    # Parse text into a Span
-    def parse_span(text) : SecSpan
+    # Parse *text* into a `SecSpan`
+    def parse_span(text : String) : SecSpan
       tokens = tokenize(text, context: @context,
         now: @now,
         hours24: @hours24,
@@ -82,35 +83,32 @@ module Cronic
       span
     end
 
-    # Clean up the specified text ready for parsing.
+    # Clean up the specified *text* ready for parsing.
     #
     # Clean up the string by stripping unwanted characters, converting
     # idioms to their canonical form, converting number words to numbers
-    # (three => 3), and converting ordinal words to numeric
-    # ordinals (third => 3rd)
-    #
-    # text - The String text to normalize.
+    # (`three` &rarr; `3`), and converting ordinal words to numeric
+    # ordinals (`third` &rarr; `3rd`)
     #
     # Examples:
+    # ```
+    # Cronic.pre_normalize('first day in May')
+    # # => "1st day in may"
     #
-    #   Cronic.pre_normalize('first day in May')
-    #     #=> "1st day in may"
+    # Cronic.pre_normalize('tomorrow after noon')
+    # # => "next day future 12:00"
     #
-    #   Cronic.pre_normalize('tomorrow after noon')
-    #     #=> "next day future 12:00"
-    #
-    #   Cronic.pre_normalize('one hundred and thirty six days from now')
-    #     #=> "136 days future this second"
-    #
+    # Cronic.pre_normalize('one hundred and thirty six days from now')
+    # # => "136 days future this second"
+    # ```
     # Returns a new String ready for Cronic to parse.
-    def pre_normalize(text) : String
+    def pre_normalize(text : String) : String
       text = text.to_s.downcase
 
       text = text.gsub(/\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/, "\\3 / \\2 / \\1")
-      text = text.gsub(/\b(\d{1,2})\.(\d{1,2})\.(\d{2})\b/, "\\2 / \\1 / \\3") # Chronic.rb#356 / 2-digit euro-date-format
 
-      # a.m, p.m. => am, pm
-      text = text.gsub(/\b([ap])\.m\.?/, "\\1m")
+      # Chronic.rb#356 / 2-digit euro-date-format
+      text = text.gsub(/\b(\d{1,2})\.(\d{1,2})\.(\d{2})\b/, "\\2 / \\1 / \\3")
 
       text = text.gsub(/t ( \d{2}:\d{2}:\d{2} (?:\.\d+)? ) (\S*) /xi) {
         ttime, zone = $1, $2
@@ -134,8 +132,8 @@ module Cronic
           number
         end
       end
-      text = text.gsub(/['"]/, "")
-      text = text.gsub(/,/, " ")
+      text = text.gsub(/['"]/, "") # remove quotes after tick-year is converted
+      text = text.gsub(/,/, " ")   # commas to spaces
       text = text.gsub(/^second /, "2nd ")
       text = text.gsub(/\bsecond (of|day|month|hour|minute|second|quarter)\b/, "2nd \\1")
       text = text.gsub(/\bthird quarter\b/, "3rd q")
@@ -164,14 +162,13 @@ module Cronic
       text = text.gsub(/\b(?:ago|before(?: now)?)\b/, "past")
       text = text.gsub(/\bthis (?:last|past)\b/, "last")
       text = text.gsub(/\b(?:in|during) the (morning)\b/, "\\1")
-      text = text.gsub(/\b(?:in) an? (second|minute|hour|day|week|month|year)\b/, "in 1 \\1")
+      text = text.gsub(/\b(in\s+|) an? \s+ (second|minute|hour|day|week|fortnight|month|quarter|year)\b/x) { $1 + "1 " + $2 }
       text = text.gsub(/\b(?:in the|during the|at) (afternoon|evening|night)\b/, "\\1")
       text = text.gsub(/\btonight\b/, "this night")
       text = text.gsub(/\b\d+:?\d*[ap]\b/, "\\0m")
       text = text.gsub(/\b(\d{2})(\d{2})(am|pm)\b/, "\\1:\\2\\3")
+      # space am/pm/oclock away from numbers
       text = text.gsub(/(\d)([ap]m|oclock)\b/, "\\1 \\2")
-      text = text.gsub(/\b(hence|after|from)\b/, "future")
-      text = text.gsub(/^\s?an? /i, "1 ")
       text = text.gsub(/\b(\d{4}):(\d{2}):(\d{2})\b/, "\\1 / \\2 / \\3") # DTOriginal
       text = text.gsub(/\b0(\d+):(\d{2}):(\d{2}) ([ap]m)\b/, "\\1:\\2:\\3 \\4")
 
@@ -181,7 +178,8 @@ module Cronic
       text
     end
 
-    # Guess a specific time within the given `span`.
+    # Guess a specific time within the given *span*.
+    # *mode* can be provided to select begin/middle/end of the *span*.
     def guess(span : SecSpan, mode : Guess = Guess::Middle) : Time
       if (span.width > 1) && (mode == Guess::Middle)
         span.middle
@@ -192,14 +190,14 @@ module Cronic
       end
     end
 
-    # Process text into tagged tokens
+    # Process *text* into tagged tokens
     def tokenize(text, **options) : Array(Token)
       text = pre_normalize(text)
       tokens = Tokenizer.tokenize(text)
       [Repeater, Grabber, Pointer, Scalar, Ordinal, Separator, Sign, TimeZone].each do |tok|
         tok.scan(tokens, **options)
       end
-      tokens.select { |token| token.tagged? }
+      tokens.select(&.tagged?)
     end
 
     private def tokens_to_span(tokens, **opts) : SecSpan
@@ -218,9 +216,9 @@ module Cronic
 
       defs = endian_defs + date_defs + anchor_defs
 
-      defs.each_with_index do |defn, idx|
+      defs.each do |defn|
         if span.nil? && (hadmatch = SeqMatcher.match(defn[:match], tokens))
-          # puts "#{idx} #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n" if Cronic.debug
+          # puts "DEFS #{hadmatch} #{tokens.map(&.to_s)} #{defn[:match].items}\n\n" if Cronic.debug
           span = defn[:proc].call(good_tokens)
         end
       end

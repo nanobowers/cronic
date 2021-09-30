@@ -14,12 +14,14 @@ module Cronic
     end
   end
 
+  # :nodoc:
   class SignPlus < Sign
     def to_s
       super + "-plus"
     end
   end
 
+  # :nodoc:
   class SignMinus < Sign
     def to_s
       super + "-minus"

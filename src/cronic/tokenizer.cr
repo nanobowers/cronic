@@ -6,7 +6,7 @@ module Cronic
       return :digit if char.number?
       return :space if char.whitespace?
       return :punct if ' ' < char < '0'
-      return :other
+      :other
     end
 
     # Process text to tokens
